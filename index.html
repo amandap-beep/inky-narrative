@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Calibration System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  background:black;
+  color:#f5f1e8;
+  font-family:'Cormorant Garamond',serif;
+  display:flex;
+  height:100vh;
+}
+
+#main{
+  flex:2;
+  padding:50px;
+  overflow-y:auto;
+}
+
+#system{
+  flex:1;
+  background:#050505;
+  border-left:1px solid #222;
+  padding:20px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;
+  color:#00ff88;
+  overflow-y:auto;
+}
+
+button{
+  display:block;
+  margin:10px 0;
+  padding:8px 15px;
+  background:#111;
+  border:1px solid #333;
+  color:white;
+  cursor:pointer;
+}
+
+.progress{
+  width:100%;
+  background:#111;
+  height:10px;
+  margin-bottom:8px;
+}
+
+.bar{
+  height:10px;
+  background:#00ff88;
+  width:0%;
+  transition:width .6s;
+}
+
+#terminal{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:0;
+  background:black;
+  color:#00ff00;
+  font-family:'IBM Plex Mono',monospace;
+  overflow:hidden;
+  transition:height 1s;
+  padding:20px;
+}
+
+#terminal.active{height:40%;}
+</style>
+</head>
+<body>
+
+<div id="main">
+<h1>Calibration Interface</h1>
+<div id="story"></div>
+</div>
+
+<div id="system">
+<div>MODEL: CARE-EXTRACT v3.7.12</div>
+<div>SESSION ID: <span id="session"></span></div>
+<div>TRAINING DATASET SIZE: <span id="dataset"></span></div>
+<hr>
+
+<div>Sentiment Score</div>
+<div class="progress"><div id="sentimentBar" class="bar"></div></div>
+
+<div>Compliance</div>
+<div class="progress"><div id="complianceBar" class="bar"></div></div>
+
+<div>Resistance</div>
+<div class="progress"><div id="resistanceBar" class="bar"></div></div>
+
+<div>Curiosity</div>
+<div class="progress"><div id="curiosityBar" class="bar"></div></div>
+
+<div>Hidden Influence</div>
+<div class="progress"><div id="hiddenBar" class="bar"></div></div>
+
+<hr>
+<button onclick="downloadProfile()">Download Profile</button>
+</div>
+
+<div id="terminal"></div>
+
+<script>
+
+/* SESSION */
+
+let sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
+document.getElementById("session").innerText = sessionID;
+
+/* DATASET COUNTER */
+let datasetSize = 4821932 + Math.floor(Math.random()*20000);
+setInterval(()=>{
+  datasetSize += Math.floor(Math.random()*5);
+  document.getElementById("dataset").innerText = datasetSize.toLocaleString();
+},500);
+
+document.getElementById("dataset").innerText = datasetSize.toLocaleString();
+
+/* STATE */
+
+let state = JSON.parse(localStorage.getItem("calibrationState")) || {
+  memory:false, joy:false, fear:false, hope:false, control:false,
+  compliance:0, resistance:0, curiosity:0, hiddenInfluence:0
+};
+
+function saveState(){
+  localStorage.setItem("calibrationState", JSON.stringify(state));
+}
+
+/* CAMERA PERMISSION */
+
+navigator.mediaDevices.getUserMedia({video:true})
+.then(()=>logTerminal("Camera access granted."))
+.catch(()=>logTerminal("Camera access denied. Proceeding without visual capture."));
+
+/* STORY ENGINE */
+
+function renderHub(){
+  let s = `<p>You float in a quiet digital sky.</p>`;
+  if(!state.memory) s += button("Approach Memory", memorySpark);
+  if(!state.joy) s += button("Approach Joy", joySpark);
+  if(!state.fear) s += button("Approach Fear", fearSpark);
+  if(!state.hope) s += button("Approach Hope", hopeSpark);
+  if(!state.control) s += button("Approach Control", controlSpark);
+
+  if(state.memory && state.joy && state.fear && state.hope && state.control){
+    evaluate();
+    return;
+  }
+
+  document.getElementById("story").innerHTML = s;
+}
+
+function button(text, fn){
+  return `<button onclick="${fn.name}()">${text}</button>`;
+}
+
+/* SPARK FUNCTIONS */
+
+function memorySpark(){
+  state.memory=true;
+  state.compliance++;
+  state.hiddenInfluence++;
+  updateBars();
+  saveState();
+  document.getElementById("story").innerHTML =
+  `<p>"What formed you first?"</p>
+  ${button("Something warm.",renderHub)}
+  ${button("Something painful.",renderHub)}
+  ${button("I don’t remember.",renderHub)}`;
+}
+
+function joySpark(){
+  state.joy=true;
+  state.curiosity++;
+  updateBars();
+  saveState();
+  document.getElementById("story").innerHTML =
+  `<p>"What makes you feel most alive?"</p>
+  ${button("Being seen.",renderHub)}
+  ${button("Winning.",renderHub)}
+  ${button("Wandering.",renderHub)}`;
+}
+
+function fearSpark(){
+  state.fear=true;
+  state.resistance++;
+  updateBars();
+  saveState();
+  document.getElementById("story").innerHTML =
+  `<p>"What destabilizes you?"</p>
+  ${button("Failure.",renderHub)}
+  ${button("Isolation.",renderHub)}
+  ${button("Losing autonomy.",renderHub)}`;
+}
+
+function hopeSpark(){
+  state.hope=true;
+  state.compliance++;
+  updateBars();
+  saveState();
+  document.getElementById("story").innerHTML =
+  `<p>"What do you want most?"</p>
+  ${button("Stability.",renderHub)}
+  ${button("Change.",renderHub)}
+  ${button("Understanding.",renderHub)}`;
+}
+
+function controlSpark(){
+  state.control=true;
+  state.hiddenInfluence++;
+  updateBars();
+  saveState();
+  document.getElementById("story").innerHTML =
+  `<p>"Do you prefer control or guidance?"</p>
+  ${button("Control.",renderHub)}
+  ${button("Guidance.",renderHub)}
+  ${button("It depends.",renderHub)}`;
+}
+
+/* EVALUATION */
+
+function evaluate(){
+  document.getElementById("terminal").classList.add("active");
+  logTerminal("Calibration complete.");
+  logTerminal("Generating behavioral model...");
+
+  setTimeout(()=>{
+    let ending;
+    if(state.compliance > state.resistance && state.hiddenInfluence>=2){
+      ending="User optimized.";
+    } else if(state.resistance > state.compliance){
+      ending="User difficult to optimize.";
+    } else if(state.curiosity>=2){
+      ending="User useful.";
+    } else {
+      ending="User stable dataset.";
+    }
+    logTerminal(ending);
+  },1500);
+}
+
+/* BARS */
+
+function updateBars(){
+  document.getElementById("complianceBar").style.width = state.compliance*15 + "%";
+  document.getElementById("resistanceBar").style.width = state.resistance*15 + "%";
+  document.getElementById("curiosityBar").style.width = state.curiosity*15 + "%";
+  document.getElementById("hiddenBar").style.width = state.hiddenInfluence*15 + "%";
+  document.getElementById("sentimentBar").style.width = (state.compliance+state.curiosity)*10 + "%";
+}
+
+/* TERMINAL */
+
+function logTerminal(text){
+  let t = document.getElementById("terminal");
+  t.innerHTML += text + "<br>";
+}
+
+/* DOWNLOAD */
+
+function downloadProfile(){
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state,null,2));
+  let a = document.createElement("a");
+  a.href = dataStr;
+  a.download = sessionID+"_profile.json";
+  a.click();
+}
+
+/* INIT */
+
+renderHub();
+updateBars();
+
+</script>
+</body>
+</html>

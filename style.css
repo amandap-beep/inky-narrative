@@ -1,0 +1,35 @@
+body {
+  background-color: #0e0e0e;
+  color: #f4f1ea;
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1.8;
+  margin: 0;
+}
+
+header {
+  text-align: center;
+  padding: 100px 20px;
+}
+
+.chapter {
+  max-width: 650px;
+  margin: 100px auto;
+  padding: 0 20px;
+}
+
+.chapter p::first-letter {
+  font-size: 3rem;
+  float: left;
+  padding-right: 10px;
+}
+
+.chapter {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+
+body {
+  background-image: url("paper-texture.jpg");
+  background-size: cover;
+}
