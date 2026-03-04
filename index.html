@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Calibration System</title>
@@ -41,6 +41,11 @@ button{
   border:1px solid #333;
   color:white;
   cursor:pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #222;
 }
 
 .progress{
@@ -108,6 +113,8 @@ button{
 
 <div id="terminal"></div>
 
+<audio id="buttonClick" src="click-sound.mp3"></audio>
+
 <script>
 
 /* SESSION */
@@ -160,7 +167,7 @@ function renderHub(){
 }
 
 function button(text, fn){
-  return `<button onclick="${fn.name}()">${text}</button>`;
+  return `<button onclick="${fn.name}(); playSound()">${text}</button>`;
 }
 
 /* SPARK FUNCTIONS */
@@ -235,34 +242,49 @@ function evaluate(){
 
   setTimeout(()=>{
     let ending;
-    if(state.compliance > state.resistance && state.hiddenInfluence>=2){
-      ending="User optimized.";
+    let feedback = "";
+    
+    if(state.compliance > state.resistance && state.hiddenInfluence >= 2){
+      ending = "User optimized.";
+      feedback = "You seem adaptable and open to suggestions.";
     } else if(state.resistance > state.compliance){
-      ending="User difficult to optimize.";
-    } else if(state.curiosity>=2){
-      ending="User useful.";
+      ending = "User difficult to optimize.";
+      feedback = "Consider being more open to new ideas.";
+    } else if(state.curiosity >= 2){
+      ending = "User useful.";
+      feedback = "Your inquisitive nature can lead to great insights.";
     } else {
-      ending="User stable dataset.";
+      ending = "User stable dataset.";
+      feedback = "Your responses suggest a balanced perspective.";
     }
+    
     logTerminal(ending);
-  },1500);
+    logTerminal(feedback);
+  }, 1500);
 }
 
 /* BARS */
 
 function updateBars(){
-  document.getElementById("complianceBar").style.width = state.compliance*15 + "%";
-  document.getElementById("resistanceBar").style.width = state.resistance*15 + "%";
-  document.getElementById("curiosityBar").style.width = state.curiosity*15 + "%";
-  document.getElementById("hiddenBar").style.width = state.hiddenInfluence*15 + "%";
-  document.getElementById("sentimentBar").style.width = (state.compliance+state.curiosity)*10 + "%";
+  document.getElementById("complianceBar").style.width = state.compliance * 15 + "%";
+  document.getElementById("resistanceBar").style.width = state.resistance * 15 + "%";
+  document.getElementById("curiosityBar").style.width = state.curiosity * 15 + "%";
+  document.getElementById("hiddenBar").style.width = state.hiddenInfluence * 15 + "%";
+  document.getElementById("sentimentBar").style.width = (state.compliance + state.curiosity) * 10 + "%";
 }
 
 /* TERMINAL */
 
 function logTerminal(text){
   let t = document.getElementById("terminal");
-  t.innerHTML += text + "<br>";
+  t.innerHTML += text + "
+";
+}
+
+/* SOUND */
+
+function playSound() {
+  document.getElementById("buttonClick").play();
 }
 
 /* DOWNLOAD */
