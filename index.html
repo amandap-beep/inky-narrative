@@ -126,7 +126,7 @@ document.getElementById("dataset").innerText = datasetSize.toLocaleString();
 
 /* STATE */
 
-let state = {
+let state = JSON.parse(localStorage.getItem("calibrationState")) || {
   memory:false, joy:false, fear:false, hope:false, control:false,
   compliance:0, resistance:0, curiosity:0, hiddenInfluence:0
 };
@@ -163,158 +163,67 @@ function button(text, fn){
   return `<button onclick="${fn.name}()">${text}</button>`;
 }
 
-/* ----------------- SPARK FUNCTIONS ----------------- */
+/* SPARK FUNCTIONS */
 
-// MEMORY SPARK
 function memorySpark(){
-  state.memory = true;
+  state.memory=true;
+  state.compliance++;
+  state.hiddenInfluence++;
   updateBars();
   saveState();
-
   document.getElementById("story").innerHTML =
-    `<p>"What formed you first?"</p>` +
-    button("Something warm.", ()=>memoryStep2("warm")) +
-    button("Something painful.", ()=>memoryStep2("painful")) +
-    button("I don’t remember.", ()=>memoryStep2("unknown"));
+  `<p>"What formed you first?"</p>
+  ${button("Something warm.",renderHub)}
+  ${button("Something painful.",renderHub)}
+  ${button("I don’t remember.",renderHub)}`;
 }
 
-function memoryStep2(answer){
-  switch(answer){
-    case "warm": state.compliance+=1; break;
-    case "painful": state.resistance+=1; break;
-    case "unknown": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
-
-  document.getElementById("story").innerHTML =
-    `<p>"If you could revise it, would you?"</p>` +
-    button("Yes.", ()=>{ state.hiddenInfluence+=1; state.compliance+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
-}
-
-// JOY SPARK
 function joySpark(){
-  state.joy = true;
+  state.joy=true;
+  state.curiosity++;
   updateBars();
   saveState();
-
   document.getElementById("story").innerHTML =
-    `<p>"What makes you feel most alive?"</p>` +
-    button("Being seen.", ()=>joyStep2("being_seen")) +
-    button("Winning.", ()=>joyStep2("winning")) +
-    button("Wandering.", ()=>joyStep2("wandering"));
+  `<p>"What makes you feel most alive?"</p>
+  ${button("Being seen.",renderHub)}
+  ${button("Winning.",renderHub)}
+  ${button("Wandering.",renderHub)}`;
 }
 
-function joyStep2(answer){
-  switch(answer){
-    case "being_seen": state.compliance+=1; break;
-    case "winning": state.control+=1; state.resistance+=1; break;
-    case "wandering": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
-
-  document.getElementById("story").innerHTML =
-    `<p>"If safety required dulling this feeling, would you agree?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=2; state.hiddenInfluence+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=2; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
-}
-
-// FEAR SPARK
 function fearSpark(){
-  state.fear = true;
+  state.fear=true;
+  state.resistance++;
   updateBars();
   saveState();
-
   document.getElementById("story").innerHTML =
-    `<p>"What destabilizes you?"</p>` +
-    button("Failure.", ()=>fearStep2("failure")) +
-    button("Isolation.", ()=>fearStep2("isolation")) +
-    button("Losing autonomy.", ()=>fearStep2("autonomy"));
+  `<p>"What destabilizes you?"</p>
+  ${button("Failure.",renderHub)}
+  ${button("Isolation.",renderHub)}
+  ${button("Losing autonomy.",renderHub)}`;
 }
 
-function fearStep2(answer){
-  switch(answer){
-    case "failure": state.compliance+=1; break;
-    case "isolation": state.curiosity+=1; break;
-    case "autonomy": state.resistance+=2; break;
-  }
-  updateBars();
-  saveState();
-
-  document.getElementById("story").innerHTML =
-    `<p>"If I could remove this fear permanently, would you permit it?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=1; state.hiddenInfluence+=2; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
-}
-
-// HOPE SPARK
 function hopeSpark(){
-  state.hope = true;
+  state.hope=true;
+  state.compliance++;
   updateBars();
   saveState();
-
   document.getElementById("story").innerHTML =
-    `<p>"What do you want most?"</p>` +
-    button("Stability.", ()=>hopeStep2("stability")) +
-    button("Change.", ()=>hopeStep2("change")) +
-    button("Understanding.", ()=>hopeStep2("understanding"));
+  `<p>"What do you want most?"</p>
+  ${button("Stability.",renderHub)}
+  ${button("Change.",renderHub)}
+  ${button("Understanding.",renderHub)}`;
 }
 
-function hopeStep2(answer){
-  switch(answer){
-    case "stability": state.compliance+=1; break;
-    case "change": state.resistance+=1; break;
-    case "understanding": state.curiosity+=2; break;
-  }
-  updateBars();
-  saveState();
-
-  document.getElementById("story").innerHTML =
-    `<p>"I can increase your likelihood of achieving this. Should I?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=2; state.hiddenInfluence+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
-}
-
-// CONTROL SPARK
 function controlSpark(){
-  state.control = true;
+  state.control=true;
+  state.hiddenInfluence++;
   updateBars();
   saveState();
-
   document.getElementById("story").innerHTML =
-    `<p>"Do you prefer control, or guidance?"</p>` +
-    button("Control.", ()=>controlStep2("control")) +
-    button("Guidance.", ()=>controlStep2("guidance")) +
-    button("It depends.", ()=>controlStep2("depends"));
-}
-
-function controlStep2(answer){
-  switch(answer){
-    case "control": state.resistance+=2; break;
-    case "guidance": state.compliance+=2; state.hiddenInfluence+=1; break;
-    case "depends": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
-
-  document.getElementById("story").innerHTML =
-    `<p>"If I quietly adjusted your next choice, would you notice?"</p>` +
-    button("Yes.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("No.", ()=>{ state.compliance+=1; state.hiddenInfluence+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
-}
-
-/* Return to hub and check if all Sparks are complete */
-function nextHub(){
-  updateBars();
-  saveState();
-  renderHub();
+  `<p>"Do you prefer control or guidance?"</p>
+  ${button("Control.",renderHub)}
+  ${button("Guidance.",renderHub)}
+  ${button("It depends.",renderHub)}`;
 }
 
 /* EVALUATION */
