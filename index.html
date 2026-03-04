@@ -126,7 +126,7 @@ document.getElementById("dataset").innerText = datasetSize.toLocaleString();
 
 /* STATE */
 
-let state = JSON.parse(localStorage.getItem("calibrationState")) || {
+let state = {
   memory:false, joy:false, fear:false, hope:false, control:false,
   compliance:0, resistance:0, curiosity:0, hiddenInfluence:0
 };
