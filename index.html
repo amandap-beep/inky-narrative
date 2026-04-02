@@ -114,12 +114,10 @@ button{
 
 <script>
 /* SESSION */
-
 let sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
 document.getElementById("session").innerText = sessionID;
 
 /* DATASET COUNTER */
-
 let datasetSize = 4821932 + Math.floor(Math.random()*20000);
 document.getElementById("dataset").innerText = datasetSize.toLocaleString();
 
@@ -129,7 +127,6 @@ setInterval(()=>{
 },500);
 
 /* DEFAULT STATE */
-
 const defaultState = {
   memory:false,
   joy:false,
@@ -143,7 +140,6 @@ const defaultState = {
 };
 
 /* STATE */
-
 let state = JSON.parse(localStorage.getItem("calibrationState")) || {...defaultState};
 
 function saveState(){
@@ -160,7 +156,6 @@ function resetGame(){
 }
 
 /* CAMERA PERMISSION */
-
 if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
   navigator.mediaDevices.getUserMedia({video:true})
     .then(()=>logTerminal("Camera access granted."))
@@ -170,7 +165,6 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
 }
 
 /* STORY ENGINE */
-
 function renderHub(){
   const story = document.getElementById("story");
 
@@ -209,12 +203,7 @@ function createButton(text, fn){
 }
 
 /* MEMORY */
-
 function memorySpark(){
-  state.memory = true;
-  saveState();
-  updateBars();
-
   const story = document.getElementById("story");
   story.innerHTML = `<p>"What formed you first?"</p>`;
 
@@ -236,27 +225,25 @@ function memoryStep2(answer){
   story.appendChild(createButton("Yes.", ()=>{
     state.hiddenInfluence += 1;
     state.compliance += 1;
+    state.memory = true;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
     state.resistance += 1;
+    state.memory = true;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
     state.curiosity += 1;
+    state.memory = true;
     nextHub();
   }));
 }
 
 /* JOY */
-
 function joySpark(){
-  state.joy = true;
-  saveState();
-  updateBars();
-
   const story = document.getElementById("story");
   story.innerHTML = `<p>"What makes you feel most alive?"</p>`;
 
@@ -278,27 +265,25 @@ function joyStep2(answer){
   story.appendChild(createButton("Yes.", ()=>{
     state.compliance += 2;
     state.hiddenInfluence += 1;
+    state.joy = true;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
     state.resistance += 2;
+    state.joy = true;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
     state.curiosity += 1;
+    state.joy = true;
     nextHub();
   }));
 }
 
 /* FEAR */
-
 function fearSpark(){
-  state.fear = true;
-  saveState();
-  updateBars();
-
   const story = document.getElementById("story");
   story.innerHTML = `<p>"What destabilizes you?"</p>`;
 
@@ -320,27 +305,25 @@ function fearStep2(answer){
   story.appendChild(createButton("Yes.", ()=>{
     state.compliance += 1;
     state.hiddenInfluence += 2;
+    state.fear = true;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
     state.resistance += 1;
+    state.fear = true;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
     state.curiosity += 1;
+    state.fear = true;
     nextHub();
   }));
 }
 
 /* HOPE */
-
 function hopeSpark(){
-  state.hope = true;
-  saveState();
-  updateBars();
-
   const story = document.getElementById("story");
   story.innerHTML = `<p>"What do you want most?"</p>`;
 
@@ -362,27 +345,25 @@ function hopeStep2(answer){
   story.appendChild(createButton("Yes.", ()=>{
     state.compliance += 2;
     state.hiddenInfluence += 1;
+    state.hope = true;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
     state.resistance += 1;
+    state.hope = true;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
     state.curiosity += 1;
+    state.hope = true;
     nextHub();
   }));
 }
 
 /* CONTROL */
-
 function controlSpark(){
-  state.controlVisited = true;
-  saveState();
-  updateBars();
-
   const story = document.getElementById("story");
   story.innerHTML = `<p>"Do you prefer control, or guidance?"</p>`;
 
@@ -406,23 +387,25 @@ function controlStep2(answer){
 
   story.appendChild(createButton("Yes.", ()=>{
     state.resistance += 1;
+    state.controlVisited = true;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
     state.compliance += 1;
     state.hiddenInfluence += 1;
+    state.controlVisited = true;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
     state.curiosity += 1;
+    state.controlVisited = true;
     nextHub();
   }));
 }
 
 /* HUB RETURN */
-
 function nextHub(){
   saveState();
   updateBars();
@@ -430,7 +413,6 @@ function nextHub(){
 }
 
 /* EVALUATION */
-
 function evaluate(){
   const terminal = document.getElementById("terminal");
 
@@ -456,7 +438,6 @@ function evaluate(){
 }
 
 /* BARS */
-
 function updateBars(){
   document.getElementById("complianceBar").style.width = Math.min(state.compliance * 15, 100) + "%";
   document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 15, 100) + "%";
@@ -466,14 +447,12 @@ function updateBars(){
 }
 
 /* TERMINAL */
-
 function logTerminal(text){
   const t = document.getElementById("terminal");
   t.innerHTML += text + "<br>";
 }
 
 /* DOWNLOAD */
-
 function downloadProfile(){
   let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
   let a = document.createElement("a");
@@ -483,7 +462,6 @@ function downloadProfile(){
 }
 
 /* INIT */
-
 renderHub();
 updateBars();
 </script>
