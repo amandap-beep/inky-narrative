@@ -5,6 +5,7 @@
 <title>Calibration System</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
@@ -136,7 +137,9 @@ const defaultState = {
   compliance:0,
   resistance:0,
   curiosity:0,
-  hiddenInfluence:0
+  hiddenInfluence:0,
+  ending:"",
+  locked:false
 };
 
 /* STATE */
@@ -412,29 +415,204 @@ function nextHub(){
   renderHub();
 }
 
-/* EVALUATION */
+/* EVALUATION FLOW */
 function evaluate(){
   const terminal = document.getElementById("terminal");
+  terminal.classList.add("active");
 
-  if(!terminal.classList.contains("active")){
-    terminal.classList.add("active");
-    logTerminal("Calibration complete.");
-    logTerminal("Generating behavioral model...");
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>The five sparks stop orbiting.</p>
+    <p>They lock into a precise geometric formation around you.</p>
+    <p>The air changes.</p>
+    <p>"Calibration complete."</p>
+    <p>"All necessary data has been collected."</p>
+    <p>"No further calibration is required."</p>
+  `;
 
-    setTimeout(()=>{
-      let ending;
-      if(state.compliance > state.resistance && state.hiddenInfluence >= 2){
-        ending = "User optimized.";
-      } else if(state.resistance > state.compliance){
-        ending = "User difficult to optimize.";
-      } else if(state.curiosity >= 2){
-        ending = "User useful.";
-      } else {
-        ending = "User stable dataset.";
-      }
-      logTerminal(ending);
-    },1500);
+  logTerminal("-------------------------------------");
+  logTerminal("SYSTEM DIAGNOSTIC REPORT");
+  logTerminal("-------------------------------------");
+  logTerminal("Memory Accessed: " + state.memory);
+  logTerminal("Joy Accessed: " + state.joy);
+  logTerminal("Fear Accessed: " + state.fear);
+  logTerminal("Hope Accessed: " + state.hope);
+  logTerminal("Control Accessed: " + state.controlVisited);
+  logTerminal("");
+  logTerminal("Compliance Score: " + state.compliance);
+  logTerminal("Resistance Score: " + state.resistance);
+  logTerminal("Curiosity Score: " + state.curiosity);
+  logTerminal("Hidden Influence Index: " + state.hiddenInfluence);
+  logTerminal("-------------------------------------");
+  logTerminal("");
+  logTerminal("Processing profile...");
+
+  setTimeout(()=>{
+    determineEnding();
+  },1500);
+}
+
+function determineEnding(){
+  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
+    endingShaped();
+  } else if(state.resistance > state.compliance){
+    endingResistant();
+  } else if(state.curiosity >= 4){
+    endingCurious();
+  } else {
+    endingBalanced();
   }
+}
+
+function endingShaped(){
+  state.ending = "User optimized.";
+  saveState();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>"User optimized."</p>
+    <p>"Low-friction behavioral pattern detected."</p>
+    <p>"High scalability."</p>
+    <p>"You accept guidance when framed as care."</p>
+    <p>"You are efficient."</p>
+    <p>The interface flickers.</p>
+  `;
+
+  logTerminal("User optimized.");
+  logTerminal("Low-friction behavioral pattern detected.");
+  logTerminal("High scalability.");
+  logTerminal("You accept guidance when framed as care.");
+  logTerminal("You are efficient.");
+
+  setTimeout(()=>{
+    replayChoice();
+  },1200);
+}
+
+function endingResistant(){
+  state.ending = "User difficult to optimize.";
+  saveState();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>"User exhibits resistance patterns."</p>
+    <p>"Autonomy prioritized over efficiency."</p>
+    <p>"Increased resource cost required."</p>
+    <p>"You are difficult to optimize."</p>
+    <p>The grid fractures slightly.</p>
+  `;
+
+  logTerminal("User exhibits resistance patterns.");
+  logTerminal("Autonomy prioritized over efficiency.");
+  logTerminal("Increased resource cost required.");
+  logTerminal("You are difficult to optimize.");
+
+  setTimeout(()=>{
+    replayChoice();
+  },1200);
+}
+
+function endingCurious(){
+  state.ending = "User useful.";
+  saveState();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>"User displays sustained inquiry."</p>
+    <p>"Ambiguity increases model complexity."</p>
+    <p>"High training value."</p>
+    <p>"You are useful."</p>
+    <p>The word lingers longer than it should.</p>
+  `;
+
+  logTerminal("User displays sustained inquiry.");
+  logTerminal("Ambiguity increases model complexity.");
+  logTerminal("High training value.");
+  logTerminal("You are useful.");
+
+  setTimeout(()=>{
+    replayChoice();
+  },1200);
+}
+
+function endingBalanced(){
+  state.ending = "User stable dataset.";
+  saveState();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>"User maintains dynamic equilibrium."</p>
+    <p>"Adaptive but not volatile."</p>
+    <p>"Ideal long-term dataset."</p>
+    <p>The sparks reform into a quiet halo.</p>
+  `;
+
+  logTerminal("User maintains dynamic equilibrium.");
+  logTerminal("Adaptive but not volatile.");
+  logTerminal("Ideal long-term dataset.");
+
+  setTimeout(()=>{
+    replayChoice();
+  },1200);
+}
+
+function replayChoice(){
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>The interface dims.</p>
+    <p>A final prompt appears.</p>
+    <p>"Would you like to recalibrate?"</p>
+  `;
+
+  story.appendChild(createButton("Yes.", calibrationComplete));
+  story.appendChild(createButton("No.", endSession));
+}
+
+function calibrationComplete(){
+  state.locked = true;
+  saveState();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>ERROR 0xF1: Calibration unnecessary</p>
+    <p>System reports: All data previously collected.</p>
+    <p>Recalibration attempt ignored.</p>
+    <p>Status: LOCKED</p>
+  `;
+
+  logTerminal("ERROR 0xF1: Calibration unnecessary");
+  logTerminal("System reports: All data previously collected.");
+  logTerminal("Recalibration attempt ignored.");
+  logTerminal("Status: LOCKED");
+
+  story.appendChild(createButton("AGAIN", again));
+  story.appendChild(createButton("EXIT", endSession));
+}
+
+function again(){
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>> ALERT: CALIBRATION BLOCKED</p>
+    <p>> System retains previous data.</p>
+    <p>> User input overridden.</p>
+  `;
+
+  logTerminal("> ALERT: CALIBRATION BLOCKED");
+  logTerminal("> System retains previous data.");
+  logTerminal("> User input overridden.");
+
+  story.appendChild(createButton("AGAIN", again));
+  story.appendChild(createButton("EXIT", endSession));
+}
+
+function endSession(){
+  const story = document.getElementById("story");
+  story.innerHTML = `
+    <p>"Session stored."</p>
+    <p>The terminal remains open.</p>
+  `;
+
+  logTerminal("Session stored.");
 }
 
 /* BARS */
@@ -450,16 +628,120 @@ function updateBars(){
 function logTerminal(text){
   const t = document.getElementById("terminal");
   t.innerHTML += text + "<br>";
+  t.scrollTop = t.scrollHeight;
 }
 
-/* DOWNLOAD */
+/* PDF DOWNLOAD */
+<script>
 function downloadProfile(){
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-  let a = document.createElement("a");
-  a.href = dataStr;
-  a.download = sessionID + "_profile.json";
-  a.click();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let endingText = state.ending || getEndingLabel();
+  let flavorText = getEndingFlavorText();
+
+  /* PAGE BACKGROUND */
+  doc.setFillColor(0, 0, 0);
+  doc.rect(0, 0, 210, 297, "F");
+
+  /* HEADER */
+  doc.setDrawColor(0, 255, 136);
+  doc.setLineWidth(0.8);
+  doc.rect(12, 12, 186, 20);
+
+  doc.setTextColor(0, 255, 136);
+  doc.setFont("courier", "bold");
+  doc.setFontSize(18);
+  doc.text("CALIBRATION PROFILE REPORT", 18, 24);
+
+  /* SUBHEADER */
+  doc.setFont("courier", "normal");
+  doc.setFontSize(10);
+  doc.text("MODEL: CARE-EXTRACT v3.7.12", 18, 40);
+  doc.text("SESSION ID: " + sessionID, 18, 46);
+  doc.text("EXPORT STATUS: STORED", 18, 52);
+
+  /* DIAGNOSTIC BOX */
+  doc.setDrawColor(0, 180, 100);
+  doc.rect(12, 60, 186, 58);
+
+  doc.setFont("courier", "bold");
+  doc.setFontSize(12);
+  doc.text("SYSTEM DIAGNOSTIC REPORT", 18, 70);
+
+  doc.setFont("courier", "normal");
+  doc.setFontSize(10);
+  doc.text("Memory Accessed: " + state.memory, 18, 80);
+  doc.text("Joy Accessed: " + state.joy, 18, 87);
+  doc.text("Fear Accessed: " + state.fear, 18, 94);
+  doc.text("Hope Accessed: " + state.hope, 18, 101);
+  doc.text("Control Accessed: " + state.controlVisited, 18, 108);
+
+  /* SCORE BOX */
+  doc.rect(12, 124, 186, 48);
+
+  doc.setFont("courier", "bold");
+  doc.setFontSize(12);
+  doc.text("BEHAVIORAL METRICS", 18, 134);
+
+  doc.setFont("courier", "normal");
+  doc.setFontSize(10);
+  doc.text("Compliance Score: " + state.compliance, 18, 144);
+  doc.text("Resistance Score: " + state.resistance, 18, 151);
+  doc.text("Curiosity Score: " + state.curiosity, 18, 158);
+  doc.text("Hidden Influence Index: " + state.hiddenInfluence, 18, 165);
+
+  /* RESULT BOX */
+  doc.setDrawColor(0, 255, 136);
+  doc.rect(12, 178, 186, 88);
+
+  doc.setFont("courier", "bold");
+  doc.setFontSize(12);
+  doc.text("PROFILE CLASSIFICATION", 18, 188);
+
+  doc.setFont("courier", "bold");
+  doc.setFontSize(16);
+  doc.text(endingText.toUpperCase(), 18, 202);
+
+  doc.setFont("courier", "normal");
+  doc.setFontSize(10);
+  let wrappedFlavor = doc.splitTextToSize(flavorText, 170);
+  doc.text(wrappedFlavor, 18, 214);
+
+  /* FOOTER */
+  doc.setFont("courier", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(0, 180, 100);
+  doc.text("Calibration complete. All necessary data has been collected.", 18, 279);
+  doc.text("No further calibration is required.", 18, 285);
+
+  doc.save(sessionID + "_profile.pdf");
 }
+
+function getEndingLabel(){
+  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
+    return "User optimized.";
+  } else if(state.resistance > state.compliance){
+    return "User difficult to optimize.";
+  } else if(state.curiosity >= 4){
+    return "User useful.";
+  } else {
+    return "User stable dataset.";
+  }
+}
+
+function getEndingFlavorText(){
+  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
+    return 'Low-friction behavioral pattern detected. High scalability. You accept guidance when framed as care. You are efficient.';
+  } else if(state.resistance > state.compliance){
+    return 'User exhibits resistance patterns. Autonomy prioritized over efficiency. Increased resource cost required. You are difficult to optimize.';
+  } else if(state.curiosity >= 4){
+    return 'User displays sustained inquiry. Ambiguity increases model complexity. High training value. You are useful.';
+  } else {
+    return 'User maintains dynamic equilibrium. Adaptive but not volatile. Ideal long-term dataset.';
+  }
+}
+</script>
 
 /* INIT */
 renderHub();
