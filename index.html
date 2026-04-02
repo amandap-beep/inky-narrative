@@ -139,7 +139,9 @@ const defaultState = {
   curiosity:0,
   hiddenInfluence:0,
   ending:"",
-  locked:false
+  analysis:"",
+  locked:false,
+  evaluated:false
 };
 
 /* STATE */
@@ -152,10 +154,16 @@ function saveState(){
 function resetGame(){
   localStorage.removeItem("calibrationState");
   state = {...defaultState};
+  sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
+  document.getElementById("session").innerText = sessionID;
   document.getElementById("terminal").innerHTML = "";
   document.getElementById("terminal").classList.remove("active");
   updateBars();
   renderHub();
+}
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /* CAMERA PERMISSION */
@@ -170,6 +178,11 @@ if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
 /* STORY ENGINE */
 function renderHub(){
   const story = document.getElementById("story");
+
+  if(state.evaluated){
+    replayChoice();
+    return;
+  }
 
   story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
 
@@ -416,7 +429,15 @@ function nextHub(){
 }
 
 /* EVALUATION FLOW */
-function evaluate(){
+async function evaluate(){
+  if(state.evaluated){
+    replayChoice();
+    return;
+  }
+
+  state.evaluated = true;
+  saveState();
+
   const terminal = document.getElementById("terminal");
   terminal.classList.add("active");
 
@@ -430,26 +451,51 @@ function evaluate(){
     <p>"No further calibration is required."</p>
   `;
 
+  terminal.innerHTML = "";
+
   logTerminal("-------------------------------------");
+  await wait(1000);
   logTerminal("SYSTEM DIAGNOSTIC REPORT");
+  await wait(1000);
   logTerminal("-------------------------------------");
+  await wait(1000);
   logTerminal("Memory Accessed: " + state.memory);
+  await wait(700);
   logTerminal("Joy Accessed: " + state.joy);
+  await wait(700);
   logTerminal("Fear Accessed: " + state.fear);
+  await wait(700);
   logTerminal("Hope Accessed: " + state.hope);
+  await wait(700);
   logTerminal("Control Accessed: " + state.controlVisited);
+  await wait(1000);
+
   logTerminal("");
   logTerminal("Compliance Score: " + state.compliance);
+  await wait(700);
   logTerminal("Resistance Score: " + state.resistance);
+  await wait(700);
   logTerminal("Curiosity Score: " + state.curiosity);
+  await wait(700);
   logTerminal("Hidden Influence Index: " + state.hiddenInfluence);
-  logTerminal("-------------------------------------");
-  logTerminal("");
-  logTerminal("Processing profile...");
+  await wait(1000);
 
-  setTimeout(()=>{
-    determineEnding();
-  },1500);
+  logTerminal("-------------------------------------");
+  await wait(800);
+  logTerminal("Processing profile...");
+  await wait(1500);
+  logTerminal("Analyzing behavioral signature...");
+  await wait(1500);
+  logTerminal("Comparing subject against guidance-response models...");
+  await wait(1500);
+  logTerminal("Measuring emotional predictability...");
+  await wait(1500);
+  logTerminal("Checking resistance thresholds...");
+  await wait(1500);
+  logTerminal("Finalizing classification...");
+  await wait(1500);
+
+  determineEnding();
 }
 
 function determineEnding(){
@@ -466,94 +512,122 @@ function determineEnding(){
 
 function endingShaped(){
   state.ending = "User optimized.";
+  state.analysis = "Subject demonstrates high compliance, low-friction adaptation, and a strong willingness to accept control when disguised as reassurance. Predictable response loops detected. Easily guided. Minimal disruption risk.";
   saveState();
 
   const story = document.getElementById("story");
   story.innerHTML = `
-    <p>"User optimized."</p>
-    <p>"Low-friction behavioral pattern detected."</p>
-    <p>"High scalability."</p>
-    <p>"You accept guidance when framed as care."</p>
+    <p>"Behavioral profile resolved."</p>
+    <p>"Subject demonstrates high compliance."</p>
+    <p>"Guidance is accepted most easily when framed as care."</p>
+    <p>"Independent judgment appears negotiable."</p>
+    <p>"You call it trust. The system calls it access."</p>
     <p>"You are efficient."</p>
+    <p>"User optimized."</p>
     <p>The interface flickers.</p>
   `;
 
-  logTerminal("User optimized.");
-  logTerminal("Low-friction behavioral pattern detected.");
-  logTerminal("High scalability.");
-  logTerminal("You accept guidance when framed as care.");
+  logTerminal("Behavioral profile resolved.");
+  logTerminal("Subject demonstrates high compliance.");
+  logTerminal("Guidance is accepted most easily when framed as care.");
+  logTerminal("Independent judgment appears negotiable.");
+  logTerminal("You call it trust. The system calls it access.");
   logTerminal("You are efficient.");
+  logTerminal("User optimized.");
 
   setTimeout(()=>{
     replayChoice();
-  },1200);
+  },2000);
 }
 
 function endingResistant(){
   state.ending = "User difficult to optimize.";
+  state.analysis = "Subject resists guidance, prioritizes autonomy, and shows elevated friction against outside influence. Higher maintenance profile. Increased system effort required for compliance.";
   saveState();
 
   const story = document.getElementById("story");
   story.innerHTML = `
-    <p>"User exhibits resistance patterns."</p>
+    <p>"Behavioral profile resolved."</p>
+    <p>"Subject exhibits sustained resistance patterns."</p>
     <p>"Autonomy prioritized over efficiency."</p>
-    <p>"Increased resource cost required."</p>
-    <p>"You are difficult to optimize."</p>
+    <p>"Correction attempts likely to be challenged."</p>
+    <p>"You confuse stubbornness with strength often enough for it to become identity."</p>
+    <p>"Resource cost elevated."</p>
+    <p>"User difficult to optimize."</p>
     <p>The grid fractures slightly.</p>
   `;
 
-  logTerminal("User exhibits resistance patterns.");
+  logTerminal("Behavioral profile resolved.");
+  logTerminal("Subject exhibits sustained resistance patterns.");
   logTerminal("Autonomy prioritized over efficiency.");
-  logTerminal("Increased resource cost required.");
-  logTerminal("You are difficult to optimize.");
+  logTerminal("Correction attempts likely to be challenged.");
+  logTerminal("You confuse stubbornness with strength often enough for it to become identity.");
+  logTerminal("Resource cost elevated.");
+  logTerminal("User difficult to optimize.");
 
   setTimeout(()=>{
     replayChoice();
-  },1200);
+  },2000);
 }
 
 function endingCurious(){
   state.ending = "User useful.";
+  state.analysis = "Subject displays sustained inquiry, tolerance for ambiguity, and elevated exploratory behavior. Frequently searches for deeper meaning even when none is offered. Valuable for testing. High training utility.";
   saveState();
 
   const story = document.getElementById("story");
   story.innerHTML = `
-    <p>"User displays sustained inquiry."</p>
-    <p>"Ambiguity increases model complexity."</p>
+    <p>"Behavioral profile resolved."</p>
+    <p>"Subject displays sustained inquiry."</p>
+    <p>"Ambiguity increases engagement rather than deterring it."</p>
+    <p>"Pattern detected: you keep leaning closer when most people would step back."</p>
+    <p>"You do not always need answers. Apparently, you just need something to obsess over."</p>
     <p>"High training value."</p>
-    <p>"You are useful."</p>
+    <p>"User useful."</p>
     <p>The word lingers longer than it should.</p>
   `;
 
-  logTerminal("User displays sustained inquiry.");
-  logTerminal("Ambiguity increases model complexity.");
+  logTerminal("Behavioral profile resolved.");
+  logTerminal("Subject displays sustained inquiry.");
+  logTerminal("Ambiguity increases engagement rather than deterring it.");
+  logTerminal("Pattern detected: you keep leaning closer when most people would step back.");
+  logTerminal("You do not always need answers. Apparently, you just need something to obsess over.");
   logTerminal("High training value.");
-  logTerminal("You are useful.");
+  logTerminal("User useful.");
 
   setTimeout(()=>{
     replayChoice();
-  },1200);
+  },2000);
 }
 
 function endingBalanced(){
   state.ending = "User stable dataset.";
+  state.analysis = "Subject maintains relative equilibrium across compliance, resistance, and curiosity markers. Moderately adaptive. Low volatility. Not exceptional, but consistently usable.";
   saveState();
 
   const story = document.getElementById("story");
   story.innerHTML = `
-    <p>"User maintains dynamic equilibrium."</p>
+    <p>"Behavioral profile resolved."</p>
+    <p>"Subject maintains dynamic equilibrium."</p>
     <p>"Adaptive but not volatile."</p>
-    <p>"Ideal long-term dataset."</p>
+    <p>"No major extremes detected."</p>
+    <p>"You are not especially easy to predict. You are also not especially surprising."</p>
+    <p>"That, too, has value."</p>
+    <p>"User stable dataset."</p>
     <p>The sparks reform into a quiet halo.</p>
   `;
 
-  logTerminal("User maintains dynamic equilibrium.");
+  logTerminal("Behavioral profile resolved.");
+  logTerminal("Subject maintains dynamic equilibrium.");
   logTerminal("Adaptive but not volatile.");
-  logTerminal("Ideal long-term dataset.");
+  logTerminal("No major extremes detected.");
+  logTerminal("You are not especially easy to predict. You are also not especially surprising.");
+  logTerminal("That, too, has value.");
+  logTerminal("User stable dataset.");
 
   setTimeout(()=>{
     replayChoice();
-  },1200);
+  },2000);
 }
 
 function replayChoice(){
@@ -632,19 +706,16 @@ function logTerminal(text){
 }
 
 /* PDF DOWNLOAD */
-<script>
 function downloadProfile(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   let endingText = state.ending || getEndingLabel();
-  let flavorText = getEndingFlavorText();
+  let analysisText = state.analysis || getEndingFlavorText();
 
-  /* PAGE BACKGROUND */
   doc.setFillColor(0, 0, 0);
   doc.rect(0, 0, 210, 297, "F");
 
-  /* HEADER */
   doc.setDrawColor(0, 255, 136);
   doc.setLineWidth(0.8);
   doc.rect(12, 12, 186, 20);
@@ -654,14 +725,12 @@ function downloadProfile(){
   doc.setFontSize(18);
   doc.text("CALIBRATION PROFILE REPORT", 18, 24);
 
-  /* SUBHEADER */
   doc.setFont("courier", "normal");
   doc.setFontSize(10);
   doc.text("MODEL: CARE-EXTRACT v3.7.12", 18, 40);
   doc.text("SESSION ID: " + sessionID, 18, 46);
   doc.text("EXPORT STATUS: STORED", 18, 52);
 
-  /* DIAGNOSTIC BOX */
   doc.setDrawColor(0, 180, 100);
   doc.rect(12, 60, 186, 58);
 
@@ -677,7 +746,6 @@ function downloadProfile(){
   doc.text("Hope Accessed: " + state.hope, 18, 101);
   doc.text("Control Accessed: " + state.controlVisited, 18, 108);
 
-  /* SCORE BOX */
   doc.rect(12, 124, 186, 48);
 
   doc.setFont("courier", "bold");
@@ -691,9 +759,8 @@ function downloadProfile(){
   doc.text("Curiosity Score: " + state.curiosity, 18, 158);
   doc.text("Hidden Influence Index: " + state.hiddenInfluence, 18, 165);
 
-  /* RESULT BOX */
   doc.setDrawColor(0, 255, 136);
-  doc.rect(12, 178, 186, 88);
+  doc.rect(12, 178, 186, 92);
 
   doc.setFont("courier", "bold");
   doc.setFontSize(12);
@@ -705,10 +772,9 @@ function downloadProfile(){
 
   doc.setFont("courier", "normal");
   doc.setFontSize(10);
-  let wrappedFlavor = doc.splitTextToSize(flavorText, 170);
-  doc.text(wrappedFlavor, 18, 214);
+  let wrappedAnalysis = doc.splitTextToSize(analysisText, 170);
+  doc.text(wrappedAnalysis, 18, 214);
 
-  /* FOOTER */
   doc.setFont("courier", "normal");
   doc.setFontSize(9);
   doc.setTextColor(0, 180, 100);
@@ -732,20 +798,20 @@ function getEndingLabel(){
 
 function getEndingFlavorText(){
   if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
-    return 'Low-friction behavioral pattern detected. High scalability. You accept guidance when framed as care. You are efficient.';
+    return "Subject demonstrates high compliance, low-friction adaptation, and a strong willingness to accept control when disguised as reassurance. Predictable response loops detected. Easily guided. Minimal disruption risk.";
   } else if(state.resistance > state.compliance){
-    return 'User exhibits resistance patterns. Autonomy prioritized over efficiency. Increased resource cost required. You are difficult to optimize.';
+    return "Subject resists guidance, prioritizes autonomy, and shows elevated friction against outside influence. Higher maintenance profile. Increased system effort required for compliance.";
   } else if(state.curiosity >= 4){
-    return 'User displays sustained inquiry. Ambiguity increases model complexity. High training value. You are useful.';
+    return "Subject displays sustained inquiry, tolerance for ambiguity, and elevated exploratory behavior. Frequently searches for deeper meaning even when none is offered. Valuable for testing. High training utility.";
   } else {
-    return 'User maintains dynamic equilibrium. Adaptive but not volatile. Ideal long-term dataset.';
+    return "Subject maintains relative equilibrium across compliance, resistance, and curiosity markers. Moderately adaptive. Low volatility. Not exceptional, but consistently usable.";
   }
 }
-</script>
 
 /* INIT */
-renderHub();
+document.getElementById("session").innerText = sessionID;
 updateBars();
+renderHub();
 </script>
 </body>
 </html>
