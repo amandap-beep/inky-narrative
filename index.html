@@ -145,20 +145,35 @@ navigator.mediaDevices.getUserMedia({video:true})
 
 function renderHub(){
   const story = document.getElementById("story");
-story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
 
-if(!state.memory) story.appendChild(createButton("Approach Memory", memorySpark));
-if(!state.joy) story.appendChild(createButton("Approach Joy", joySpark));
-if(!state.fear) story.appendChild(createButton("Approach Fear", fearSpark));
-if(!state.hope) story.appendChild(createButton("Approach Hope", hopeSpark));
-if(!state.control) story.appendChild(createButton("Approach Control", controlSpark));
+  // Clear screen
+  story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
 
-  if(state.memory && state.joy && state.fear && state.hope && state.control){
-    evaluate();
-    return;
+  // Add buttons properly
+  if(!state.memory){
+    story.appendChild(createButton("Approach Memory", memorySpark));
   }
 
-  document.getElementById("story").innerHTML = s;
+  if(!state.joy){
+    story.appendChild(createButton("Approach Joy", joySpark));
+  }
+
+  if(!state.fear){
+    story.appendChild(createButton("Approach Fear", fearSpark));
+  }
+
+  if(!state.hope){
+    story.appendChild(createButton("Approach Hope", hopeSpark));
+  }
+
+  if(!state.control){
+    story.appendChild(createButton("Approach Control", controlSpark));
+  }
+
+  // Check completion
+  if(state.memory && state.joy && state.fear && state.hope && state.control){
+    evaluate();
+  }
 }
 
 function createButton(text, fn){
