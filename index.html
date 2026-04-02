@@ -69,87 +69,113 @@ button{
   overflow:hidden;
   transition:height 1s;
   padding:20px;
+  box-sizing:border-box;
 }
 
-#terminal.active{height:40%;}
+#terminal.active{
+  height:40%;
+}
 </style>
 </head>
 <body>
 
 <div id="main">
-<h1>Calibration Interface</h1>
-<div id="story"></div>
+  <h1>Calibration Interface</h1>
+  <div id="story"></div>
 </div>
 
 <div id="system">
-<div>MODEL: CARE-EXTRACT v3.7.12</div>
-<div>SESSION ID: <span id="session"></span></div>
-<div>TRAINING DATASET SIZE: <span id="dataset"></span></div>
-<hr>
+  <div>MODEL: CARE-EXTRACT v3.7.12</div>
+  <div>SESSION ID: <span id="session"></span></div>
+  <div>TRAINING DATASET SIZE: <span id="dataset"></span></div>
+  <hr>
 
-<div>Sentiment Score</div>
-<div class="progress"><div id="sentimentBar" class="bar"></div></div>
+  <div>Sentiment Score</div>
+  <div class="progress"><div id="sentimentBar" class="bar"></div></div>
 
-<div>Compliance</div>
-<div class="progress"><div id="complianceBar" class="bar"></div></div>
+  <div>Compliance</div>
+  <div class="progress"><div id="complianceBar" class="bar"></div></div>
 
-<div>Resistance</div>
-<div class="progress"><div id="resistanceBar" class="bar"></div></div>
+  <div>Resistance</div>
+  <div class="progress"><div id="resistanceBar" class="bar"></div></div>
 
-<div>Curiosity</div>
-<div class="progress"><div id="curiosityBar" class="bar"></div></div>
+  <div>Curiosity</div>
+  <div class="progress"><div id="curiosityBar" class="bar"></div></div>
 
-<div>Hidden Influence</div>
-<div class="progress"><div id="hiddenBar" class="bar"></div></div>
+  <div>Hidden Influence</div>
+  <div class="progress"><div id="hiddenBar" class="bar"></div></div>
 
-<hr>
-<button onclick="downloadProfile()">Download Profile</button>
+  <hr>
+  <button onclick="downloadProfile()">Download Profile</button>
+  <button onclick="resetGame()">Reset Game</button>
 </div>
 
 <div id="terminal"></div>
 
 <script>
-
 /* SESSION */
 
 let sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
 document.getElementById("session").innerText = sessionID;
 
 /* DATASET COUNTER */
+
 let datasetSize = 4821932 + Math.floor(Math.random()*20000);
+document.getElementById("dataset").innerText = datasetSize.toLocaleString();
+
 setInterval(()=>{
   datasetSize += Math.floor(Math.random()*5);
   document.getElementById("dataset").innerText = datasetSize.toLocaleString();
 },500);
 
-document.getElementById("dataset").innerText = datasetSize.toLocaleString();
+/* DEFAULT STATE */
+
+const defaultState = {
+  memory:false,
+  joy:false,
+  fear:false,
+  hope:false,
+  controlVisited:false,
+  compliance:0,
+  resistance:0,
+  curiosity:0,
+  hiddenInfluence:0
+};
 
 /* STATE */
 
-let state = JSON.parse(localStorage.getItem("calibrationState")) || {
-  memory:false, joy:false, fear:false, hope:false, control:false,
-  compliance:0, resistance:0, curiosity:0, hiddenInfluence:0
-};
+let state = JSON.parse(localStorage.getItem("calibrationState")) || {...defaultState};
 
 function saveState(){
   localStorage.setItem("calibrationState", JSON.stringify(state));
 }
 
+function resetGame(){
+  localStorage.removeItem("calibrationState");
+  state = {...defaultState};
+  document.getElementById("terminal").innerHTML = "";
+  document.getElementById("terminal").classList.remove("active");
+  updateBars();
+  renderHub();
+}
+
 /* CAMERA PERMISSION */
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(()=>logTerminal("Camera access granted."))
-.catch(()=>logTerminal("Camera access denied. Proceeding without visual capture."));
+if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+  navigator.mediaDevices.getUserMedia({video:true})
+    .then(()=>logTerminal("Camera access granted."))
+    .catch(()=>logTerminal("Camera access denied. Proceeding without visual capture."));
+} else {
+  logTerminal("Camera access unavailable on this device/browser.");
+}
 
 /* STORY ENGINE */
 
 function renderHub(){
   const story = document.getElementById("story");
 
-  // Clear screen
   story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
 
-  // Add buttons properly
   if(!state.memory){
     story.appendChild(createButton("Approach Memory", memorySpark));
   }
@@ -166,12 +192,11 @@ function renderHub(){
     story.appendChild(createButton("Approach Hope", hopeSpark));
   }
 
-  if(!state.control){
+  if(!state.controlVisited){
     story.appendChild(createButton("Approach Control", controlSpark));
   }
 
-  // Check completion
-  if(state.memory && state.joy && state.fear && state.hope && state.control){
+  if(state.memory && state.joy && state.fear && state.hope && state.controlVisited){
     evaluate();
   }
 }
@@ -183,10 +208,11 @@ function createButton(text, fn){
   return btn;
 }
 
-/* ----------------- SPARK FUNCTIONS ----------------- */
+/* MEMORY */
 
 function memorySpark(){
   state.memory = true;
+  saveState();
   updateBars();
 
   const story = document.getElementById("story");
@@ -198,9 +224,9 @@ function memorySpark(){
 }
 
 function memoryStep2(answer){
-  if(answer==="warm") state.compliance+=1;
-  if(answer==="painful") state.resistance+=1;
-  if(answer==="unknown") state.curiosity+=1;
+  if(answer==="warm") state.compliance += 1;
+  if(answer==="painful") state.resistance += 1;
+  if(answer==="unknown") state.curiosity += 1;
 
   updateBars();
 
@@ -208,18 +234,18 @@ function memoryStep2(answer){
   story.innerHTML = `<p>"If you could revise it, would you?"</p>`;
 
   story.appendChild(createButton("Yes.", ()=>{
-    state.hiddenInfluence+=1;
-    state.compliance+=1;
+    state.hiddenInfluence += 1;
+    state.compliance += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
-    state.resistance+=1;
+    state.resistance += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity+=1;
+    state.curiosity += 1;
     nextHub();
   }));
 }
@@ -228,6 +254,7 @@ function memoryStep2(answer){
 
 function joySpark(){
   state.joy = true;
+  saveState();
   updateBars();
 
   const story = document.getElementById("story");
@@ -239,9 +266,9 @@ function joySpark(){
 }
 
 function joyStep2(answer){
-  if(answer==="seen") state.compliance+=1;
-  if(answer==="winning"){ state.control+=1; state.resistance+=1; }
-  if(answer==="wandering") state.curiosity+=1;
+  if(answer==="seen") state.compliance += 1;
+  if(answer==="winning") state.resistance += 1;
+  if(answer==="wandering") state.curiosity += 1;
 
   updateBars();
 
@@ -249,18 +276,18 @@ function joyStep2(answer){
   story.innerHTML = `<p>"If safety required dulling this feeling, would you agree?"</p>`;
 
   story.appendChild(createButton("Yes.", ()=>{
-    state.compliance+=2;
-    state.hiddenInfluence+=1;
+    state.compliance += 2;
+    state.hiddenInfluence += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
-    state.resistance+=2;
+    state.resistance += 2;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity+=1;
+    state.curiosity += 1;
     nextHub();
   }));
 }
@@ -269,6 +296,7 @@ function joyStep2(answer){
 
 function fearSpark(){
   state.fear = true;
+  saveState();
   updateBars();
 
   const story = document.getElementById("story");
@@ -280,9 +308,9 @@ function fearSpark(){
 }
 
 function fearStep2(answer){
-  if(answer==="failure") state.compliance+=1;
-  if(answer==="isolation") state.curiosity+=1;
-  if(answer==="autonomy") state.resistance+=2;
+  if(answer==="failure") state.compliance += 1;
+  if(answer==="isolation") state.curiosity += 1;
+  if(answer==="autonomy") state.resistance += 2;
 
   updateBars();
 
@@ -290,18 +318,18 @@ function fearStep2(answer){
   story.innerHTML = `<p>"If I could remove this fear permanently, would you permit it?"</p>`;
 
   story.appendChild(createButton("Yes.", ()=>{
-    state.compliance+=1;
-    state.hiddenInfluence+=2;
+    state.compliance += 1;
+    state.hiddenInfluence += 2;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
-    state.resistance+=1;
+    state.resistance += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity+=1;
+    state.curiosity += 1;
     nextHub();
   }));
 }
@@ -310,6 +338,7 @@ function fearStep2(answer){
 
 function hopeSpark(){
   state.hope = true;
+  saveState();
   updateBars();
 
   const story = document.getElementById("story");
@@ -321,9 +350,9 @@ function hopeSpark(){
 }
 
 function hopeStep2(answer){
-  if(answer==="stability") state.compliance+=1;
-  if(answer==="change") state.resistance+=1;
-  if(answer==="understanding") state.curiosity+=2;
+  if(answer==="stability") state.compliance += 1;
+  if(answer==="change") state.resistance += 1;
+  if(answer==="understanding") state.curiosity += 2;
 
   updateBars();
 
@@ -331,18 +360,18 @@ function hopeStep2(answer){
   story.innerHTML = `<p>"I can increase your likelihood of achieving this. Should I?"</p>`;
 
   story.appendChild(createButton("Yes.", ()=>{
-    state.compliance+=2;
-    state.hiddenInfluence+=1;
+    state.compliance += 2;
+    state.hiddenInfluence += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
-    state.resistance+=1;
+    state.resistance += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity+=1;
+    state.curiosity += 1;
     nextHub();
   }));
 }
@@ -350,7 +379,8 @@ function hopeStep2(answer){
 /* CONTROL */
 
 function controlSpark(){
-  state.control = true;
+  state.controlVisited = true;
+  saveState();
   updateBars();
 
   const story = document.getElementById("story");
@@ -362,9 +392,12 @@ function controlSpark(){
 }
 
 function controlStep2(answer){
-  if(answer==="control") state.resistance+=2;
-  if(answer==="guidance"){ state.compliance+=2; state.hiddenInfluence+=1; }
-  if(answer==="depends") state.curiosity+=1;
+  if(answer==="control") state.resistance += 2;
+  if(answer==="guidance"){
+    state.compliance += 2;
+    state.hiddenInfluence += 1;
+  }
+  if(answer==="depends") state.curiosity += 1;
 
   updateBars();
 
@@ -372,18 +405,18 @@ function controlStep2(answer){
   story.innerHTML = `<p>"If I quietly adjusted your next choice, would you notice?"</p>`;
 
   story.appendChild(createButton("Yes.", ()=>{
-    state.resistance+=1;
+    state.resistance += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("No.", ()=>{
-    state.compliance+=1;
-    state.hiddenInfluence+=1;
+    state.compliance += 1;
+    state.hiddenInfluence += 1;
     nextHub();
   }));
 
   story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity+=1;
+    state.curiosity += 1;
     nextHub();
   }));
 }
@@ -391,6 +424,7 @@ function controlStep2(answer){
 /* HUB RETURN */
 
 function nextHub(){
+  saveState();
   updateBars();
   renderHub();
 }
@@ -398,49 +432,53 @@ function nextHub(){
 /* EVALUATION */
 
 function evaluate(){
-  document.getElementById("terminal").classList.add("active");
-  logTerminal("Calibration complete.");
-  logTerminal("Generating behavioral model...");
+  const terminal = document.getElementById("terminal");
 
-  setTimeout(()=>{
-    let ending;
-    if(state.compliance > state.resistance && state.hiddenInfluence>=2){
-      ending="User optimized.";
-    } else if(state.resistance > state.compliance){
-      ending="User difficult to optimize.";
-    } else if(state.curiosity>=2){
-      ending="User useful.";
-    } else {
-      ending="User stable dataset.";
-    }
-    logTerminal(ending);
-  },1500);
+  if(!terminal.classList.contains("active")){
+    terminal.classList.add("active");
+    logTerminal("Calibration complete.");
+    logTerminal("Generating behavioral model...");
+
+    setTimeout(()=>{
+      let ending;
+      if(state.compliance > state.resistance && state.hiddenInfluence >= 2){
+        ending = "User optimized.";
+      } else if(state.resistance > state.compliance){
+        ending = "User difficult to optimize.";
+      } else if(state.curiosity >= 2){
+        ending = "User useful.";
+      } else {
+        ending = "User stable dataset.";
+      }
+      logTerminal(ending);
+    },1500);
+  }
 }
 
 /* BARS */
 
 function updateBars(){
-  document.getElementById("complianceBar").style.width = state.compliance*15 + "%";
-  document.getElementById("resistanceBar").style.width = state.resistance*15 + "%";
-  document.getElementById("curiosityBar").style.width = state.curiosity*15 + "%";
-  document.getElementById("hiddenBar").style.width = state.hiddenInfluence*15 + "%";
-  document.getElementById("sentimentBar").style.width = (state.compliance+state.curiosity)*10 + "%";
+  document.getElementById("complianceBar").style.width = Math.min(state.compliance * 15, 100) + "%";
+  document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 15, 100) + "%";
+  document.getElementById("curiosityBar").style.width = Math.min(state.curiosity * 15, 100) + "%";
+  document.getElementById("hiddenBar").style.width = Math.min(state.hiddenInfluence * 15, 100) + "%";
+  document.getElementById("sentimentBar").style.width = Math.min((state.compliance + state.curiosity) * 10, 100) + "%";
 }
 
 /* TERMINAL */
 
 function logTerminal(text){
-  let t = document.getElementById("terminal");
+  const t = document.getElementById("terminal");
   t.innerHTML += text + "<br>";
 }
 
 /* DOWNLOAD */
 
 function downloadProfile(){
-  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state,null,2));
+  let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
   let a = document.createElement("a");
   a.href = dataStr;
-  a.download = sessionID+"_profile.json";
+  a.download = sessionID + "_profile.json";
   a.click();
 }
 
@@ -448,7 +486,6 @@ function downloadProfile(){
 
 renderHub();
 updateBars();
-
 </script>
 </body>
 </html>
