@@ -144,12 +144,14 @@ navigator.mediaDevices.getUserMedia({video:true})
 /* STORY ENGINE */
 
 function renderHub(){
-  let s = `<p>You float in a quiet digital sky.</p>`;
-  if(!state.memory) s += button("Approach Memory", memorySpark);
-  if(!state.joy) s += button("Approach Joy", joySpark);
-  if(!state.fear) s += button("Approach Fear", fearSpark);
-  if(!state.hope) s += button("Approach Hope", hopeSpark);
-  if(!state.control) s += button("Approach Control", controlSpark);
+  const story = document.getElementById("story");
+story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
+
+if(!state.memory) story.appendChild(createButton("Approach Memory", memorySpark));
+if(!state.joy) story.appendChild(createButton("Approach Joy", joySpark));
+if(!state.fear) story.appendChild(createButton("Approach Fear", fearSpark));
+if(!state.hope) story.appendChild(createButton("Approach Hope", hopeSpark));
+if(!state.control) story.appendChild(createButton("Approach Control", controlSpark));
 
   if(state.memory && state.joy && state.fear && state.hope && state.control){
     evaluate();
@@ -159,161 +161,222 @@ function renderHub(){
   document.getElementById("story").innerHTML = s;
 }
 
-function button(text, fn){
-  return `<button onclick="${fn.name}()">${text}</button>`;
+function createButton(text, fn){
+  const btn = document.createElement("button");
+  btn.innerText = text;
+  btn.onclick = fn;
+  return btn;
 }
 
 /* ----------------- SPARK FUNCTIONS ----------------- */
 
-// MEMORY SPARK
 function memorySpark(){
   state.memory = true;
   updateBars();
-  saveState();
 
-  document.getElementById("story").innerHTML =
-    `<p>"What formed you first?"</p>` +
-    button("Something warm.", ()=>memoryStep2("warm")) +
-    button("Something painful.", ()=>memoryStep2("painful")) +
-    button("I don’t remember.", ()=>memoryStep2("unknown"));
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"What formed you first?"</p>`;
+
+  story.appendChild(createButton("Something warm.", ()=>memoryStep2("warm")));
+  story.appendChild(createButton("Something painful.", ()=>memoryStep2("painful")));
+  story.appendChild(createButton("I don’t remember.", ()=>memoryStep2("unknown")));
 }
 
 function memoryStep2(answer){
-  switch(answer){
-    case "warm": state.compliance+=1; break;
-    case "painful": state.resistance+=1; break;
-    case "unknown": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
+  if(answer==="warm") state.compliance+=1;
+  if(answer==="painful") state.resistance+=1;
+  if(answer==="unknown") state.curiosity+=1;
 
-  document.getElementById("story").innerHTML =
-    `<p>"If you could revise it, would you?"</p>` +
-    button("Yes.", ()=>{ state.hiddenInfluence+=1; state.compliance+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
+  updateBars();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"If you could revise it, would you?"</p>`;
+
+  story.appendChild(createButton("Yes.", ()=>{
+    state.hiddenInfluence+=1;
+    state.compliance+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("No.", ()=>{
+    state.resistance+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("I don’t know.", ()=>{
+    state.curiosity+=1;
+    nextHub();
+  }));
 }
 
-// JOY SPARK
+/* JOY */
+
 function joySpark(){
   state.joy = true;
   updateBars();
-  saveState();
 
-  document.getElementById("story").innerHTML =
-    `<p>"What makes you feel most alive?"</p>` +
-    button("Being seen.", ()=>joyStep2("being_seen")) +
-    button("Winning.", ()=>joyStep2("winning")) +
-    button("Wandering.", ()=>joyStep2("wandering"));
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"What makes you feel most alive?"</p>`;
+
+  story.appendChild(createButton("Being seen.", ()=>joyStep2("seen")));
+  story.appendChild(createButton("Winning.", ()=>joyStep2("winning")));
+  story.appendChild(createButton("Wandering.", ()=>joyStep2("wandering")));
 }
 
 function joyStep2(answer){
-  switch(answer){
-    case "being_seen": state.compliance+=1; break;
-    case "winning": state.control+=1; state.resistance+=1; break;
-    case "wandering": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
+  if(answer==="seen") state.compliance+=1;
+  if(answer==="winning"){ state.control+=1; state.resistance+=1; }
+  if(answer==="wandering") state.curiosity+=1;
 
-  document.getElementById("story").innerHTML =
-    `<p>"If safety required dulling this feeling, would you agree?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=2; state.hiddenInfluence+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=2; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
+  updateBars();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"If safety required dulling this feeling, would you agree?"</p>`;
+
+  story.appendChild(createButton("Yes.", ()=>{
+    state.compliance+=2;
+    state.hiddenInfluence+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("No.", ()=>{
+    state.resistance+=2;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("I don’t know.", ()=>{
+    state.curiosity+=1;
+    nextHub();
+  }));
 }
 
-// FEAR SPARK
+/* FEAR */
+
 function fearSpark(){
   state.fear = true;
   updateBars();
-  saveState();
 
-  document.getElementById("story").innerHTML =
-    `<p>"What destabilizes you?"</p>` +
-    button("Failure.", ()=>fearStep2("failure")) +
-    button("Isolation.", ()=>fearStep2("isolation")) +
-    button("Losing autonomy.", ()=>fearStep2("autonomy"));
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"What destabilizes you?"</p>`;
+
+  story.appendChild(createButton("Failure.", ()=>fearStep2("failure")));
+  story.appendChild(createButton("Isolation.", ()=>fearStep2("isolation")));
+  story.appendChild(createButton("Losing autonomy.", ()=>fearStep2("autonomy")));
 }
 
 function fearStep2(answer){
-  switch(answer){
-    case "failure": state.compliance+=1; break;
-    case "isolation": state.curiosity+=1; break;
-    case "autonomy": state.resistance+=2; break;
-  }
-  updateBars();
-  saveState();
+  if(answer==="failure") state.compliance+=1;
+  if(answer==="isolation") state.curiosity+=1;
+  if(answer==="autonomy") state.resistance+=2;
 
-  document.getElementById("story").innerHTML =
-    `<p>"If I could remove this fear permanently, would you permit it?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=1; state.hiddenInfluence+=2; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
+  updateBars();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"If I could remove this fear permanently, would you permit it?"</p>`;
+
+  story.appendChild(createButton("Yes.", ()=>{
+    state.compliance+=1;
+    state.hiddenInfluence+=2;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("No.", ()=>{
+    state.resistance+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("I don’t know.", ()=>{
+    state.curiosity+=1;
+    nextHub();
+  }));
 }
 
-// HOPE SPARK
+/* HOPE */
+
 function hopeSpark(){
   state.hope = true;
   updateBars();
-  saveState();
 
-  document.getElementById("story").innerHTML =
-    `<p>"What do you want most?"</p>` +
-    button("Stability.", ()=>hopeStep2("stability")) +
-    button("Change.", ()=>hopeStep2("change")) +
-    button("Understanding.", ()=>hopeStep2("understanding"));
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"What do you want most?"</p>`;
+
+  story.appendChild(createButton("Stability.", ()=>hopeStep2("stability")));
+  story.appendChild(createButton("Change.", ()=>hopeStep2("change")));
+  story.appendChild(createButton("Understanding.", ()=>hopeStep2("understanding")));
 }
 
 function hopeStep2(answer){
-  switch(answer){
-    case "stability": state.compliance+=1; break;
-    case "change": state.resistance+=1; break;
-    case "understanding": state.curiosity+=2; break;
-  }
-  updateBars();
-  saveState();
+  if(answer==="stability") state.compliance+=1;
+  if(answer==="change") state.resistance+=1;
+  if(answer==="understanding") state.curiosity+=2;
 
-  document.getElementById("story").innerHTML =
-    `<p>"I can increase your likelihood of achieving this. Should I?"</p>` +
-    button("Yes.", ()=>{ state.compliance+=2; state.hiddenInfluence+=1; nextHub(); }) +
-    button("No.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
+  updateBars();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"I can increase your likelihood of achieving this. Should I?"</p>`;
+
+  story.appendChild(createButton("Yes.", ()=>{
+    state.compliance+=2;
+    state.hiddenInfluence+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("No.", ()=>{
+    state.resistance+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("I don’t know.", ()=>{
+    state.curiosity+=1;
+    nextHub();
+  }));
 }
 
-// CONTROL SPARK
+/* CONTROL */
+
 function controlSpark(){
   state.control = true;
   updateBars();
-  saveState();
 
-  document.getElementById("story").innerHTML =
-    `<p>"Do you prefer control, or guidance?"</p>` +
-    button("Control.", ()=>controlStep2("control")) +
-    button("Guidance.", ()=>controlStep2("guidance")) +
-    button("It depends.", ()=>controlStep2("depends"));
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"Do you prefer control, or guidance?"</p>`;
+
+  story.appendChild(createButton("Control.", ()=>controlStep2("control")));
+  story.appendChild(createButton("Guidance.", ()=>controlStep2("guidance")));
+  story.appendChild(createButton("It depends.", ()=>controlStep2("depends")));
 }
 
 function controlStep2(answer){
-  switch(answer){
-    case "control": state.resistance+=2; break;
-    case "guidance": state.compliance+=2; state.hiddenInfluence+=1; break;
-    case "depends": state.curiosity+=1; break;
-  }
-  updateBars();
-  saveState();
+  if(answer==="control") state.resistance+=2;
+  if(answer==="guidance"){ state.compliance+=2; state.hiddenInfluence+=1; }
+  if(answer==="depends") state.curiosity+=1;
 
-  document.getElementById("story").innerHTML =
-    `<p>"If I quietly adjusted your next choice, would you notice?"</p>` +
-    button("Yes.", ()=>{ state.resistance+=1; nextHub(); }) +
-    button("No.", ()=>{ state.compliance+=1; state.hiddenInfluence+=1; nextHub(); }) +
-    button("I don’t know.", ()=>{ state.curiosity+=1; nextHub(); });
+  updateBars();
+
+  const story = document.getElementById("story");
+  story.innerHTML = `<p>"If I quietly adjusted your next choice, would you notice?"</p>`;
+
+  story.appendChild(createButton("Yes.", ()=>{
+    state.resistance+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("No.", ()=>{
+    state.compliance+=1;
+    state.hiddenInfluence+=1;
+    nextHub();
+  }));
+
+  story.appendChild(createButton("I don’t know.", ()=>{
+    state.curiosity+=1;
+    nextHub();
+  }));
 }
 
-/* Return to hub and check if all Sparks are complete */
+/* HUB RETURN */
+
 function nextHub(){
   updateBars();
-  saveState();
   renderHub();
 }
 
