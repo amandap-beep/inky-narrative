@@ -67,8 +67,12 @@ button:hover{ background:#171717; }
   box-sizing:border-box;
   border-top:1px solid #133;
   opacity:.98;
+  z-index:50;
 }
-#terminal.active{ height:40%; padding:20px; }
+#terminal.active{
+  height:40%;
+  padding:20px;
+}
 #terminal.glitching{
   animation: terminalGlitch .22s steps(2,end) 5;
 }
@@ -127,11 +131,25 @@ button:hover{ background:#171717; }
   background:#00ff88;
   transition:width .5s;
 }
+hr{ border:0; border-top:1px solid #222; margin:18px 0; }
 pre{
   white-space:pre-wrap;
   word-wrap:break-word;
+  margin:0;
 }
-hr{ border:0; border-top:1px solid #222; margin:18px 0; }
+label.checkbox-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  cursor:pointer;
+  line-height:1.5;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+}
+input[type="checkbox"]{
+  margin-top:3px;
+  accent-color:#00ff88;
+}
 </style>
 </head>
 <body>
@@ -345,8 +363,7 @@ const defaultState = {
   answers:[],
   finished:false,
   result:null,
-  resultStats:null,
-  terminalSeen:false
+  resultStats:null
 };
 
 let state = JSON.parse(localStorage.getItem("personaMetricState")) || {...defaultState};
@@ -361,7 +378,7 @@ function resetGame(){
   sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
   document.getElementById("session").innerText = sessionID;
   document.getElementById("terminal").innerHTML = "";
-  document.getElementById("terminal").classList.remove("active");
+  document.getElementById("terminal").classList.remove("active","glitching");
   updateBars();
   route();
 }
@@ -460,35 +477,28 @@ function renderPolicy(){
         <p>Assessment completion does not guarantee employment, advancement, or selection for any current or future opportunity.</p>
         <p>By continuing, you confirm that the information you provide is accurate to the best of your knowledge and that you consent to PersonaMetric's collection and processing practices as described above.</p>
       </div>
-      <div style="margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px;">
-        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer; line-height:1.5;">
-          <input type="checkbox" id="consentCheck" style="margin-top:3px; accent-color:#00ff88;">
+      <div style="margin-top:18px;">
+        <label class="checkbox-row">
+          <input type="checkbox" id="consentCheck">
           <span>I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions.</span>
         </label>
       </div>
+      <div id="consentWarning"></div>
     </div>
   `);
   const story = document.getElementById("story");
-  const acceptBtn = createButton("CONTINUE", ()=>{
+  story.appendChild(createButton("CONTINUE", ()=>{
     const consent = document.getElementById("consentCheck");
+    const warning = document.getElementById("consentWarning");
     if(!consent || !consent.checked){
+      warning.innerHTML = '<p class="muted" style="color:#ff8f8f; margin-top:12px;">You must agree to the terms before continuing.</p>';
       logTerminalGlitch(["consent flag missing","assessment progression blocked","awaiting user agreement"]);
-      const existing = document.getElementById("consentWarning");
-      if(!existing){
-        const warn = document.createElement("p");
-        warn.id = "consentWarning";
-        warn.className = "muted";
-        warn.style.color = "#ff8f8f";
-        warn.textContent = "You must agree to the terms before continuing.";
-        story.appendChild(warn);
-      }
       return;
     }
     state.screen = "assessment";
     saveState();
     route();
-  });
-  story.appendChild(acceptBtn);
+  }));
   story.appendChild(createButton("RETURN", returnPortal));
 }
 
@@ -562,25 +572,26 @@ function answerQuestion(option){
     logTerminalGlitch(q.glitch);
   }
 
-  if(q.link === "sessionLog") addTerminalLink("view session log", ()=>{
-    state.screen = "sessionLog";
-    saveState();
-    route();
-  });
+  if(q.link === "sessionLog"){
+    addTerminalLink("view session log", ()=>{
+      state.screen = "sessionLog";
+      saveState();
+      route();
+    });
+  }
 
-  if(q.link === "datasetSummary") addTerminalLink("open dataset summary", ()=>{
-    state.screen = "datasetSummary";
-    saveState();
-    route();
-  });
+  if(q.link === "datasetSummary"){
+    addTerminalLink("open dataset summary", ()=>{
+      state.screen = "datasetSummary";
+      saveState();
+      route();
+    });
+  }
 
   state.questionIndex += 1;
   saveState();
   updateBars();
-
-  setTimeout(()=>{
-    renderQuestion();
-  },250);
+  setTimeout(renderQuestion, 220);
 }
 
 function addTerminalLink(text, fn){
@@ -793,38 +804,8 @@ function finishAssessment(){
   showResults();
 }
 
-function showResults(){
-  if(!state.result) buildResult();
-  const r = state.result;
-  setStory(`
-    <div class="card">
-      <div class="q-title">Your Behavioral Assessment Report</div>
-      <p><strong>Applicant ID:</strong> ${sessionID}</p>
-      <p><strong>Behavioral Classification:</strong> ${r.title}</p>
-      <p><strong>Assessment Summary:</strong> ${r.description}</p>
-      <p><strong>Recommended Work Environments:</strong><br>- ${r.environments.join("<br>- ")}</p>
-      <p class="muted">Thank you for completing the PersonaMetric applicant assessment. Your results suggest strengths that may support a variety of modern workplace environments.</p>
-      <hr>
-      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#00ff88; line-height:1.7;">
-        <div>> variance detected beneath surface response set</div>
-        <div>> ${getTeaLine1()}</div>
-        <div>> ${getTeaLine2()}</div>
-        <div>> ${getTeaLine3()}</div>
-      </div>
-      <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
-    </div>
-  `);
-  const story = document.getElementById("story");
-  story.appendChild(createButton("END SESSION", ()=>{
-    state.screen = "end";
-    saveState();
-    route();
-  }));
-  addTerminalLink("download behavioral report", ()=>downloadProfile());
-}
-
 function getTeaLine1(){
-  const r = state.result?.title || "Balanced Profile";
+  const title = state.result ? state.result.title : "Balanced Profile";
   const lines = {
     "Adaptive Complier":"seeks approval faster than certainty",
     "System Skeptic":"trust threshold remains inconveniently high",
@@ -836,7 +817,7 @@ function getTeaLine1(){
     "Quiet Resister":"withholds agreement but rarely escapes the system entirely",
     "Balanced Profile":"avoids extremes but offers little surprise in exchange"
   };
-  return lines[r] || "classification stabilized with limited deviation";
+  return lines[title] || "classification stabilized with limited deviation";
 }
 
 function getTeaLine2(){
@@ -862,6 +843,38 @@ function getTeaLine3(){
   return "profile retained for future comparative modeling";
 }
 
+function showResults(){
+  if(!state.result){
+    buildResult();
+  }
+  const r = state.result;
+  setStory(`
+    <div class="card">
+      <div class="q-title">Your Behavioral Assessment Report</div>
+      <p><strong>Applicant ID:</strong> ${sessionID}</p>
+      <p><strong>Behavioral Classification:</strong> ${r.title}</p>
+      <p><strong>Assessment Summary:</strong> ${r.description}</p>
+      <p><strong>Recommended Work Environments:</strong><br>- ${r.environments.join("<br>- ")}</p>
+      <p class="muted">Thank you for completing the PersonaMetric applicant assessment. Your results suggest strengths that may support a variety of modern workplace environments.</p>
+      <hr>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:#00ff88; line-height:1.7;">
+        <div>> variance detected beneath surface response set</div>
+        <div>> ${getTeaLine1()}</div>
+        <div>> ${getTeaLine2()}</div>
+        <div>> ${getTeaLine3()}</div>
+      </div>
+      <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("END SESSION", ()=>{
+    state.screen = "end";
+    saveState();
+    route();
+  }));
+  addTerminalLink("download behavioral report", downloadProfile);
+}
+
 function endSession(){
   setStory(`
     <div class="card">
@@ -873,7 +886,7 @@ function endSession(){
     </div>
   `);
   logTerminalGlitch(["profile added to training dataset"]);
-  addTerminalLink("download behavioral report", ()=>downloadProfile());
+  addTerminalLink("download behavioral report", downloadProfile);
 }
 
 function updateBars(){
@@ -891,7 +904,9 @@ function updateBars(){
 function downloadProfile(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  if(!state.result) buildResult();
+  if(!state.result){
+    buildResult();
+  }
   const r = state.result;
   const s = state.resultStats;
 
@@ -913,7 +928,7 @@ function downloadProfile(){
   doc.rect(12,60,186,56);
   doc.setFont("courier","bold");
   doc.setFontSize(12);
-  doc.text("BEHAVIORAL METRICS",18,70);
+  doc.text("INTERNAL METRICS",18,70);
   doc.setFont("courier","normal");
   doc.setFontSize(10);
   doc.text("Compliance Score: " + s.compliance + "%",18,82);
@@ -922,7 +937,7 @@ function downloadProfile(){
   doc.text("Suggestibility Score: " + s.suggestibility + "%",18,103);
   doc.text("Predictability Score: " + s.predictability + "%",18,110);
 
-  doc.rect(12,124,186,94);
+  doc.rect(12,124,186,110);
   doc.setFont("courier","bold");
   doc.setFontSize(12);
   doc.text("PROFILE CLASSIFICATION",18,134);
@@ -930,14 +945,24 @@ function downloadProfile(){
   doc.text(r.title.toUpperCase(),18,148);
   doc.setFont("courier","normal");
   doc.setFontSize(10);
-  let wrapped = doc.splitTextToSize(r.description, 170);
+  const wrapped = doc.splitTextToSize(r.description, 170);
   doc.text(wrapped,18,162);
-  doc.text("Model Confidence: " + r.confidence,18,184);
-  doc.text("Recommended Environments:",18,194);
-  doc.text("- " + r.environments.join("\n- "),18,202);
+  doc.text("Model Confidence: " + r.confidence,18,186);
+  doc.text("Recommended Environments:",18,196);
+  doc.text("- " + r.environments.join("
+- "),18,204);
+
+  doc.setFont("courier","bold");
+  doc.setFontSize(11);
+  doc.text("SUPPLEMENTAL INTERNAL NOTES",18,252);
+  doc.setFont("courier","normal");
+  doc.setFontSize(9);
+  const tea = [getTeaLine1(), getTeaLine2(), getTeaLine3()].join(" ");
+  const wrappedTea = doc.splitTextToSize(tea, 170);
+  doc.text(wrappedTea,18,260);
 
   doc.setFontSize(9);
-  doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,280);
+  doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,286);
   doc.save(sessionID + "_personametric_report.pdf");
 }
 
