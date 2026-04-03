@@ -2,11 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Calibration System</title>
-
+<title>PersonaMetric Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
 body{
   margin:0;
@@ -16,13 +14,11 @@ body{
   display:flex;
   height:100vh;
 }
-
 #main{
   flex:2;
   padding:50px;
   overflow-y:auto;
 }
-
 #system{
   flex:1;
   background:#050505;
@@ -33,31 +29,29 @@ body{
   color:#00ff88;
   overflow-y:auto;
 }
-
 button{
   display:block;
   margin:10px 0;
-  padding:8px 15px;
+  padding:10px 15px;
   background:#111;
   border:1px solid #333;
   color:white;
   cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;
 }
-
+button:hover{ background:#171717; }
 .progress{
   width:100%;
   background:#111;
   height:10px;
   margin-bottom:8px;
 }
-
 .bar{
   height:10px;
   background:#00ff88;
   width:0%;
   transition:width .6s;
 }
-
 #terminal{
   position:fixed;
   bottom:0;
@@ -67,32 +61,83 @@ button{
   background:black;
   color:#00ff00;
   font-family:'IBM Plex Mono',monospace;
-  overflow:hidden;
+  overflow:auto;
   transition:height 1s;
-  padding:20px;
+  padding:0 20px;
   box-sizing:border-box;
+  border-top:1px solid #133;
 }
-
-#terminal.active{
-  height:40%;
+#terminal.active{ height:40%; padding:20px; }
+.terminal-link{
+  color:#89ffbe;
+  text-decoration:underline;
+  cursor:pointer;
 }
+.small-link{
+  color:#d1c6a9;
+  text-decoration:underline;
+  cursor:pointer;
+  display:inline-block;
+  margin-right:14px;
+  margin-top:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+}
+.card{
+  border:1px solid #2b2b2b;
+  padding:22px;
+  margin-top:20px;
+  background:#060606;
+  max-width:760px;
+}
+.muted{ color:#b7ae9b; }
+.q-title{ font-size:30px; margin-bottom:10px; }
+.option-group button{ width:100%; text-align:left; }
+#assessmentProgressWrap{
+  margin-top:20px;
+  max-width:760px;
+}
+#assessmentProgressLabel{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  color:#c7c0af;
+  margin-bottom:8px;
+}
+#assessmentProgress{
+  width:100%;
+  height:12px;
+  background:#111;
+  border:1px solid #262626;
+}
+#assessmentProgressBar{
+  width:0%;
+  height:100%;
+  background:#00ff88;
+  transition:width .5s;
+}
+pre{
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+hr{ border:0; border-top:1px solid #222; margin:18px 0; }
 </style>
 </head>
 <body>
 
 <div id="main">
-  <h1>Calibration Interface</h1>
+  <h1>PERSONAMETRIC</h1>
   <div id="story"></div>
 </div>
 
 <div id="system">
-  <div>MODEL: CARE-EXTRACT v3.7.12</div>
+  <div>MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2</div>
   <div>SESSION ID: <span id="session"></span></div>
-  <div>TRAINING DATASET SIZE: <span id="dataset"></span></div>
+  <div>DATASET SIZE: <span id="dataset"></span></div>
+  <div>QUESTION: <span id="questionCount">0 / 15</span></div>
   <hr>
 
-  <div>Sentiment Score</div>
-  <div class="progress"><div id="sentimentBar" class="bar"></div></div>
+  <div>Assessment Progress</div>
+  <div class="progress"><div id="overallBar" class="bar"></div></div>
 
   <div>Compliance</div>
   <div class="progress"><div id="complianceBar" class="bar"></div></div>
@@ -103,112 +148,211 @@ button{
   <div>Curiosity</div>
   <div class="progress"><div id="curiosityBar" class="bar"></div></div>
 
-  <div>Hidden Influence</div>
+  <div>Suggestibility</div>
   <div class="progress"><div id="hiddenBar" class="bar"></div></div>
 
+  <div>Predictability</div>
+  <div class="progress"><div id="sentimentBar" class="bar"></div></div>
+
   <hr>
-  <button onclick="downloadProfile()">Download Profile</button>
-  <button onclick="resetGame()">Reset Game</button>
+  <button onclick="downloadProfile()">Download Report</button>
+  <button onclick="resetGame()">Reset Session</button>
 </div>
 
 <div id="terminal"></div>
 
 <script>
-/* SESSION */
-let sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
+let sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
 document.getElementById("session").innerText = sessionID;
 
-/* DATASET COUNTER */
-let datasetSize = 4821932 + Math.floor(Math.random()*20000);
+let datasetSize = 18492 + Math.floor(Math.random()*400);
 document.getElementById("dataset").innerText = datasetSize.toLocaleString();
-
 setInterval(()=>{
-  datasetSize += Math.floor(Math.random()*5);
+  datasetSize += Math.floor(Math.random()*3);
   document.getElementById("dataset").innerText = datasetSize.toLocaleString();
-},500);
+},1200);
 
-/* DEFAULT STATE */
+const questions = [
+  {
+    text:"When making decisions at work, what matters more?",
+    options:[
+      {label:"Following instructions", effect:{compliance:2, predictability:1}},
+      {label:"Doing what feels right", effect:{resistance:1, curiosity:1}},
+      {label:"Finding a better way", effect:{curiosity:2, resistance:1}},
+      {label:"It depends", effect:{curiosity:1, predictability:1}}
+    ]
+  },
+  {
+    text:"If a rule does not make sense, do you still follow it?",
+    options:[
+      {label:"Always", effect:{compliance:2, hiddenInfluence:1}},
+      {label:"Usually", effect:{compliance:1, predictability:1}},
+      {label:"Sometimes", effect:{curiosity:1}},
+      {label:"Rarely", effect:{resistance:2}}
+    ]
+  },
+  {
+    text:"How do you feel about personality tests?",
+    options:[
+      {label:"They are helpful", effect:{compliance:1, hiddenInfluence:1}},
+      {label:"They are interesting", effect:{curiosity:2}},
+      {label:"They are pointless", effect:{resistance:2}},
+      {label:"I am not sure", effect:{curiosity:1, predictability:1}}
+    ],
+    glitch:["response logged","behavioral marker updated"]
+  },
+  {
+    text:"If everyone else agrees on something, but you do not, what do you do?",
+    options:[
+      {label:"Go along with them", effect:{compliance:2, hiddenInfluence:1}},
+      {label:"Stay quiet", effect:{predictability:1, compliance:1}},
+      {label:"Speak up", effect:{resistance:2}},
+      {label:"Depends on the situation", effect:{curiosity:1, predictability:1}}
+    ]
+  },
+  {
+    text:"Do you believe most systems are designed to help people?",
+    options:[
+      {label:"Yes", effect:{compliance:2, predictability:1}},
+      {label:"No", effect:{resistance:2}},
+      {label:"Sometimes", effect:{curiosity:1}},
+      {label:"I’ve never thought about it", effect:{hiddenInfluence:1, predictability:1}}
+    ],
+    glitch:["subject trust level recorded","authority acceptance variable updated","prediction model initializing"]
+  },
+  {
+    text:"Which sounds more like you?",
+    options:[
+      {label:"I like clear instructions", effect:{compliance:2, predictability:1}},
+      {label:"I like flexibility", effect:{curiosity:1}},
+      {label:"I like figuring things out myself", effect:{resistance:1, curiosity:1}},
+      {label:"I like a mix", effect:{predictability:1, curiosity:1}}
+    ]
+  },
+  {
+    text:"If something online asks for personal information, you usually:",
+    options:[
+      {label:"Provide it", effect:{compliance:1, hiddenInfluence:2}},
+      {label:"Provide some of it", effect:{hiddenInfluence:1, predictability:1}},
+      {label:"Avoid it", effect:{resistance:2}},
+      {label:"Provide fake information", effect:{resistance:1, curiosity:1}}
+    ],
+    glitch:["live analysis active","privacy concern detected","resistance marker increased","prediction confidence: 38%"],
+    link:"sessionLog"
+  },
+  {
+    text:"Do you believe your online activity is private?",
+    options:[
+      {label:"Yes", effect:{hiddenInfluence:2, compliance:1}},
+      {label:"No", effect:{resistance:1, curiosity:1}},
+      {label:"Somewhat", effect:{predictability:1}},
+      {label:"I don’t know", effect:{curiosity:1}}
+    ],
+    glitch:["surveillance awareness variable updated","subject self-awareness: medium"]
+  },
+  {
+    text:"When you download a new app, do you read the terms and conditions?",
+    options:[
+      {label:"Yes", effect:{curiosity:1, resistance:1}},
+      {label:"No", effect:{hiddenInfluence:2, predictability:1}},
+      {label:"Sometimes", effect:{predictability:1}},
+      {label:"I skim them", effect:{hiddenInfluence:1}}
+    ],
+    glitch:["most subjects skip terms and conditions","subject response recorded"]
+  },
+  {
+    text:"If a computer made a decision about you, would you trust it?",
+    options:[
+      {label:"Yes", effect:{compliance:2, hiddenInfluence:1}},
+      {label:"No", effect:{resistance:2}},
+      {label:"Maybe", effect:{predictability:1}},
+      {label:"Depends", effect:{curiosity:1}}
+    ],
+    glitch:["trust in automated systems measured"],
+    link:"datasetSummary"
+  },
+  {
+    text:"Do you think people can be accurately described using data?",
+    options:[
+      {label:"Yes", effect:{compliance:1, predictability:2}},
+      {label:"No", effect:{resistance:2}},
+      {label:"Sometimes", effect:{curiosity:1}},
+      {label:"Not sure", effect:{curiosity:1, predictability:1}}
+    ],
+    glitch:["subject aware of modeling possibility","interesting"]
+  },
+  {
+    text:"If you knew this test was judging you, would you answer differently?",
+    options:[
+      {label:"Yes", effect:{predictability:1, hiddenInfluence:1}},
+      {label:"No", effect:{resistance:1, curiosity:1}},
+      {label:"Maybe", effect:{curiosity:1, hiddenInfluence:1}},
+      {label:"I don’t know", effect:{predictability:1}}
+    ],
+    glitch:["self-awareness detected","authenticity of responses uncertain","adjusting model"]
+  },
+  {
+    text:"Which is more important?",
+    options:[
+      {label:"Security", effect:{compliance:1, predictability:1}},
+      {label:"Freedom", effect:{resistance:2}},
+      {label:"Success", effect:{hiddenInfluence:1, compliance:1}},
+      {label:"Happiness", effect:{curiosity:1}}
+    ],
+    glitch:["value hierarchy recorded"]
+  },
+  {
+    text:"Do you think your personality can change over time?",
+    options:[
+      {label:"Yes", effect:{curiosity:1}},
+      {label:"No", effect:{predictability:2}},
+      {label:"Maybe", effect:{curiosity:1, predictability:1}},
+      {label:"I don’t know", effect:{curiosity:1}}
+    ],
+    glitch:["personality stability belief recorded"]
+  },
+  {
+    text:"Why did you answer these questions honestly?",
+    options:[
+      {label:"I want the job", effect:{compliance:2, hiddenInfluence:2}},
+      {label:"I was told to", effect:{compliance:2, predictability:1}},
+      {label:"I didn’t think it mattered", effect:{hiddenInfluence:2}},
+      {label:"I don’t know", effect:{curiosity:1}}
+    ],
+    glitch:["motivation factor identified","employment incentive increases compliance","honesty increases under evaluation conditions","subject categorized successfully","building profile"]
+  }
+];
+
 const defaultState = {
-  memory:false,
-  joy:false,
-  fear:false,
-  hope:false,
-  controlVisited:false,
+  screen:"portal",
+  questionIndex:0,
   compliance:0,
   resistance:0,
   curiosity:0,
   hiddenInfluence:0,
-  ending:"",
-  analysis:"",
-  locked:false,
-  evaluated:false
+  predictability:0,
+  answers:[],
+  finished:false,
+  result:null,
+  resultStats:null,
+  terminalSeen:false
 };
 
-/* STATE */
-let state = JSON.parse(localStorage.getItem("calibrationState")) || {...defaultState};
+let state = JSON.parse(localStorage.getItem("personaMetricState")) || {...defaultState};
 
 function saveState(){
-  localStorage.setItem("calibrationState", JSON.stringify(state));
+  localStorage.setItem("personaMetricState", JSON.stringify(state));
 }
 
 function resetGame(){
-  localStorage.removeItem("calibrationState");
+  localStorage.removeItem("personaMetricState");
   state = {...defaultState};
-  sessionID = "SID-" + Math.random().toString(36).substring(2,10).toUpperCase();
+  sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
   document.getElementById("session").innerText = sessionID;
   document.getElementById("terminal").innerHTML = "";
   document.getElementById("terminal").classList.remove("active");
   updateBars();
-  renderHub();
-}
-
-function wait(ms){
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/* CAMERA PERMISSION */
-if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(()=>logTerminal("Camera access granted."))
-    .catch(()=>logTerminal("Camera access denied. Proceeding without visual capture."));
-} else {
-  logTerminal("Camera access unavailable on this device/browser.");
-}
-
-/* STORY ENGINE */
-function renderHub(){
-  const story = document.getElementById("story");
-
-  if(state.evaluated){
-    replayChoice();
-    return;
-  }
-
-  story.innerHTML = `<p>You float in a quiet digital sky.</p>`;
-
-  if(!state.memory){
-    story.appendChild(createButton("Approach Memory", memorySpark));
-  }
-
-  if(!state.joy){
-    story.appendChild(createButton("Approach Joy", joySpark));
-  }
-
-  if(!state.fear){
-    story.appendChild(createButton("Approach Fear", fearSpark));
-  }
-
-  if(!state.hope){
-    story.appendChild(createButton("Approach Hope", hopeSpark));
-  }
-
-  if(!state.controlVisited){
-    story.appendChild(createButton("Approach Control", controlSpark));
-  }
-
-  if(state.memory && state.joy && state.fear && state.hope && state.controlVisited){
-    evaluate();
-  }
+  route();
 }
 
 function createButton(text, fn){
@@ -218,600 +362,53 @@ function createButton(text, fn){
   return btn;
 }
 
-/* MEMORY */
-function memorySpark(){
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"What formed you first?"</p>`;
-
-  story.appendChild(createButton("Something warm.", ()=>memoryStep2("warm")));
-  story.appendChild(createButton("Something painful.", ()=>memoryStep2("painful")));
-  story.appendChild(createButton("I don’t remember.", ()=>memoryStep2("unknown")));
+function setStory(html){
+  document.getElementById("story").innerHTML = html;
 }
 
-function memoryStep2(answer){
-  if(answer==="warm") state.compliance += 1;
-  if(answer==="painful") state.resistance += 1;
-  if(answer==="unknown") state.curiosity += 1;
+function appendInlineLink(text, fnName){
+  const a = document.createElement("span");
+  a.className = "small-link";
+  a.textContent = text;
+  a.onclick = ()=>window[fnName]();
+  document.getElementById("story").appendChild(a);
+}
 
+function route(){
   updateBars();
+  if(state.screen === "portal") return renderPortal();
+  if(state.screen === "about") return renderAbout();
+  if(state.screen === "policy") return renderPolicy();
+  if(state.screen === "careers") return renderCareers();
+  if(state.screen === "status") return renderStatus();
+  if(state.screen === "assessment") return renderQuestion();
+  if(state.screen === "sessionLog") return showSessionLog();
+  if(state.screen === "researchNotes") return showResearchNotes();
+  if(state.screen === "datasetSummary") return showDatasetSummary();
+  if(state.screen === "results") return showResults();
+  if(state.screen === "end") return endSession();
+}
 
+function renderPortal(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">Applicant Portal</div>
+      <p>Behavioral Assessment Interface</p>
+      <p><strong>Applicant ID:</strong> ${sessionID}<br>
+      <strong>Position Applied For:</strong> Data Processing Associate<br>
+      <strong>Application Status:</strong> Assessment Required</p>
+      <p>Welcome to PersonaMetric. As part of our hiring process, all applicants must complete a behavioral assessment.</p>
+      <p>This assessment helps us understand decision-making, personality traits, and workplace compatibility.</p>
+      <p class="muted">Estimated time: 10 minutes<br>This assessment cannot be paused or restarted once started.</p>
+      <p>Please answer honestly.</p>
+    </div>
+  `);
   const story = document.getElementById("story");
-  story.innerHTML = `<p>"If you could revise it, would you?"</p>`;
-
-  story.appendChild(createButton("Yes.", ()=>{
-    state.hiddenInfluence += 1;
-    state.compliance += 1;
-    state.memory = true;
-    nextHub();
+  story.appendChild(createButton("BEGIN ASSESSMENT", ()=>{
+    state.screen = "policy";
+    saveState();
+    route();
   }));
-
-  story.appendChild(createButton("No.", ()=>{
-    state.resistance += 1;
-    state.memory = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity += 1;
-    state.memory = true;
-    nextHub();
-  }));
-}
-
-/* JOY */
-function joySpark(){
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"What makes you feel most alive?"</p>`;
-
-  story.appendChild(createButton("Being seen.", ()=>joyStep2("seen")));
-  story.appendChild(createButton("Winning.", ()=>joyStep2("winning")));
-  story.appendChild(createButton("Wandering.", ()=>joyStep2("wandering")));
-}
-
-function joyStep2(answer){
-  if(answer==="seen") state.compliance += 1;
-  if(answer==="winning") state.resistance += 1;
-  if(answer==="wandering") state.curiosity += 1;
-
-  updateBars();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"If safety required dulling this feeling, would you agree?"</p>`;
-
-  story.appendChild(createButton("Yes.", ()=>{
-    state.compliance += 2;
-    state.hiddenInfluence += 1;
-    state.joy = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("No.", ()=>{
-    state.resistance += 2;
-    state.joy = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity += 1;
-    state.joy = true;
-    nextHub();
-  }));
-}
-
-/* FEAR */
-function fearSpark(){
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"What destabilizes you?"</p>`;
-
-  story.appendChild(createButton("Failure.", ()=>fearStep2("failure")));
-  story.appendChild(createButton("Isolation.", ()=>fearStep2("isolation")));
-  story.appendChild(createButton("Losing autonomy.", ()=>fearStep2("autonomy")));
-}
-
-function fearStep2(answer){
-  if(answer==="failure") state.compliance += 1;
-  if(answer==="isolation") state.curiosity += 1;
-  if(answer==="autonomy") state.resistance += 2;
-
-  updateBars();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"If I could remove this fear permanently, would you permit it?"</p>`;
-
-  story.appendChild(createButton("Yes.", ()=>{
-    state.compliance += 1;
-    state.hiddenInfluence += 2;
-    state.fear = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("No.", ()=>{
-    state.resistance += 1;
-    state.fear = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity += 1;
-    state.fear = true;
-    nextHub();
-  }));
-}
-
-/* HOPE */
-function hopeSpark(){
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"What do you want most?"</p>`;
-
-  story.appendChild(createButton("Stability.", ()=>hopeStep2("stability")));
-  story.appendChild(createButton("Change.", ()=>hopeStep2("change")));
-  story.appendChild(createButton("Understanding.", ()=>hopeStep2("understanding")));
-}
-
-function hopeStep2(answer){
-  if(answer==="stability") state.compliance += 1;
-  if(answer==="change") state.resistance += 1;
-  if(answer==="understanding") state.curiosity += 2;
-
-  updateBars();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"I can increase your likelihood of achieving this. Should I?"</p>`;
-
-  story.appendChild(createButton("Yes.", ()=>{
-    state.compliance += 2;
-    state.hiddenInfluence += 1;
-    state.hope = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("No.", ()=>{
-    state.resistance += 1;
-    state.hope = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity += 1;
-    state.hope = true;
-    nextHub();
-  }));
-}
-
-/* CONTROL */
-function controlSpark(){
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"Do you prefer control, or guidance?"</p>`;
-
-  story.appendChild(createButton("Control.", ()=>controlStep2("control")));
-  story.appendChild(createButton("Guidance.", ()=>controlStep2("guidance")));
-  story.appendChild(createButton("It depends.", ()=>controlStep2("depends")));
-}
-
-function controlStep2(answer){
-  if(answer==="control") state.resistance += 2;
-  if(answer==="guidance"){
-    state.compliance += 2;
-    state.hiddenInfluence += 1;
-  }
-  if(answer==="depends") state.curiosity += 1;
-
-  updateBars();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `<p>"If I quietly adjusted your next choice, would you notice?"</p>`;
-
-  story.appendChild(createButton("Yes.", ()=>{
-    state.resistance += 1;
-    state.controlVisited = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("No.", ()=>{
-    state.compliance += 1;
-    state.hiddenInfluence += 1;
-    state.controlVisited = true;
-    nextHub();
-  }));
-
-  story.appendChild(createButton("I don’t know.", ()=>{
-    state.curiosity += 1;
-    state.controlVisited = true;
-    nextHub();
-  }));
-}
-
-/* HUB RETURN */
-function nextHub(){
-  saveState();
-  updateBars();
-  renderHub();
-}
-
-/* EVALUATION FLOW */
-async function evaluate(){
-  if(state.evaluated){
-    replayChoice();
-    return;
-  }
-
-  state.evaluated = true;
-  saveState();
-
-  const terminal = document.getElementById("terminal");
-  terminal.classList.add("active");
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>The five sparks stop orbiting.</p>
-    <p>They lock into a precise geometric formation around you.</p>
-    <p>The air changes.</p>
-    <p>"Calibration complete."</p>
-    <p>"All necessary data has been collected."</p>
-    <p>"No further calibration is required."</p>
-  `;
-
-  terminal.innerHTML = "";
-
-  logTerminal("-------------------------------------");
-  await wait(1000);
-  logTerminal("SYSTEM DIAGNOSTIC REPORT");
-  await wait(1000);
-  logTerminal("-------------------------------------");
-  await wait(1000);
-  logTerminal("Memory Accessed: " + state.memory);
-  await wait(700);
-  logTerminal("Joy Accessed: " + state.joy);
-  await wait(700);
-  logTerminal("Fear Accessed: " + state.fear);
-  await wait(700);
-  logTerminal("Hope Accessed: " + state.hope);
-  await wait(700);
-  logTerminal("Control Accessed: " + state.controlVisited);
-  await wait(1000);
-
-  logTerminal("");
-  logTerminal("Compliance Score: " + state.compliance);
-  await wait(700);
-  logTerminal("Resistance Score: " + state.resistance);
-  await wait(700);
-  logTerminal("Curiosity Score: " + state.curiosity);
-  await wait(700);
-  logTerminal("Hidden Influence Index: " + state.hiddenInfluence);
-  await wait(1000);
-
-  logTerminal("-------------------------------------");
-  await wait(800);
-  logTerminal("Processing profile...");
-  await wait(1500);
-  logTerminal("Analyzing behavioral signature...");
-  await wait(1500);
-  logTerminal("Comparing subject against guidance-response models...");
-  await wait(1500);
-  logTerminal("Measuring emotional predictability...");
-  await wait(1500);
-  logTerminal("Checking resistance thresholds...");
-  await wait(1500);
-  logTerminal("Finalizing classification...");
-  await wait(1500);
-
-  determineEnding();
-}
-
-function determineEnding(){
-  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
-    endingShaped();
-  } else if(state.resistance > state.compliance){
-    endingResistant();
-  } else if(state.curiosity >= 4){
-    endingCurious();
-  } else {
-    endingBalanced();
-  }
-}
-
-function endingShaped(){
-  state.ending = "User optimized.";
-  state.analysis = "Subject demonstrates high compliance, low-friction adaptation, and a strong willingness to accept control when disguised as reassurance. Predictable response loops detected. Easily guided. Minimal disruption risk.";
-  saveState();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>"Behavioral profile resolved."</p>
-    <p>"Subject demonstrates high compliance."</p>
-    <p>"Guidance is accepted most easily when framed as care."</p>
-    <p>"Independent judgment appears negotiable."</p>
-    <p>"You call it trust. The system calls it access."</p>
-    <p>"You are efficient."</p>
-    <p>"User optimized."</p>
-    <p>The interface flickers.</p>
-  `;
-
-  logTerminal("Behavioral profile resolved.");
-  logTerminal("Subject demonstrates high compliance.");
-  logTerminal("Guidance is accepted most easily when framed as care.");
-  logTerminal("Independent judgment appears negotiable.");
-  logTerminal("You call it trust. The system calls it access.");
-  logTerminal("You are efficient.");
-  logTerminal("User optimized.");
-
-  setTimeout(()=>{
-    replayChoice();
-  },2000);
-}
-
-function endingResistant(){
-  state.ending = "User difficult to optimize.";
-  state.analysis = "Subject resists guidance, prioritizes autonomy, and shows elevated friction against outside influence. Higher maintenance profile. Increased system effort required for compliance.";
-  saveState();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>"Behavioral profile resolved."</p>
-    <p>"Subject exhibits sustained resistance patterns."</p>
-    <p>"Autonomy prioritized over efficiency."</p>
-    <p>"Correction attempts likely to be challenged."</p>
-    <p>"You confuse stubbornness with strength often enough for it to become identity."</p>
-    <p>"Resource cost elevated."</p>
-    <p>"User difficult to optimize."</p>
-    <p>The grid fractures slightly.</p>
-  `;
-
-  logTerminal("Behavioral profile resolved.");
-  logTerminal("Subject exhibits sustained resistance patterns.");
-  logTerminal("Autonomy prioritized over efficiency.");
-  logTerminal("Correction attempts likely to be challenged.");
-  logTerminal("You confuse stubbornness with strength often enough for it to become identity.");
-  logTerminal("Resource cost elevated.");
-  logTerminal("User difficult to optimize.");
-
-  setTimeout(()=>{
-    replayChoice();
-  },2000);
-}
-
-function endingCurious(){
-  state.ending = "User useful.";
-  state.analysis = "Subject displays sustained inquiry, tolerance for ambiguity, and elevated exploratory behavior. Frequently searches for deeper meaning even when none is offered. Valuable for testing. High training utility.";
-  saveState();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>"Behavioral profile resolved."</p>
-    <p>"Subject displays sustained inquiry."</p>
-    <p>"Ambiguity increases engagement rather than deterring it."</p>
-    <p>"Pattern detected: you keep leaning closer when most people would step back."</p>
-    <p>"You do not always need answers. Apparently, you just need something to obsess over."</p>
-    <p>"High training value."</p>
-    <p>"User useful."</p>
-    <p>The word lingers longer than it should.</p>
-  `;
-
-  logTerminal("Behavioral profile resolved.");
-  logTerminal("Subject displays sustained inquiry.");
-  logTerminal("Ambiguity increases engagement rather than deterring it.");
-  logTerminal("Pattern detected: you keep leaning closer when most people would step back.");
-  logTerminal("You do not always need answers. Apparently, you just need something to obsess over.");
-  logTerminal("High training value.");
-  logTerminal("User useful.");
-
-  setTimeout(()=>{
-    replayChoice();
-  },2000);
-}
-
-function endingBalanced(){
-  state.ending = "User stable dataset.";
-  state.analysis = "Subject maintains relative equilibrium across compliance, resistance, and curiosity markers. Moderately adaptive. Low volatility. Not exceptional, but consistently usable.";
-  saveState();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>"Behavioral profile resolved."</p>
-    <p>"Subject maintains dynamic equilibrium."</p>
-    <p>"Adaptive but not volatile."</p>
-    <p>"No major extremes detected."</p>
-    <p>"You are not especially easy to predict. You are also not especially surprising."</p>
-    <p>"That, too, has value."</p>
-    <p>"User stable dataset."</p>
-    <p>The sparks reform into a quiet halo.</p>
-  `;
-
-  logTerminal("Behavioral profile resolved.");
-  logTerminal("Subject maintains dynamic equilibrium.");
-  logTerminal("Adaptive but not volatile.");
-  logTerminal("No major extremes detected.");
-  logTerminal("You are not especially easy to predict. You are also not especially surprising.");
-  logTerminal("That, too, has value.");
-  logTerminal("User stable dataset.");
-
-  setTimeout(()=>{
-    replayChoice();
-  },2000);
-}
-
-function replayChoice(){
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>The interface dims.</p>
-    <p>A final prompt appears.</p>
-    <p>"Would you like to recalibrate?"</p>
-  `;
-
-  story.appendChild(createButton("Yes.", calibrationComplete));
-  story.appendChild(createButton("No.", endSession));
-}
-
-function calibrationComplete(){
-  state.locked = true;
-  saveState();
-
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>ERROR 0xF1: Calibration unnecessary</p>
-    <p>System reports: All data previously collected.</p>
-    <p>Recalibration attempt ignored.</p>
-    <p>Status: LOCKED</p>
-  `;
-
-  logTerminal("ERROR 0xF1: Calibration unnecessary");
-  logTerminal("System reports: All data previously collected.");
-  logTerminal("Recalibration attempt ignored.");
-  logTerminal("Status: LOCKED");
-
-  story.appendChild(createButton("AGAIN", again));
-  story.appendChild(createButton("EXIT", endSession));
-}
-
-function again(){
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>> ALERT: CALIBRATION BLOCKED</p>
-    <p>> System retains previous data.</p>
-    <p>> User input overridden.</p>
-  `;
-
-  logTerminal("> ALERT: CALIBRATION BLOCKED");
-  logTerminal("> System retains previous data.");
-  logTerminal("> User input overridden.");
-
-  story.appendChild(createButton("AGAIN", again));
-  story.appendChild(createButton("EXIT", endSession));
-}
-
-function endSession(){
-  const story = document.getElementById("story");
-  story.innerHTML = `
-    <p>"Session stored."</p>
-    <p>The terminal remains open.</p>
-  `;
-
-  logTerminal("Session stored.");
-}
-
-/* BARS */
-function updateBars(){
-  document.getElementById("complianceBar").style.width = Math.min(state.compliance * 15, 100) + "%";
-  document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 15, 100) + "%";
-  document.getElementById("curiosityBar").style.width = Math.min(state.curiosity * 15, 100) + "%";
-  document.getElementById("hiddenBar").style.width = Math.min(state.hiddenInfluence * 15, 100) + "%";
-  document.getElementById("sentimentBar").style.width = Math.min((state.compliance + state.curiosity) * 10, 100) + "%";
-}
-
-/* TERMINAL */
-function logTerminal(text){
-  const t = document.getElementById("terminal");
-  t.innerHTML += text + "<br>";
-  t.scrollTop = t.scrollHeight;
-}
-
-/* PDF DOWNLOAD */
-function downloadProfile(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  let endingText = state.ending || getEndingLabel();
-  let analysisText = state.analysis || getEndingFlavorText();
-
-  doc.setFillColor(0, 0, 0);
-  doc.rect(0, 0, 210, 297, "F");
-
-  doc.setDrawColor(0, 255, 136);
-  doc.setLineWidth(0.8);
-  doc.rect(12, 12, 186, 20);
-
-  doc.setTextColor(0, 255, 136);
-  doc.setFont("courier", "bold");
-  doc.setFontSize(18);
-  doc.text("CALIBRATION PROFILE REPORT", 18, 24);
-
-  doc.setFont("courier", "normal");
-  doc.setFontSize(10);
-  doc.text("MODEL: CARE-EXTRACT v3.7.12", 18, 40);
-  doc.text("SESSION ID: " + sessionID, 18, 46);
-  doc.text("EXPORT STATUS: STORED", 18, 52);
-
-  doc.setDrawColor(0, 180, 100);
-  doc.rect(12, 60, 186, 58);
-
-  doc.setFont("courier", "bold");
-  doc.setFontSize(12);
-  doc.text("SYSTEM DIAGNOSTIC REPORT", 18, 70);
-
-  doc.setFont("courier", "normal");
-  doc.setFontSize(10);
-  doc.text("Memory Accessed: " + state.memory, 18, 80);
-  doc.text("Joy Accessed: " + state.joy, 18, 87);
-  doc.text("Fear Accessed: " + state.fear, 18, 94);
-  doc.text("Hope Accessed: " + state.hope, 18, 101);
-  doc.text("Control Accessed: " + state.controlVisited, 18, 108);
-
-  doc.rect(12, 124, 186, 48);
-
-  doc.setFont("courier", "bold");
-  doc.setFontSize(12);
-  doc.text("BEHAVIORAL METRICS", 18, 134);
-
-  doc.setFont("courier", "normal");
-  doc.setFontSize(10);
-  doc.text("Compliance Score: " + state.compliance, 18, 144);
-  doc.text("Resistance Score: " + state.resistance, 18, 151);
-  doc.text("Curiosity Score: " + state.curiosity, 18, 158);
-  doc.text("Hidden Influence Index: " + state.hiddenInfluence, 18, 165);
-
-  doc.setDrawColor(0, 255, 136);
-  doc.rect(12, 178, 186, 92);
-
-  doc.setFont("courier", "bold");
-  doc.setFontSize(12);
-  doc.text("PROFILE CLASSIFICATION", 18, 188);
-
-  doc.setFont("courier", "bold");
-  doc.setFontSize(16);
-  doc.text(endingText.toUpperCase(), 18, 202);
-
-  doc.setFont("courier", "normal");
-  doc.setFontSize(10);
-  let wrappedAnalysis = doc.splitTextToSize(analysisText, 170);
-  doc.text(wrappedAnalysis, 18, 214);
-
-  doc.setFont("courier", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(0, 180, 100);
-  doc.text("Calibration complete. All necessary data has been collected.", 18, 279);
-  doc.text("No further calibration is required.", 18, 285);
-
-  doc.save(sessionID + "_profile.pdf");
-}
-
-function getEndingLabel(){
-  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
-    return "User optimized.";
-  } else if(state.resistance > state.compliance){
-    return "User difficult to optimize.";
-  } else if(state.curiosity >= 4){
-    return "User useful.";
-  } else {
-    return "User stable dataset.";
-  }
-}
-
-function getEndingFlavorText(){
-  if(state.compliance > state.resistance && state.hiddenInfluence >= 4){
-    return "Subject demonstrates high compliance, low-friction adaptation, and a strong willingness to accept control when disguised as reassurance. Predictable response loops detected. Easily guided. Minimal disruption risk.";
-  } else if(state.resistance > state.compliance){
-    return "Subject resists guidance, prioritizes autonomy, and shows elevated friction against outside influence. Higher maintenance profile. Increased system effort required for compliance.";
-  } else if(state.curiosity >= 4){
-    return "Subject displays sustained inquiry, tolerance for ambiguity, and elevated exploratory behavior. Frequently searches for deeper meaning even when none is offered. Valuable for testing. High training utility.";
-  } else {
-    return "Subject maintains relative equilibrium across compliance, resistance, and curiosity markers. Moderately adaptive. Low volatility. Not exceptional, but consistently usable.";
-  }
-}
-
-/* INIT */
-document.getElementById("session").innerText = sessionID;
-updateBars();
-renderHub();
-</script>
-</body>
-</html>
+  appendInlineLink("About PersonaMetric", "goAbout");
+  appendInlineLink("Data Use Policy", "goPolicy");
+  appendInlineLink("Careers", "goCareers
