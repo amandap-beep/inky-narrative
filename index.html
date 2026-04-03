@@ -411,4 +411,439 @@ function renderPortal(){
   }));
   appendInlineLink("About PersonaMetric", "goAbout");
   appendInlineLink("Data Use Policy", "goPolicy");
-  appendInlineLink("Careers", "goCareers
+  appendInlineLink("Careers", "goCareers");
+  appendInlineLink("System Status", "goStatus");
+}
+
+function goAbout(){ state.screen = "about"; saveState(); route(); }
+function goPolicy(){ state.screen = "policy"; saveState(); route(); }
+function goCareers(){ state.screen = "careers"; saveState(); route(); }
+function goStatus(){ state.screen = "status"; saveState(); route(); }
+function returnPortal(){ state.screen = "portal"; saveState(); route(); }
+
+function renderAbout(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">About PersonaMetric</div>
+      <p>PersonaMetric is a behavioral analytics company specializing in predictive personality modeling and decision analysis.</p>
+      <p>Our systems help organizations better understand how individuals make decisions, respond to challenges, and function within structured environments.</p>
+      <p>Using behavioral assessments, response tracking, and adaptive modeling, PersonaMetric develops tools that improve hiring processes, workplace productivity, and user experience research.</p>
+      <p>Our technology is used across hiring, education, marketing, and organizational development.</p>
+      <p><em>PersonaMetric — Understanding People, Predicting Potential.</em></p>
+    </div>
+  `);
+  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+}
+
+function renderPolicy(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">Data Use Agreement</div>
+      <p>By continuing, you agree that PersonaMetric may collect, store, and analyze your responses for assessment and research purposes.</p>
+      <p>Your data may be used to improve automated decision-making systems, behavioral prediction tools, and machine learning models.</p>
+      <p>PersonaMetric is not responsible for employment decisions made using this assessment.</p>
+      <p>All assessment data may be retained for research and system improvement.</p>
+      <p>By selecting ACCEPT, you consent to data collection and analysis.</p>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("ACCEPT", ()=>{
+    state.screen = "assessment";
+    saveState();
+    route();
+  }));
+  story.appendChild(createButton("RETURN", returnPortal));
+}
+
+function renderCareers(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">Careers</div>
+      <p>Open Opportunities:</p>
+      <p>- Data Processing Associate<br>- Assessment Support Analyst<br>- Behavioral Systems Coordinator</p>
+      <p class="muted">Applicants selected for advancement are contacted automatically.</p>
+    </div>
+  `);
+  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+}
+
+function renderStatus(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">System Status</div>
+      <p>Assessment Portal: Online</p>
+      <p>Behavioral Engine: Stable</p>
+      <p>Applicant Queue: Active</p>
+      <p>Dataset Sync: In Progress</p>
+    </div>
+  `);
+  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+}
+
+function renderQuestion(){
+  if(state.questionIndex >= questions.length){
+    finishAssessment();
+    return;
+  }
+
+  const q = questions[state.questionIndex];
+  const progress = Math.round((state.questionIndex / questions.length) * 100);
+  setStory(`
+    <div class="card">
+      <div class="q-title">Question ${state.questionIndex + 1}</div>
+      <p>${q.text}</p>
+      <div id="assessmentProgressWrap">
+        <div id="assessmentProgressLabel">Progress: ${progress}%</div>
+        <div id="assessmentProgress"><div id="assessmentProgressBar" style="width:${progress}%"></div></div>
+      </div>
+      <div class="option-group" id="options"></div>
+    </div>
+  `);
+
+  const optWrap = document.getElementById("options");
+  q.options.forEach((opt, idx)=>{
+    const btn = createButton(String.fromCharCode(65 + idx) + " — " + opt.label, ()=>answerQuestion(opt));
+    optWrap.appendChild(btn);
+  });
+
+  if(state.questionIndex >= 6){
+    document.getElementById("terminal").classList.add("active");
+  }
+}
+
+function answerQuestion(option){
+  const effect = option.effect || {};
+  state.compliance += effect.compliance || 0;
+  state.resistance += effect.resistance || 0;
+  state.curiosity += effect.curiosity || 0;
+  state.hiddenInfluence += effect.hiddenInfluence || 0;
+  state.predictability += effect.predictability || 0;
+  state.answers.push({question: state.questionIndex, option: option.label});
+
+  const q = questions[state.questionIndex];
+  if(q.glitch){
+    q.glitch.forEach(line=>logTerminal(line));
+  }
+
+  if(q.link === "sessionLog") addTerminalLink("view session log", ()=>{
+    state.screen = "sessionLog";
+    saveState();
+    route();
+  });
+
+  if(q.link === "datasetSummary") addTerminalLink("open dataset summary", ()=>{
+    state.screen = "datasetSummary";
+    saveState();
+    route();
+  });
+
+  state.questionIndex += 1;
+  saveState();
+  updateBars();
+
+  setTimeout(()=>{
+    renderQuestion();
+  },250);
+}
+
+function addTerminalLink(text, fn){
+  const t = document.getElementById("terminal");
+  const line = document.createElement("div");
+  const link = document.createElement("span");
+  link.className = "terminal-link";
+  link.textContent = "> " + text;
+  link.onclick = fn;
+  line.appendChild(link);
+  t.appendChild(line);
+  t.scrollTop = t.scrollHeight;
+}
+
+function logTerminal(text){
+  const t = document.getElementById("terminal");
+  const line = document.createElement("div");
+  line.textContent = "> " + text;
+  t.appendChild(line);
+  t.scrollTop = t.scrollHeight;
+}
+
+function showSessionLog(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">SESSION LOG — ${sessionID}</div>
+      <pre>> response pattern forming
+> subject believes assessment is for employment
+> honesty levels higher under evaluation conditions
+> continue using employment framing</pre>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("OPEN RESEARCH NOTES", ()=>{
+    state.screen = "researchNotes";
+    saveState();
+    route();
+  }));
+  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
+    state.screen = "assessment";
+    saveState();
+    route();
+  }));
+}
+
+function showResearchNotes(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">RESEARCH NOTES — INTERNAL</div>
+      <pre>Note 12:
+Subjects respond more honestly when they believe results impact employment.
+
+Note 18:
+Personality assessments produce more reliable behavioral data than direct questioning.
+
+Note 21:
+Most subjects do not question data collection if framed as opportunity.
+
+Note 34:
+Prediction accuracy improves with each completed assessment.
+
+Long-term objective:
+Predict behavioral decisions before they are made.</pre>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
+    state.screen = "assessment";
+    saveState();
+    route();
+  }));
+}
+
+function showDatasetSummary(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">DATASET SUMMARY</div>
+      <pre>Total Subjects: ${datasetSize.toLocaleString()}
+Profiles Generated: ${datasetSize.toLocaleString()}
+Average Completion Time: 8m 12s
+Prediction Accuracy (Current Model): 71%
+
+Top Behavioral Types:
+- Adaptive Complier
+- Predictable Performer
+- Structure Seeker
+- Curious Observer
+- Quiet Resister</pre>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
+    state.screen = "assessment";
+    saveState();
+    route();
+  }));
+}
+
+function buildResult(){
+  const metrics = {
+    compliance: Math.min(100, state.compliance * 8),
+    resistance: Math.min(100, state.resistance * 8),
+    curiosity: Math.min(100, state.curiosity * 8),
+    suggestibility: Math.min(100, state.hiddenInfluence * 8),
+    predictability: Math.min(100, state.predictability * 8 + state.compliance * 2)
+  };
+
+  let result = {
+    title:"Balanced Profile",
+    description:"You demonstrate a balance between independence and cooperation. You are capable of following structure when necessary while maintaining personal judgment.",
+    confidence:"Medium",
+    environments:["Mixed structure","Collaborative teams","Adaptive roles"]
+  };
+
+  if(metrics.suggestibility >= 72 && metrics.compliance >= metrics.resistance + 10){
+    result = {
+      title:"Adaptive Complier",
+      description:"You demonstrate a high ability to adapt to existing systems and expectations. You respond well to clear instructions and external guidance.",
+      confidence:"High",
+      environments:["Structured environments","Process-driven teams","Defined workflows"]
+    };
+  } else if(metrics.resistance >= 72 && metrics.curiosity >= 48){
+    result = {
+      title:"System Skeptic",
+      description:"You demonstrate low trust in systems and automated decision-making. You are more likely to question authority, data collection, and system motives.",
+      confidence:"High",
+      environments:["Autonomous roles","Independent review work","Investigative tasks"]
+    };
+  } else if(metrics.curiosity >= 72 && metrics.resistance >= 40){
+    result = {
+      title:"Curious Observer",
+      description:"You display a high level of curiosity and pattern recognition. You are likely to question systems, explore alternatives, and seek to understand how things work.",
+      confidence:"Medium",
+      environments:["Flexible structure","Problem-solving roles","Independent tasks"]
+    };
+  } else if(metrics.predictability >= 76 && metrics.compliance >= 48){
+    result = {
+      title:"Predictable Performer",
+      description:"Your responses indicate consistent decision-making patterns and stable preferences. You tend to respond predictably in structured environments.",
+      confidence:"High",
+      environments:["Routine operations","Consistent process work","Stable organizational roles"]
+    };
+  } else if(metrics.compliance >= 64 && metrics.resistance <= 32){
+    result = {
+      title:"Structure Seeker",
+      description:"You prefer clear expectations, defined systems, and predictable environments. You perform best when rules and goals are clearly communicated.",
+      confidence:"Medium",
+      environments:["Clear hierarchies","Stable teams","Policy-driven roles"]
+    };
+  } else if(metrics.resistance >= 64 && metrics.compliance < 48){
+    result = {
+      title:"Independent Actor",
+      description:"You prioritize personal judgment over external instruction. You are comfortable making decisions without guidance and may challenge systems that feel inefficient.",
+      confidence:"Medium",
+      environments:["Self-directed work","Leadership under ambiguity","Creative problem solving"]
+    };
+  } else if(metrics.suggestibility >= 72){
+    result = {
+      title:"Suggestible Responder",
+      description:"You are highly responsive to external guidance and environmental cues. Your decisions may be influenced by framing, authority, or perceived expectations.",
+      confidence:"High",
+      environments:["Guided teams","Supervised workflows","Instruction-led tasks"]
+    };
+  } else if(metrics.resistance >= 56 && metrics.compliance >= 40){
+    result = {
+      title:"Quiet Resister",
+      description:"You tend to question systems internally but do not always express resistance outwardly. You may comply in action while maintaining independent thought.",
+      confidence:"Medium",
+      environments:["Low-drama teams","Independent support roles","Observation-heavy work"]
+    };
+  }
+
+  state.result = result;
+  state.resultStats = metrics;
+  state.finished = true;
+  state.screen = "results";
+  saveState();
+}
+
+function finishAssessment(){
+  document.getElementById("terminal").classList.add("active");
+  logTerminal("measuring response time");
+  logTerminal("measuring hesitation");
+  logTerminal("measuring compliance indicators");
+  logTerminal("measuring resistance indicators");
+  logTerminal("measuring curiosity indicators");
+  logTerminal("measuring suggestibility");
+  logTerminal("building predictive model");
+  logTerminal("profile generated");
+  logTerminal("adding profile to dataset");
+  buildResult();
+  showResults();
+}
+
+function showResults(){
+  if(!state.result) buildResult();
+  const r = state.result;
+  const s = state.resultStats;
+  setStory(`
+    <div class="card">
+      <div class="q-title">Behavioral Assessment Report</div>
+      <p><strong>Applicant ID:</strong> ${sessionID}</p>
+      <p><strong>Compliance Score:</strong> ${s.compliance}%<br>
+      <strong>Resistance Score:</strong> ${s.resistance}%<br>
+      <strong>Curiosity Score:</strong> ${s.curiosity}%<br>
+      <strong>Suggestibility Score:</strong> ${s.suggestibility}%<br>
+      <strong>Predictability Score:</strong> ${s.predictability}%</p>
+      <p><strong>Behavioral Classification:</strong> ${r.title}</p>
+      <p><strong>Model Confidence:</strong> ${r.confidence}</p>
+      <p>${r.description}</p>
+      <p><strong>Recommended Work Environments:</strong><br>- ${r.environments.join("<br>- ")}</p>
+      <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
+    </div>
+  `);
+  const story = document.getElementById("story");
+  story.appendChild(createButton("END SESSION", ()=>{
+    state.screen = "end";
+    saveState();
+    route();
+  }));
+}
+
+function endSession(){
+  setStory(`
+    <div class="card">
+      <div class="q-title">Session Complete</div>
+      <p>Report Saved</p>
+      <p>Applicant Profile Stored</p>
+      <p>Session Logged</p>
+      <p>You may now close the window.</p>
+    </div>
+  `);
+  logTerminal("profile added to training dataset");
+}
+
+function updateBars(){
+  const totalAnswered = Math.min(state.questionIndex, questions.length);
+  const overall = Math.round((totalAnswered / questions.length) * 100);
+  document.getElementById("overallBar").style.width = overall + "%";
+  document.getElementById("complianceBar").style.width = Math.min(state.compliance * 8, 100) + "%";
+  document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 8, 100) + "%";
+  document.getElementById("curiosityBar").style.width = Math.min(state.curiosity * 8, 100) + "%";
+  document.getElementById("hiddenBar").style.width = Math.min(state.hiddenInfluence * 8, 100) + "%";
+  document.getElementById("sentimentBar").style.width = Math.min((state.predictability * 8) + (state.compliance * 2), 100) + "%";
+  document.getElementById("questionCount").innerText = `${Math.min(totalAnswered, 15)} / 15`;
+}
+
+function downloadProfile(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  if(!state.result) buildResult();
+  const r = state.result;
+  const s = state.resultStats;
+
+  doc.setFillColor(0,0,0);
+  doc.rect(0,0,210,297,"F");
+  doc.setDrawColor(0,255,136);
+  doc.rect(12,12,186,20);
+  doc.setTextColor(0,255,136);
+  doc.setFont("courier","bold");
+  doc.setFontSize(18);
+  doc.text("PERSONAMETRIC REPORT",18,24);
+
+  doc.setFont("courier","normal");
+  doc.setFontSize(10);
+  doc.text("SESSION ID: " + sessionID,18,40);
+  doc.text("MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2",18,46);
+  doc.text("EXPORT STATUS: STORED",18,52);
+
+  doc.rect(12,60,186,56);
+  doc.setFont("courier","bold");
+  doc.setFontSize(12);
+  doc.text("BEHAVIORAL METRICS",18,70);
+  doc.setFont("courier","normal");
+  doc.setFontSize(10);
+  doc.text("Compliance Score: " + s.compliance + "%",18,82);
+  doc.text("Resistance Score: " + s.resistance + "%",18,89);
+  doc.text("Curiosity Score: " + s.curiosity + "%",18,96);
+  doc.text("Suggestibility Score: " + s.suggestibility + "%",18,103);
+  doc.text("Predictability Score: " + s.predictability + "%",18,110);
+
+  doc.rect(12,124,186,94);
+  doc.setFont("courier","bold");
+  doc.setFontSize(12);
+  doc.text("PROFILE CLASSIFICATION",18,134);
+  doc.setFontSize(16);
+  doc.text(r.title.toUpperCase(),18,148);
+  doc.setFont("courier","normal");
+  doc.setFontSize(10);
+  let wrapped = doc.splitTextToSize(r.description, 170);
+  doc.text(wrapped,18,162);
+  doc.text("Model Confidence: " + r.confidence,18,184);
+  doc.text("Recommended Environments:",18,194);
+  doc.text("- " + r.environments.join("\n- "),18,202);
+
+  doc.setFontSize(9);
+  doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,280);
+  doc.save(sessionID + "_personametric_report.pdf");
+}
+
+route();
+</script>
+</body
