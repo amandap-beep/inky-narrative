@@ -5,6 +5,7 @@
 <title>PersonaMetric Assessment</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 *{ box-sizing:border-box; }
 
@@ -43,6 +44,7 @@ body{
   font-size:11px;
   opacity:.9;
   user-select:none;
+  cursor:pointer;
 }
 
 .desktop-icon .icon-box{
@@ -239,7 +241,6 @@ button:hover{
   padding:12px;
   box-sizing:border-box;
   opacity:.98;
-  border-top:0;
   z-index:1;
 }
 
@@ -251,43 +252,6 @@ button:hover{
 #terminal.glitching{
   animation: terminalGlitch .22s steps(2,end) 5;
 }
-  #applicantPopup{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:60;
-}
-
-.popup-hidden{
-  display:none !important;
-}
-
-#popupCard{
-  width:min(420px, 88vw);
-  background:#10131a;
-  border:1px solid #2c3342;
-  border-radius:14px;
-  box-shadow:0 20px 50px rgba(0,0,0,.45);
-  padding:22px;
-  color:#eef2ff;
-  font-family:'IBM Plex Mono',monospace;
-}
-
-#popupTitle{
-  font-size:14px;
-  margin-bottom:12px;
-  color:#ffffff;
-}
-
-#popupMessage{
-  font-size:12px;
-  line-height:1.7;
-  color:#c8cedd;
-  margin-bottom:16px;
-}
 
 @keyframes terminalGlitch{
   0%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
@@ -296,12 +260,6 @@ button:hover{
   60%{ transform:translate(-1px,2px); text-shadow:1px 0 0 #00ffff, -1px 0 0 #ff003c; }
   80%{ transform:translate(2px,0); text-shadow:-2px 0 0 #00ffff, 2px 0 0 #ff003c; }
   100%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
-}
-
-.terminal-link{
-  color:#89ffbe;
-  text-decoration:underline;
-  cursor:pointer;
 }
 
 .small-link{
@@ -368,12 +326,51 @@ button:hover{
 pre{
   white-space:pre-wrap;
   word-wrap:break-word;
+  margin:0;
 }
 
 hr{
   border:0;
   border-top:1px solid #222;
   margin:18px 0;
+}
+
+#applicantPopup{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+}
+
+.popup-hidden{
+  display:none !important;
+}
+
+#popupCard{
+  width:min(420px, 88vw);
+  background:#10131a;
+  border:1px solid #2c3342;
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.45);
+  padding:22px;
+  color:#eef2ff;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+#popupTitle{
+  font-size:14px;
+  margin-bottom:12px;
+  color:#ffffff;
+}
+
+#popupMessage{
+  font-size:12px;
+  line-height:1.7;
+  color:#c8cedd;
+  margin-bottom:16px;
 }
 
 #taskbar{
@@ -424,13 +421,15 @@ hr{
   min-width:150px;
 }
 
+.green-report{
+  color:#00ff88;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  line-height:1.8;
+}
+
 @media (max-width: 980px){
   #window{
-    left:20px;
-    right:20px;
-  }
-
-  #terminal{
     left:20px;
     right:20px;
   }
@@ -453,24 +452,24 @@ hr{
 <body>
 <div id="desktop">
 
-<div id="desktopIcons">
-  <div class="desktop-icon" onclick="denyDesktopAccess('Applicants')">
-    <div class="icon-box"></div>
-    <div>Applicants</div>
+  <div id="desktopIcons">
+    <div class="desktop-icon" onclick="denyDesktopAccess('Applicants')">
+      <div class="icon-box"></div>
+      <div>Applicants</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
+      <div class="icon-box"></div>
+      <div>Profiles</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
+      <div class="icon-box"></div>
+      <div>Archive</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Internal')">
+      <div class="icon-box"></div>
+      <div>Internal</div>
+    </div>
   </div>
-  <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
-    <div class="icon-box"></div>
-    <div>Profiles</div>
-  </div>
-  <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
-    <div class="icon-box"></div>
-    <div>Archive</div>
-  </div>
-  <div class="desktop-icon" onclick="denyDesktopAccess('Internal')">
-    <div class="icon-box"></div>
-    <div>Internal</div>
-  </div>
-</div>
 
   <div id="window">
     <div id="titlebar">
@@ -522,27 +521,25 @@ hr{
         <div class="progress"><div id="sentimentBar" class="bar"></div></div>
 
         <hr>
-        <hr>
 
-<div id="systemFeedWrap">
-  <div id="systemFeedTitle">Behavioral Engine Feed</div>
-  <div id="terminal"></div>
-</div>
+        <div id="systemFeedWrap">
+          <div id="systemFeedTitle">Internal Process Log</div>
+          <div id="terminal"></div>
+        </div>
 
-<button onclick="resetGame()">Reset Session</button>
-        
+        <button onclick="resetGame()">Reset Session</button>
       </div>
     </div>
   </div>
 
   <div id="applicantPopup" class="popup-hidden">
-  <div id="popupCard">
-    <div id="popupTitle">Access Restricted</div>
-    <div id="popupMessage">This directory is not available in applicant view.</div>
-    <button onclick="closeApplicantPopup()">Close</button>
+    <div id="popupCard">
+      <div id="popupTitle">Access Restricted</div>
+      <div id="popupMessage">This directory is not available in applicant view.</div>
+      <button onclick="closeApplicantPopup()">Close</button>
+    </div>
   </div>
-</div>
-  
+
   <div id="taskbar">
     <div id="taskbarLeft">
       <div class="task-app">SYSTEM</div>
@@ -556,9 +553,6 @@ hr{
   </div>
 
 </div>
-</body>
-
-
 
 <script>
 let sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
@@ -733,8 +727,7 @@ const defaultState = {
   answers:[],
   finished:false,
   result:null,
-  resultStats:null,
-  terminalSeen:false
+  resultStats:null
 };
 
 let state = JSON.parse(localStorage.getItem("personaMetricState")) || {...defaultState};
@@ -749,9 +742,9 @@ function resetGame(){
   sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
   document.getElementById("session").innerText = sessionID;
   document.getElementById("terminal").innerHTML = "";
-  document.getElementById("terminal").classList.remove("active");
+  document.getElementById("terminal").classList.remove("active","glitching");
   updateBars();
- route();
+  route();
 }
 
 function createButton(text, fn){
@@ -781,9 +774,6 @@ function route(){
   if(state.screen === "careers") return renderCareers();
   if(state.screen === "status") return renderStatus();
   if(state.screen === "assessment") return renderQuestion();
-  if(state.screen === "sessionLog") return showSessionLog();
-  if(state.screen === "researchNotes") return showResearchNotes();
-  if(state.screen === "datasetSummary") return showDatasetSummary();
   if(state.screen === "results") return showResults();
   if(state.screen === "end") return endSession();
 }
@@ -802,12 +792,14 @@ function renderPortal(){
       <p>Please answer honestly.</p>
     </div>
   `);
+
   const story = document.getElementById("story");
   story.appendChild(createButton("BEGIN ASSESSMENT", ()=>{
     state.screen = "policy";
     saveState();
     route();
   }));
+
   appendInlineLink("About PersonaMetric", "goAbout");
   appendInlineLink("Data Use Policy", "goPolicy");
   appendInlineLink("Careers", "goCareers");
@@ -839,7 +831,8 @@ function renderPolicy(){
     <div class="card">
       <div class="q-title">Terms of Use & Consent</div>
       <p class="muted">Please review the following terms before continuing your assessment.</p>
-       <div id="policyScrollBox" style="max-height:280px; overflow:auto; border:1px solid #222; padding:16px; background:#040404; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#d7d0c0;">
+
+      <div id="policyScrollBox" style="max-height:280px; overflow:auto; border:1px solid #222; padding:16px; background:#040404; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#d7d0c0;">
         <p><strong>PersonaMetric Applicant Assessment Terms</strong></p>
         <p>By accessing this assessment portal, you acknowledge that your participation is part of PersonaMetric's applicant review process.</p>
         <p>You understand that information submitted through this assessment may be collected, stored, processed, and retained for evaluation, research, quality assurance, security, product improvement, and system optimization purposes.</p>
@@ -848,29 +841,31 @@ function renderPolicy(){
         <p>Assessment completion does not guarantee employment, advancement, or selection for any current or future opportunity.</p>
         <p>By continuing, you confirm that the information you provide is accurate to the best of your knowledge and that you consent to PersonaMetric's collection and processing practices as described above.</p>
       </div>
+
       <div style="margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px;">
         <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer; line-height:1.5;">
-        <input type="checkbox" id="consentCheck" disabled style="margin-top:3px; accent-color:#00ff88;">
+          <input type="checkbox" id="consentCheck" disabled style="margin-top:3px; accent-color:#00ff88;">
           <span>I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions.</span>
         </label>
         <p id="scrollNotice" class="muted" style="font-size:11px; margin-top:10px;">Scroll to the bottom to enable consent.</p>
       </div>
     </div>
   `);
-  
-  const scrollBox = document.getElementById("policyScrollBox");
-const consentCheck = document.getElementById("consentCheck");
-const scrollNotice = document.getElementById("scrollNotice");
 
-if(scrollBox && consentCheck){
-  scrollBox.addEventListener("scroll", ()=>{
-    const atBottom = scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 4;
-    if(atBottom){
-      consentCheck.disabled = false;
-      if(scrollNotice) scrollNotice.innerText = "Consent enabled.";
-    }
-  });
-}
+  const scrollBox = document.getElementById("policyScrollBox");
+  const consentCheck = document.getElementById("consentCheck");
+  const scrollNotice = document.getElementById("scrollNotice");
+
+  if(scrollBox && consentCheck){
+    scrollBox.addEventListener("scroll", ()=>{
+      const atBottom = scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 4;
+      if(atBottom){
+        consentCheck.disabled = false;
+        if(scrollNotice) scrollNotice.innerText = "Consent enabled.";
+      }
+    });
+  }
+
   const story = document.getElementById("story");
   const acceptBtn = createButton("CONTINUE", ()=>{
     const consent = document.getElementById("consentCheck");
@@ -891,6 +886,7 @@ if(scrollBox && consentCheck){
     saveState();
     route();
   });
+
   story.appendChild(acceptBtn);
   story.appendChild(createButton("RETURN", returnPortal));
 }
@@ -928,6 +924,7 @@ function renderQuestion(){
 
   const q = questions[state.questionIndex];
   const progress = Math.round((state.questionIndex / questions.length) * 100);
+
   setStory(`
     <div class="card">
       <div class="q-title">Question ${state.questionIndex + 1}</div>
@@ -965,19 +962,19 @@ function answerQuestion(option){
     logTerminalGlitch(q.glitch);
   }
 
-if(q.link === "sessionLog"){
-  logTerminal("session log expanded");
-  logTerminal("subject believes assessment is for employment");
-  logTerminal("honesty levels higher under evaluation conditions");
-  logTerminal("continue using employment framing");
-}
+  if(q.link === "sessionLog"){
+    logTerminal("session log expanded");
+    logTerminal("subject believes assessment is for employment");
+    logTerminal("honesty levels higher under evaluation conditions");
+    logTerminal("continue using employment framing");
+  }
 
-if(q.link === "datasetSummary"){
-  logTerminal("dataset summary appended");
-  logTerminal("top behavioral types: Adaptive Complier, Predictable Performer, Structure Seeker");
-  logTerminal("prediction accuracy: 71%");
-  logTerminal("profiles generated: " + datasetSize.toLocaleString());
-}
+  if(q.link === "datasetSummary"){
+    logTerminal("dataset summary appended");
+    logTerminal("top behavioral types: Adaptive Complier, Predictable Performer, Structure Seeker");
+    logTerminal("prediction accuracy: 71%");
+    logTerminal("profiles generated: " + datasetSize.toLocaleString());
+  }
 
   state.questionIndex += 1;
   saveState();
@@ -986,18 +983,6 @@ if(q.link === "datasetSummary"){
   setTimeout(()=>{
     renderQuestion();
   },250);
-}
-
-function addTerminalLink(text, fn){
-  const t = document.getElementById("terminal");
-  const line = document.createElement("div");
-  const link = document.createElement("span");
-  link.className = "terminal-link";
-  link.textContent = "> " + text;
-  link.onclick = fn;
-  line.appendChild(link);
-  t.appendChild(line);
-  t.scrollTop = t.scrollHeight;
 }
 
 function triggerTerminalGlitch(){
@@ -1022,82 +1007,6 @@ function logTerminalGlitch(lines){
   lines.forEach((line, idx)=>{
     setTimeout(()=>logTerminal(line), idx * 90);
   });
-}
-
-function showSessionLog(){
-  setStory(`
-    <div class="card">
-      <div class="q-title">SESSION LOG — ${sessionID}</div>
-      <pre>> response pattern forming
-> subject believes assessment is for employment
-> honesty levels higher under evaluation conditions
-> continue using employment framing</pre>
-    </div>
-  `);
-  const story = document.getElementById("story");
-  story.appendChild(createButton("OPEN RESEARCH NOTES", ()=>{
-    state.screen = "researchNotes";
-    saveState();
-    route();
-  }));
-  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
-    state.screen = "assessment";
-    saveState();
-    route();
-  }));
-}
-
-function showResearchNotes(){
-  setStory(`
-    <div class="card">
-      <div class="q-title">RESEARCH NOTES — INTERNAL</div>
-      <pre>Note 12:
-Subjects respond more honestly when they believe results impact employment.
-
-Note 18:
-Personality assessments produce more reliable behavioral data than direct questioning.
-
-Note 21:
-Most subjects do not question data collection if framed as opportunity.
-
-Note 34:
-Prediction accuracy improves with each completed assessment.
-
-Long-term objective:
-Predict behavioral decisions before they are made.</pre>
-    </div>
-  `);
-  const story = document.getElementById("story");
-  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
-    state.screen = "assessment";
-    saveState();
-    route();
-  }));
-}
-
-function showDatasetSummary(){
-  setStory(`
-    <div class="card">
-      <div class="q-title">DATASET SUMMARY</div>
-      <pre>Total Subjects: ${datasetSize.toLocaleString()}
-Profiles Generated: ${datasetSize.toLocaleString()}
-Average Completion Time: 8m 12s
-Prediction Accuracy (Current Model): 71%
-
-Top Behavioral Types:
-- Adaptive Complier
-- Predictable Performer
-- Structure Seeker
-- Curious Observer
-- Quiet Resister</pre>
-    </div>
-  `);
-  const story = document.getElementById("story");
-  story.appendChild(createButton("RETURN TO ASSESSMENT", ()=>{
-    state.screen = "assessment";
-    saveState();
-    route();
-  }));
 }
 
 function buildResult(){
@@ -1168,7 +1077,9 @@ function buildResult(){
   } else if(metrics.resistance >= 56 && metrics.compliance >= 40){
     result = {
       title:"Quiet Resister",
-      description:"vbent support roles","Observation-heavy work"]
+      description:"You tend to question systems internally but do not always express resistance outwardly. You may comply in action while maintaining independent thought.",
+      confidence:"Medium",
+      environments:["Low-drama teams","Independent support roles","Observation-heavy work"]
     };
   }
 
@@ -1225,72 +1136,26 @@ function showResults(){
 
       <p><strong>Applicant ID:</strong> ${sessionID}</p>
 
-      <p style="color:#00ff88; font-family:'IBM Plex Mono',monospace; font-size:14px; line-height:1.8;">
+      <div class="green-report">
         <strong>Persona Type:</strong> ${personaType}<br>
         <strong>Behavioral Classification:</strong> ${r.title}<br><br>
         <strong>Assessment Summary:</strong> ${r.description}<br><br>
         <strong>Recommended Work Environments:</strong><br>
         - ${r.environments.join("<br>- ")}
-      </p>
+      </div>
 
+      <p class="muted" style="margin-top:18px;">Assessment confidence: ${r.confidence}</p>
       <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
     </div>
   `);
 
   const story = document.getElementById("story");
+  story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
   story.appendChild(createButton("END SESSION", ()=>{
     state.screen = "end";
     saveState();
     route();
   }));
-}
-  addTerminalLink("download behavioral report", ()=>downloadProfile());
-  
-  logTerminalGlitch([
-  "surface report prepared for applicant view",
-  getTeaLine1(),
-  getTeaLine2(),
-  getTeaLine3()
-]);
-}
-
-function getTeaLine1(){
-  const r = state.result?.title || "Balanced Profile";
-  const lines = {
-    "Adaptive Complier":"seeks approval faster than certainty",
-    "System Skeptic":"trust threshold remains inconveniently high",
-    "Curious Observer":"keeps leaning closer when caution would suffice",
-    "Predictable Performer":"consistency borders on algorithmic comfort",
-    "Structure Seeker":"prefers rules when uncertainty asks for courage",
-    "Independent Actor":"mistakes defiance for originality often enough to repeat it",
-    "Suggestible Responder":"responds strongly to framing and perceived authority",
-    "Quiet Resister":"withholds agreement but rarely escapes the system entirely",
-    "Balanced Profile":"avoids extremes but offers little surprise in exchange"
-  };
-  return lines[r] || "classification stabilized with limited deviation";
-}
-
-function getTeaLine2(){
-  if(state.hiddenInfluence >= state.compliance && state.hiddenInfluence >= state.resistance){
-    return "high responsiveness to subtle prompting detected";
-  }
-  if(state.resistance > state.compliance){
-    return "subject resists direction, especially when motives feel obscured";
-  }
-  if(state.curiosity >= state.compliance){
-    return "subject trades comfort for unanswered questions";
-  }
-  return "subject favors smooth pathways over disruptive judgment";
-}
-
-function getTeaLine3(){
-  if(state.predictability >= 9){
-    return "prediction confidence increased by behavioral repetition";
-  }
-  if(state.curiosity >= 8){
-    return "further exposure likely to increase engagement rather than refusal";
-  }
-  return "profile retained for future comparative modeling";
 }
 
 function endSession(){
@@ -1304,7 +1169,7 @@ function endSession(){
     </div>
   `);
   logTerminalGlitch(["profile added to training dataset"]);
-  addTerminalLink("download behavioral report", ()=>downloadProfile());
+  document.getElementById("story").appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
 }
 
 function updateBars(){
@@ -1322,6 +1187,7 @@ function updateBars(){
 function downloadProfile(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+
   if(!state.result) buildResult();
   const r = state.result;
   const s = state.resultStats;
@@ -1353,7 +1219,7 @@ function downloadProfile(){
   doc.text("Suggestibility Score: " + s.suggestibility + "%",18,103);
   doc.text("Predictability Score: " + s.predictability + "%",18,110);
 
-  doc.rect(12,124,186,94);
+  doc.rect(12,124,186,110);
   doc.setFont("courier","bold");
   doc.setFontSize(12);
   doc.text("PROFILE CLASSIFICATION",18,134);
@@ -1363,16 +1229,16 @@ function downloadProfile(){
   doc.setFontSize(10);
   let wrapped = doc.splitTextToSize(r.description, 170);
   doc.text(wrapped,18,162);
-  doc.text("Model Confidence: " + r.confidence,18,184);
-  doc.text("Recommended Environments:",18,194);
-  doc.text("- " + r.environments.join("\n- "),18,202);
+  doc.text("Model Confidence: " + r.confidence,18,186);
+  doc.text("Recommended Environments:",18,196);
+  doc.text("- " + r.environments.join("\n- "),18,204);
 
   doc.setFontSize(9);
   doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,280);
   doc.save(sessionID + "_personametric_report.pdf");
 }
 
-  function updateDesktopClock(){
+function updateDesktopClock(){
   const now = new Date();
 
   const time = now.toLocaleTimeString([], {
@@ -1392,21 +1258,8 @@ function downloadProfile(){
   if(timeEl) timeEl.innerText = time;
   if(dateEl) dateEl.innerText = date;
 }
-  
-updateDesktopClock();
-setInterval(updateDesktopClock, 1000);
-route();
 
-function denyDesktopAccess(folderName){
-  const terminal = document.getElementById("terminal");
-  terminal.classList.add("active");
-  triggerTerminalGlitch();
-
-  logTerminal("ACCESS ATTEMPT DETECTED: " + folderName);
-  setTimeout(()=>logTerminal("permission denied"), 120);
-  setTimeout(()=>logTerminal("restricted to PersonaMetric personnel only"), 240);
-
-  function showApplicantPopup(title, message){
+function showApplicantPopup(title, message){
   const popup = document.getElementById("applicantPopup");
   const popupTitle = document.getElementById("popupTitle");
   const popupMessage = document.getElementById("popupMessage");
@@ -1424,10 +1277,13 @@ function closeApplicantPopup(){
 function denyDesktopAccess(folderName){
   showApplicantPopup(
     "Access Restricted",
-    folderName + " is restricted to authorized internal personnel."
+    folderName + " is not available in applicant view."
   );
 }
-}
+
+updateDesktopClock();
+setInterval(updateDesktopClock, 1000);
+route();
 </script>
 </body>
 </html>
