@@ -211,31 +211,83 @@ button:hover{
   transition:width .6s;
 }
 
+#systemFeedWrap{
+  margin-top:18px;
+  border:1px solid #1f2a24;
+  background:#030403;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+#systemFeedTitle{
+  padding:10px 12px;
+  border-bottom:1px solid #17301f;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:#8affbb;
+  background:#071109;
+  letter-spacing:.03em;
+}
+
 #terminal{
-  position:fixed;
-  left:120px;
-  right:26px;
-  bottom:68px;
-  height:0;
+  position:relative;
+  height:180px;
   background:black;
   color:#00ff00;
   font-family:'IBM Plex Mono',monospace;
   overflow:auto;
-  transition:height .45s ease, padding .3s ease, transform .12s ease, opacity .12s ease;
-  padding:0 20px;
+  padding:12px;
   box-sizing:border-box;
-  border-top:1px solid #133;
   opacity:.98;
-  z-index:20;
+  border-top:0;
+  z-index:1;
 }
 
 #terminal.active{
-  height:34%;
-  padding:20px;
+  height:180px;
+  padding:12px;
 }
 
 #terminal.glitching{
   animation: terminalGlitch .22s steps(2,end) 5;
+}
+  #applicantPopup{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+}
+
+.popup-hidden{
+  display:none !important;
+}
+
+#popupCard{
+  width:min(420px, 88vw);
+  background:#10131a;
+  border:1px solid #2c3342;
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.45);
+  padding:22px;
+  color:#eef2ff;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+#popupTitle{
+  font-size:14px;
+  margin-bottom:12px;
+  color:#ffffff;
+}
+
+#popupMessage{
+  font-size:12px;
+  line-height:1.7;
+  color:#c8cedd;
+  margin-bottom:16px;
+}
 }
 
 @keyframes terminalGlitch{
@@ -470,13 +522,27 @@ hr{
         <div class="progress"><div id="sentimentBar" class="bar"></div></div>
 
         <hr>
-        <button onclick="resetGame()">Reset Session</button>
+        <hr>
+
+<div id="systemFeedWrap">
+  <div id="systemFeedTitle">Behavioral Engine Feed</div>
+  <div id="terminal"></div>
+</div>
+
+<button onclick="resetGame()">Reset Session</button>
+        
       </div>
     </div>
   </div>
 
-  <div id="terminal"></div>
-
+  <div id="applicantPopup" class="popup-hidden">
+  <div id="popupCard">
+    <div id="popupTitle">Access Restricted</div>
+    <div id="popupMessage">This directory is not available in applicant view.</div>
+    <button onclick="closeApplicantPopup()">Close</button>
+  </div>
+</div>
+  
   <div id="taskbar">
     <div id="taskbarLeft">
       <div class="task-app">SYSTEM</div>
@@ -1314,6 +1380,28 @@ function denyDesktopAccess(folderName){
   logTerminal("ACCESS ATTEMPT DETECTED: " + folderName);
   setTimeout(()=>logTerminal("permission denied"), 120);
   setTimeout(()=>logTerminal("restricted to PersonaMetric personnel only"), 240);
+
+  function showApplicantPopup(title, message){
+  const popup = document.getElementById("applicantPopup");
+  const popupTitle = document.getElementById("popupTitle");
+  const popupMessage = document.getElementById("popupMessage");
+
+  if(popupTitle) popupTitle.innerText = title;
+  if(popupMessage) popupMessage.innerText = message;
+  if(popup) popup.classList.remove("popup-hidden");
+}
+
+function closeApplicantPopup(){
+  const popup = document.getElementById("applicantPopup");
+  if(popup) popup.classList.add("popup-hidden");
+}
+
+function denyDesktopAccess(folderName){
+  showApplicantPopup(
+    "Access Restricted",
+    folderName + " is restricted to authorized internal personnel."
+  );
+}
 }
 </script>
 </body>
