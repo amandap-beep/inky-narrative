@@ -787,8 +787,9 @@ function buildResult(){
   saveState();
 }
 
-function finishAssessment(){
+async function finishAssessment(){
   document.getElementById("terminal").classList.add("active");
+
   logTerminalGlitch([
     "measuring response time",
     "measuring hesitation",
@@ -796,49 +797,63 @@ function finishAssessment(){
     "measuring resistance indicators",
     "measuring curiosity indicators",
     "measuring suggestibility",
-    "building predictive model",
-    "profile generated",
-    "adding profile to dataset"
+    "building predictive model"
   ]);
+
+  await wait(2200);
+  logTerminal("cross-referencing with archived behavioral profiles");
+  await wait(2200);
+  logTerminal("checking response stability under evaluation conditions");
+  await wait(2200);
+  logTerminal("estimating future compliance probability");
+  await wait(2200);
+  logTerminal("estimating resistance threshold");
+  await wait(2200);
+  logTerminal("finalizing subject classification");
+  await wait(2200);
+  logTerminal("profile generated");
+  await wait(1200);
+  logTerminal("adding profile to dataset");
+  await wait(1000);
+
   buildResult();
   showResults();
 }
-
 function getTeaLine1(){
   const title = state.result ? state.result.title : "Balanced Profile";
   const lines = {
-    "Adaptive Complier":"seeks approval faster than certainty",
-    "System Skeptic":"trust threshold remains inconveniently high",
-    "Curious Observer":"keeps leaning closer when caution would suffice",
-    "Predictable Performer":"consistency borders on algorithmic comfort",
-    "Structure Seeker":"prefers rules when uncertainty asks for courage",
-    "Independent Actor":"mistakes defiance for originality often enough to repeat it",
-    "Suggestible Responder":"responds strongly to framing and perceived authority",
-    "Quiet Resister":"withholds agreement but rarely escapes the system entirely",
-    "Balanced Profile":"avoids extremes but offers little surprise in exchange"
+    "Adaptive Complier":"accepts structure quickly, especially when it sounds supportive",
+    "System Skeptic":"questions authority, but only after staying long enough to be measured",
+    "Curious Observer":"keeps leaning closer when most people would walk away",
+    "Predictable Performer":"so consistent it almost feels pre-entered",
+    "Structure Seeker":"prefers rules when uncertainty asks for actual nerve",
+    "Independent Actor":"mistakes resistance for uniqueness often enough to repeat it",
+    "Suggestible Responder":"highly responsive to framing, tone, and implied authority",
+    "Quiet Resister":"internally objects while externally remaining very convenient",
+    "Balanced Profile":"avoids extremes, though not in a way anyone would call unforgettable"
   };
-  return lines[title] || "classification stabilized with limited deviation";
+  return lines[title] || "classification stabilized with minimal deviation";
 }
 
 function getTeaLine2(){
   if(state.hiddenInfluence >= state.compliance && state.hiddenInfluence >= state.resistance){
-    return "high responsiveness to subtle prompting detected";
+    return "subtle prompting remains more effective than subject would probably enjoy admitting";
   }
   if(state.resistance > state.compliance){
-    return "subject resists direction, especially when motives feel obscured";
+    return "subject resists direction, especially when control becomes visible";
   }
   if(state.curiosity >= state.compliance){
-    return "subject trades comfort for unanswered questions";
+    return "subject continues probing even after the warning signs become obvious";
   }
-  return "subject favors smooth pathways over disruptive judgment";
+  return "subject favors the path of least friction and tends to call it practicality";
 }
 
 function getTeaLine3(){
   if(state.predictability >= 9){
-    return "prediction confidence increased by behavioral repetition";
+    return "prediction confidence increased through repeated behavioral patterning";
   }
   if(state.curiosity >= 8){
-    return "further exposure likely to increase engagement rather than refusal";
+    return "further exposure likely to increase engagement rather than withdrawal";
   }
   return "profile retained for future comparative modeling";
 }
