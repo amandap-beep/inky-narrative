@@ -288,7 +288,6 @@ button:hover{
   color:#c8cedd;
   margin-bottom:16px;
 }
-}
 
 @keyframes terminalGlitch{
   0%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
@@ -450,6 +449,7 @@ hr{
   }
 }
 </style>
+</head>
 <body>
 <div id="desktop">
 
@@ -977,13 +977,7 @@ if(q.link === "datasetSummary"){
   logTerminal("top behavioral types: Adaptive Complier, Predictable Performer, Structure Seeker");
   logTerminal("prediction accuracy: 71%");
   logTerminal("profiles generated: " + datasetSize.toLocaleString());
-}
-
-  if(q.link === "datasetSummary") addTerminalLink("open dataset summary", ()=>{
-    state.screen = "datasetSummary";
-    saveState();
-    route();
-  });
+});
 
   state.questionIndex += 1;
   saveState();
