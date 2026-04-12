@@ -6,19 +6,168 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
-  background:black;
+  background:
+    radial-gradient(circle at top left, #1b1f2a 0%, #0e1017 35%, #06070b 100%);
   color:#f5f1e8;
   font-family:'Cormorant Garamond',serif;
-  display:flex;
   height:100vh;
+  overflow:hidden;
 }
+
+#desktop{
+  position:relative;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+}
+
+#desktopIcons{
+  position:absolute;
+  top:22px;
+  left:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  z-index:2;
+}
+
+.desktop-icon{
+  width:92px;
+  text-align:center;
+  color:#d9dfef;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  opacity:.9;
+  user-select:none;
+}
+
+.desktop-icon .icon-box{
+  width:54px;
+  height:42px;
+  margin:0 auto 8px auto;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border-radius:6px;
+  position:relative;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);
+}
+
+.desktop-icon .icon-box:before{
+  content:"";
+  position:absolute;
+  top:8px;
+  left:10px;
+  width:34px;
+  height:22px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:3px;
+}
+
+#window{
+  position:absolute;
+  top:34px;
+  left:120px;
+  right:26px;
+  bottom:68px;
+  background:#080909;
+  border:1px solid #24262c;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,.02) inset;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+}
+
+#titlebar{
+  height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:linear-gradient(180deg, #11131a, #0c0e14);
+  border-bottom:1px solid #23252e;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+#windowControls{
+  display:flex;
+  gap:8px;
+}
+
+.window-dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#2a2d37;
+  border:1px solid #3a3e49;
+}
+
+#tabStrip{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:1;
+  margin:0 18px;
+}
+
+.fake-tab{
+  min-width:220px;
+  max-width:320px;
+  height:34px;
+  padding:0 14px;
+  display:flex;
+  align-items:center;
+  border:1px solid #2a2e38;
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+  background:#0f1218;
+  color:#d6dbc8;
+  font-size:12px;
+  box-shadow:0 -1px 0 rgba(255,255,255,.02) inset;
+}
+
+.fake-tab .tab-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#00ff88;
+  margin-right:10px;
+  box-shadow:0 0 8px rgba(0,255,136,.4);
+}
+
+#addressBar{
+  width:260px;
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  color:#8a8f9d;
+  font-size:11px;
+}
+
+#windowContent{
+  flex:1;
+  display:flex;
+  min-height:0;
+  background:black;
+}
+
 #main{
   flex:2;
   padding:50px;
   overflow-y:auto;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),
+    #050505;
 }
+
 #system{
   flex:1;
   background:#050505;
@@ -29,6 +178,7 @@ body{
   color:#00ff88;
   overflow-y:auto;
 }
+
 button{
   display:block;
   margin:10px 0;
@@ -38,25 +188,34 @@ button{
   color:white;
   cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
+  border-radius:8px;
 }
-button:hover{ background:#171717; }
+
+button:hover{
+  background:#171717;
+}
+
 .progress{
   width:100%;
   background:#111;
   height:10px;
   margin-bottom:8px;
+  border-radius:999px;
+  overflow:hidden;
 }
+
 .bar{
   height:10px;
   background:#00ff88;
   width:0%;
   transition:width .6s;
 }
+
 #terminal{
   position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
+  left:120px;
+  right:26px;
+  bottom:68px;
   height:0;
   background:black;
   color:#00ff00;
@@ -67,11 +226,18 @@ button:hover{ background:#171717; }
   box-sizing:border-box;
   border-top:1px solid #133;
   opacity:.98;
+  z-index:20;
 }
-#terminal.active{ height:40%; padding:20px; }
+
+#terminal.active{
+  height:34%;
+  padding:20px;
+}
+
 #terminal.glitching{
   animation: terminalGlitch .22s steps(2,end) 5;
 }
+
 @keyframes terminalGlitch{
   0%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
   20%{ transform:translate(-2px,1px); text-shadow:2px 0 0 #00ffff, -2px 0 0 #ff003c; filter:contrast(1.25); }
@@ -80,11 +246,13 @@ button:hover{ background:#171717; }
   80%{ transform:translate(2px,0); text-shadow:-2px 0 0 #00ffff, 2px 0 0 #ff003c; }
   100%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
 }
+
 .terminal-link{
   color:#89ffbe;
   text-decoration:underline;
   cursor:pointer;
 }
+
 .small-link{
   color:#d1c6a9;
   text-decoration:underline;
@@ -95,82 +263,236 @@ button:hover{ background:#171717; }
   font-family:'IBM Plex Mono',monospace;
   font-size:12px;
 }
+
 .card{
   border:1px solid #2b2b2b;
   padding:22px;
   margin-top:20px;
   background:#060606;
   max-width:760px;
+  border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
 }
+
 .muted{ color:#b7ae9b; }
-.q-title{ font-size:30px; margin-bottom:10px; }
-.option-group button{ width:100%; text-align:left; }
+
+.q-title{
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.option-group button{
+  width:100%;
+  text-align:left;
+}
+
 #assessmentProgressWrap{
   margin-top:20px;
   max-width:760px;
 }
+
 #assessmentProgressLabel{
   font-family:'IBM Plex Mono',monospace;
   font-size:12px;
   color:#c7c0af;
   margin-bottom:8px;
 }
+
 #assessmentProgress{
   width:100%;
   height:12px;
   background:#111;
   border:1px solid #262626;
+  border-radius:999px;
+  overflow:hidden;
 }
+
 #assessmentProgressBar{
   width:0%;
   height:100%;
   background:#00ff88;
   transition:width .5s;
 }
+
 pre{
   white-space:pre-wrap;
   word-wrap:break-word;
 }
-hr{ border:0; border-top:1px solid #222; margin:18px 0; }
+
+hr{
+  border:0;
+  border-top:1px solid #222;
+  margin:18px 0;
+}
+
+#taskbar{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:48px;
+  background:rgba(10,12,18,.92);
+  border-top:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(10px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  z-index:40;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+#taskbarLeft{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.task-app{
+  height:32px;
+  min-width:110px;
+  padding:0 12px;
+  border:1px solid #2a2e38;
+  border-radius:8px;
+  background:#12151d;
+  color:#dce4d2;
+  display:flex;
+  align-items:center;
+  font-size:11px;
+}
+
+.task-app.active{
+  box-shadow:inset 0 -2px 0 #00ff88;
+}
+
+#taskbarClock{
+  text-align:right;
+  color:#d6dbeb;
+  font-size:11px;
+  line-height:1.3;
+  min-width:150px;
+}
+
+@media (max-width: 980px){
+  #window{
+    left:20px;
+    right:20px;
+  }
+
+  #terminal{
+    left:20px;
+    right:20px;
+  }
+
+  #windowContent{
+    flex-direction:column;
+  }
+
+  #system{
+    border-left:none;
+    border-top:1px solid #222;
+  }
+
+  #desktopIcons{
+    display:none;
+  }
+}
 </style>
-</head>
 <body>
+<div id="desktop">
 
-<div id="main">
-  <h1>PERSONAMETRIC</h1>
-  <div id="story"></div>
+  <div id="desktopIcons">
+    <div class="desktop-icon">
+      <div class="icon-box"></div>
+      <div>Applicants</div>
+    </div>
+    <div class="desktop-icon">
+      <div class="icon-box"></div>
+      <div>Profiles</div>
+    </div>
+    <div class="desktop-icon">
+      <div class="icon-box"></div>
+      <div>Archive</div>
+    </div>
+    <div class="desktop-icon">
+      <div class="icon-box"></div>
+      <div>Internal</div>
+    </div>
+  </div>
+
+  <div id="window">
+    <div id="titlebar">
+      <div id="windowControls">
+        <div class="window-dot"></div>
+        <div class="window-dot"></div>
+        <div class="window-dot"></div>
+      </div>
+
+      <div id="tabStrip">
+        <div class="fake-tab">
+          <span class="tab-dot"></span>
+          PersonaMetric Applicant Portal
+        </div>
+      </div>
+
+      <div id="addressBar">secured://personametric/applicant</div>
+    </div>
+
+    <div id="windowContent">
+      <div id="main">
+        <h1>PERSONAMETRIC</h1>
+        <div id="story"></div>
+      </div>
+
+      <div id="system">
+        <div>MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2</div>
+        <div>SESSION ID: <span id="session"></span></div>
+        <div>DATASET SIZE: <span id="dataset"></span></div>
+        <div>QUESTION: <span id="questionCount">0 / 15</span></div>
+        <hr>
+
+        <div>Assessment Progress</div>
+        <div class="progress"><div id="overallBar" class="bar"></div></div>
+
+        <div>Compliance</div>
+        <div class="progress"><div id="complianceBar" class="bar"></div></div>
+
+        <div>Resistance</div>
+        <div class="progress"><div id="resistanceBar" class="bar"></div></div>
+
+        <div>Curiosity</div>
+        <div class="progress"><div id="curiosityBar" class="bar"></div></div>
+
+        <div>Suggestibility</div>
+        <div class="progress"><div id="hiddenBar" class="bar"></div></div>
+
+        <div>Predictability</div>
+        <div class="progress"><div id="sentimentBar" class="bar"></div></div>
+
+        <hr>
+        <button onclick="resetGame()">Reset Session</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="terminal"></div>
+
+  <div id="taskbar">
+    <div id="taskbarLeft">
+      <div class="task-app">SYSTEM</div>
+      <div class="task-app active">PersonaMetric</div>
+      <div class="task-app">Terminal</div>
+    </div>
+    <div id="taskbarClock">
+      <div id="clockTime">1:00 PM</div>
+      <div id="clockDate">Sun Apr 12, 2026</div>
+    </div>
+  </div>
+
 </div>
+</body>
 
-<div id="system">
-  <div>MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2</div>
-  <div>SESSION ID: <span id="session"></span></div>
-  <div>DATASET SIZE: <span id="dataset"></span></div>
-  <div>QUESTION: <span id="questionCount">0 / 15</span></div>
-  <hr>
 
-  <div>Assessment Progress</div>
-  <div class="progress"><div id="overallBar" class="bar"></div></div>
-
-  <div>Compliance</div>
-  <div class="progress"><div id="complianceBar" class="bar"></div></div>
-
-  <div>Resistance</div>
-  <div class="progress"><div id="resistanceBar" class="bar"></div></div>
-
-  <div>Curiosity</div>
-  <div class="progress"><div id="curiosityBar" class="bar"></div></div>
-
-  <div>Suggestibility</div>
-  <div class="progress"><div id="hiddenBar" class="bar"></div></div>
-
-  <div>Predictability</div>
-  <div class="progress"><div id="sentimentBar" class="bar"></div></div>
-
-  <hr>
-  <button onclick="resetGame()">Reset Session</button>
-</div>
-
-<div id="terminal"></div>
 
 <script>
 let sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
@@ -363,7 +685,7 @@ function resetGame(){
   document.getElementById("terminal").innerHTML = "";
   document.getElementById("terminal").classList.remove("active");
   updateBars();
-  route();
+ route();
 }
 
 function createButton(text, fn){
@@ -941,6 +1263,29 @@ function downloadProfile(){
   doc.save(sessionID + "_personametric_report.pdf");
 }
 
+  function updateDesktopClock(){
+  const now = new Date();
+
+  const time = now.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+
+  const date = now.toLocaleDateString([], {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+
+  const timeEl = document.getElementById("clockTime");
+  const dateEl = document.getElementById("clockDate");
+
+  if(timeEl) timeEl.innerText = time;
+  if(dateEl) dateEl.innerText = date;
+}
+  
+updateDesktopClock();
+setInterval(updateDesktopClock, 1000);
 route();
 </script>
 </body>
