@@ -1123,20 +1123,37 @@ function showResults(){
     "Balanced Profile":"Grounded Problem-Solver"
   };
 
+  const workplaceLines = {
+    "Adaptive Complier":"structured environments, process-driven teams, and clearly defined workflows",
+    "System Skeptic":"autonomous roles, investigative tasks, and independent review work",
+    "Curious Observer":"problem-solving roles, flexible structure, and independent tasks",
+    "Predictable Performer":"routine operations, stable organizational roles, and consistent process work",
+    "Structure Seeker":"clear hierarchies, stable teams, and policy-driven roles",
+    "Independent Actor":"self-directed work, creative problem solving, and leadership under ambiguity",
+    "Suggestible Responder":"guided teams, supervised workflows, and instruction-led tasks",
+    "Quiet Resister":"low-drama teams, independent support roles, and observation-heavy work",
+    "Balanced Profile":"collaborative teams, adaptive roles, and mixed-structure environments"
+  };
+
   const personaType = personaNames[r.title] || "Thoughtful Adapter";
+  const workplaceFit = workplaceLines[r.title] || "collaborative teams and adaptive workplace settings";
 
   setStory(`
     <div class="card">
       <div class="q-title" style="font-size:38px;">Thank you for completing the PersonaMetric applicant assessment.</div>
-      <p style="font-size:20px; line-height:1.6; max-width:720px;">
-        Your results suggest strengths that may support a variety of modern workplace environments.
+
+      <p style="font-size:24px; line-height:1.5; margin-top:18px;">
+        You are a <strong>${personaType}</strong>.
+      </p>
+
+      <p style="font-size:20px; line-height:1.7; max-width:720px;">
+        Your results suggest strengths that may support a variety of modern workplace environments such as ${workplaceFit}.
       </p>
 
       <hr>
 
-      <p><strong>Applicant ID:</strong> ${sessionID}</p>
-
       <div class="green-report">
+        <strong>Applicant ID:</strong> ${sessionID}<br><br>
         <strong>Persona Type:</strong> ${personaType}<br>
         <strong>Behavioral Classification:</strong> ${r.title}<br><br>
         <strong>Assessment Summary:</strong> ${r.description}<br><br>
@@ -1149,6 +1166,13 @@ function showResults(){
     </div>
   `);
 
+  logTerminalGlitch([
+    "surface report prepared for applicant view",
+    getHiddenLine1(r.title),
+    getHiddenLine2(r.title),
+    getHiddenLine3(r.title)
+  ]);
+
   const story = document.getElementById("story");
   story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
   story.appendChild(createButton("END SESSION", ()=>{
@@ -1156,6 +1180,50 @@ function showResults(){
     saveState();
     route();
   }));
+}
+function getHiddenLine1(title){
+  const lines = {
+    "Adaptive Complier":"subject accepts structure quickly when framed as support",
+    "System Skeptic":"trust threshold remains inconveniently high",
+    "Curious Observer":"subject continues probing after warning indicators appear",
+    "Predictable Performer":"behavioral repetition increased model confidence",
+    "Structure Seeker":"subject prefers rules when uncertainty demands independence",
+    "Independent Actor":"subject resists direction when control becomes visible",
+    "Suggestible Responder":"subject remains highly responsive to framing and authority cues",
+    "Quiet Resister":"subject questions systems internally while remaining behaviorally usable",
+    "Balanced Profile":"subject avoids extremes and stabilizes easily"
+  };
+  return lines[title] || "classification stabilized with limited deviation";
+}
+
+function getHiddenLine2(title){
+  const lines = {
+    "Adaptive Complier":"low-friction compliance profile retained",
+    "System Skeptic":"higher resistance cost projected for future steering attempts",
+    "Curious Observer":"continued exposure likely to increase engagement rather than refusal",
+    "Predictable Performer":"subject remains easy to model across repeated prompts",
+    "Structure Seeker":"predictable response pattern linked to external guidance",
+    "Independent Actor":"autonomy preference may reduce system efficiency",
+    "Suggestible Responder":"subtle prompting remains effective",
+    "Quiet Resister":"surface compliance conceals mild internal opposition",
+    "Balanced Profile":"moderate adaptability with low volatility"
+  };
+  return lines[title] || "profile retained for future comparison";
+}
+
+function getHiddenLine3(title){
+  const lines = {
+    "Adaptive Complier":"applicant-facing summary softened",
+    "System Skeptic":"applicant-facing summary softened",
+    "Curious Observer":"applicant-facing summary softened",
+    "Predictable Performer":"applicant-facing summary softened",
+    "Structure Seeker":"applicant-facing summary softened",
+    "Independent Actor":"applicant-facing summary softened",
+    "Suggestible Responder":"applicant-facing summary softened",
+    "Quiet Resister":"applicant-facing summary softened",
+    "Balanced Profile":"applicant-facing summary softened"
+  };
+  return lines[title] || "applicant-facing summary softened";
 }
 
 function endSession(){
