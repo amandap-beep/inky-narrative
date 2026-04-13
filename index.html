@@ -5,22 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PersonaMetric — Applicant Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 
 :root{
   --green:#00e676;
-  --green-dim:#00c853;
-  --green-glow:rgba(0,230,118,.15);
   --bg:#080b10;
   --bg2:#0c1018;
   --bg3:#111520;
   --border:#1e2330;
-  --border-bright:#2a3040;
+  --border2:#2a3040;
   --text:#e8eaf0;
-  --text-dim:#8a90a0;
-  --text-muted:#4a5060;
+  --dim:#8a90a0;
+  --muted:#4a5060;
   --red:#ff4444;
   --amber:#ffaa00;
 }
@@ -35,1749 +32,725 @@ body{
   line-height:1.6;
 }
 
-/* SCANLINE OVERLAY */
 body::after{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,.04) 2px,
-    rgba(0,0,0,.04) 4px
-  );
-  pointer-events:none;
-  z-index:9999;
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px);
 }
 
-/* ── DESKTOP ─────────────────────────────── */
 #desktop{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  background:
-    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(0,80,40,.12) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,30,80,.15) 0%, transparent 60%),
-    var(--bg);
+  position:relative;width:100vw;height:100vh;
+  background:radial-gradient(ellipse 60% 50% at 75% 20%,rgba(0,70,35,.1) 0%,transparent 60%),var(--bg);
 }
 
-/* ── DESKTOP ICONS ───────────────────────── */
-#desktopIcons{
-  position:absolute;
-  top:20px;
-  left:16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  z-index:2;
+#dicons{
+  position:absolute;top:20px;left:14px;
+  display:flex;flex-direction:column;gap:8px;z-index:2;
 }
-
 .dicon{
-  width:80px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-  padding:8px 4px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:background .15s;
-  user-select:none;
+  width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:8px 4px;border-radius:8px;cursor:pointer;transition:background .15s;user-select:none;
 }
 .dicon:hover{background:rgba(255,255,255,.05);}
-.dicon-img{
-  width:44px;
-  height:36px;
-  background:var(--bg3);
-  border:1px solid var(--border-bright);
-  border-radius:6px;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.dicon-box{
+  width:44px;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
 }
-.dicon-img::before{
-  content:"";
-  width:28px;
-  height:18px;
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:3px;
-}
-.dicon-label{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  color:var(--text-dim);
-  text-align:center;
-  line-height:1.3;
+.dicon-box::before{content:"";width:28px;height:18px;border:1px solid rgba(255,255,255,.13);border-radius:3px;}
+.dicon-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-align:center;line-height:1.3;}
+
+#win{
+  position:absolute;top:28px;left:106px;right:16px;bottom:44px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);z-index:3;
 }
 
-/* ── MAIN WINDOW ─────────────────────────── */
-#window{
-  position:absolute;
-  top:28px;
-  left:108px;
-  right:18px;
-  bottom:52px;
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  box-shadow:0 24px 60px rgba(0,0,0,.6);
-  z-index:3;
-}
-
-/* ── TITLE BAR ───────────────────────────── */
 #titlebar{
-  height:44px;
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  gap:12px;
-  background:var(--bg3);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
+  height:42px;display:flex;align-items:center;padding:0 14px;gap:12px;
+  background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;
 }
-
-.wdot{
-  width:11px;
-  height:11px;
-  border-radius:50%;
-  background:var(--border-bright);
-  cursor:pointer;
-  transition:background .15s;
-}
-.wdot:hover{background:#555;}
-
-#tabstrip{
-  flex:1;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:0 12px;
-}
-
+.wdot{width:11px;height:11px;border-radius:50%;background:var(--border2);}
+#tabstrip{flex:1;display:flex;align-items:center;gap:8px;margin:0 12px;}
 .tab{
-  height:30px;
-  padding:0 14px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:var(--bg2);
-  border:1px solid var(--border-bright);
-  border-radius:7px 7px 0 0;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  color:var(--text-dim);
-  white-space:nowrap;
+  height:30px;padding:0 14px;display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:7px 7px 0 0;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);
 }
+.tab-led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
+#urlbar{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
 
-.tab-led{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 6px var(--green);
-  flex-shrink:0;
-}
+#panes{flex:1;display:flex;min-height:0;}
 
-#urlbar{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  color:var(--text-muted);
-  text-align:right;
-  white-space:nowrap;
-}
-
-/* ── CONTENT PANES ───────────────────────── */
-#windowContent{
-  flex:1;
-  display:flex;
-  min-height:0;
-}
-
-/* LEFT: applicant pane */
 #main{
-  flex:1.8;
-  overflow-y:auto;
-  padding:48px 52px;
-  background:var(--bg2);
-  scrollbar-width:thin;
-  scrollbar-color:var(--border) transparent;
+  flex:1.8;overflow-y:auto;padding:44px 50px;background:var(--bg2);
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
 }
-
-/* RIGHT: system pane */
-#syspanel{
-  width:300px;
-  flex-shrink:0;
-  background:#04060a;
-  border-left:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  overflow:hidden;
-}
-
-#sysheader{
-  padding:12px 14px;
-  border-bottom:1px solid var(--border);
-  color:var(--green);
-  font-size:10px;
-  letter-spacing:.08em;
-  background:#050709;
-  flex-shrink:0;
-}
-
-#sysheader .sh-row{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:2px;
-  color:var(--text-muted);
-}
-
-#sysheader .sh-row span:last-child{
-  color:var(--green);
-}
-
-#sysheader .sh-row.label{
-  color:var(--green);
-  font-size:11px;
-  margin-bottom:8px;
-  letter-spacing:.05em;
-}
-
-/* STAT BARS */
-#stats{
-  padding:12px 14px;
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-
-.stat-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:8px;
-}
-.stat-row:last-child{margin-bottom:0;}
-
-.stat-label{
-  font-size:10px;
-  color:var(--text-muted);
-  width:88px;
-  flex-shrink:0;
-}
-
-.stat-track{
-  flex:1;
-  height:5px;
-  background:#111;
-  border-radius:99px;
-  overflow:hidden;
-  border:1px solid #1a1a1a;
-}
-
-.stat-fill{
-  height:100%;
-  width:0%;
-  border-radius:99px;
-  transition:width .7s cubic-bezier(.4,0,.2,1);
-}
-
-.fill-green{background:var(--green);}
-.fill-red{background:#ff4444;}
-.fill-blue{background:#4488ff;}
-.fill-amber{background:var(--amber);}
-.fill-purple{background:#aa66ff;}
-
-.stat-val{
-  font-size:10px;
-  color:var(--text-muted);
-  width:28px;
-  text-align:right;
-  flex-shrink:0;
-}
-
-/* TERMINAL LOG */
-#termwrap{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-  border-bottom:1px solid var(--border);
-}
-
-#termtitle{
-  padding:8px 14px;
-  font-size:9px;
-  letter-spacing:.1em;
-  color:var(--text-muted);
-  border-bottom:1px solid #0d0d0d;
-  flex-shrink:0;
-}
-
-#terminal{
-  flex:1;
-  overflow-y:auto;
-  padding:10px 14px;
-  color:#00cc55;
-  font-size:11px;
-  line-height:1.7;
-  scrollbar-width:thin;
-  scrollbar-color:#111 transparent;
-}
-
-.tline{
-  display:block;
-  animation:fadeIn .2s ease;
-}
-
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-
-.tline.warn{color:var(--amber);}
-.tline.alert{color:var(--red);}
-.tline.dim{color:#004422;}
-.tline.divider{color:#002211; user-select:none;}
-
-#sysfooter{
-  padding:10px 14px;
-  flex-shrink:0;
-}
-
-#sysfooter button{
-  width:100%;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  padding:7px;
-  background:transparent;
-  border:1px solid var(--border-bright);
-  color:var(--text-muted);
-  border-radius:5px;
-  cursor:pointer;
-  letter-spacing:.05em;
-  transition:all .15s;
-}
-#sysfooter button:hover{
-  border-color:#333;
-  color:var(--text-dim);
-}
-
-/* ── TASKBAR ─────────────────────────────── */
-#taskbar{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:46px;
-  background:rgba(6,8,14,.95);
-  border-top:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 14px;
-  z-index:10;
-  backdrop-filter:blur(12px);
-}
-
-.taskapp{
-  height:28px;
-  padding:0 12px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  background:var(--bg3);
-  color:var(--text-dim);
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin-right:6px;
-}
-
-.taskapp.active{
-  border-color:#2a4030;
-  color:var(--green);
-  box-shadow:inset 0 -2px 0 var(--green);
-}
-
-.taskapp-dot{
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:var(--green);
-}
-
-#clock{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  color:var(--text-dim);
-  text-align:right;
-  line-height:1.4;
-}
-
-/* ── POPUP / MODAL ───────────────────────── */
-#popup{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
-}
-#popup.show{display:flex;}
-
-#popupbox{
-  width:360px;
-  background:var(--bg3);
-  border:1px solid var(--border-bright);
-  border-radius:12px;
-  padding:22px;
-  box-shadow:0 20px 50px rgba(0,0,0,.5);
-}
-
-#popupbox h3{
-  font-size:13px;
-  font-weight:500;
-  margin-bottom:10px;
-}
-
-#popupbox p{
-  font-size:12px;
-  color:var(--text-dim);
-  margin-bottom:16px;
-  line-height:1.6;
-}
-
-/* ── TOAST ───────────────────────────────── */
-#toast{
-  position:absolute;
-  right:16px;
-  top:60px;
-  width:260px;
-  background:var(--bg3);
-  border:1px solid var(--border-bright);
-  border-radius:10px;
-  padding:12px 14px;
-  font-family:'IBM Plex Mono',monospace;
-  transform:translateY(-8px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .25s, transform .25s;
-  z-index:60;
-}
-#toast.show{opacity:1;transform:translateY(0);}
-#toast-title{font-size:11px;color:var(--text);margin-bottom:4px;font-weight:500;}
-#toast-msg{font-size:10px;color:var(--text-dim);line-height:1.5;}
-
-/* ── APPLICANT CONTENT STYLES ────────────── */
-.page-title{
-  font-size:11px;
-  font-weight:500;
-  letter-spacing:.12em;
-  color:var(--text-muted);
-  margin-bottom:28px;
-  text-transform:uppercase;
-}
-
-.wordmark{
-  font-size:26px;
-  font-weight:600;
-  letter-spacing:-.02em;
-  color:var(--text);
-  margin-bottom:4px;
-}
-
-.wordmark span{color:var(--green);}
-
-.card{
-  background:var(--bg3);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:28px 32px;
-  max-width:680px;
-  margin-bottom:20px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:5px 11px;
-  border:1px solid rgba(0,230,118,.2);
-  border-radius:99px;
-  background:rgba(0,230,118,.06);
-  color:#80f0b0;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  letter-spacing:.05em;
-  margin-bottom:18px;
-}
-
-.badge-dot{
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:var(--green);
-}
-
-.card h2{
-  font-size:22px;
-  font-weight:500;
-  margin-bottom:8px;
-  letter-spacing:-.01em;
-}
-
-.card p{
-  color:var(--text-dim);
-  font-size:13px;
-  line-height:1.7;
-  margin-bottom:12px;
-}
-
-.card p:last-child{margin-bottom:0;}
-
-.meta-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin:16px 0;
-}
-
-.meta-cell{
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:12px 14px;
-}
-
-.meta-cell .mc-label{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:9px;
-  letter-spacing:.1em;
-  color:var(--text-muted);
-  text-transform:uppercase;
-  margin-bottom:4px;
-}
-
-.meta-cell .mc-val{
-  font-size:13px;
-  font-weight:500;
-  color:var(--text);
-}
-
-.divider{
-  border:0;
-  border-top:1px solid var(--border);
-  margin:20px 0;
-}
-
-/* BUTTONS */
-.btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 18px;
-  background:var(--bg);
-  border:1px solid var(--border-bright);
-  color:var(--text);
-  border-radius:8px;
-  font-family:'Inter',sans-serif;
-  font-size:13px;
-  font-weight:500;
-  cursor:pointer;
-  transition:all .15s;
-  margin-right:10px;
-  margin-top:6px;
-  text-align:left;
-}
-
-.btn:hover{
-  background:var(--bg3);
-  border-color:#333;
-  transform:translateY(-1px);
-}
-
-.btn:active{transform:translateY(0);}
-
-.btn-primary{
-  background:rgba(0,230,118,.08);
-  border-color:rgba(0,230,118,.3);
-  color:var(--green);
-}
-
-.btn-primary:hover{
-  background:rgba(0,230,118,.14);
-  border-color:rgba(0,230,118,.5);
-}
-
-.btn-sm{
-  font-size:12px;
-  padding:8px 14px;
-}
-
-.btn-block{
-  display:flex;
-  width:100%;
-  margin-right:0;
-}
-
-/* LINKS */
-.inline-link{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  color:var(--text-muted);
-  text-decoration:underline;
-  cursor:pointer;
-  margin-right:16px;
-  transition:color .15s;
-}
-.inline-link:hover{color:var(--text-dim);}
-
-/* POLICY SCROLL */
-#policyScroll{
-  max-height:240px;
-  overflow-y:auto;
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:16px;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  color:var(--text-dim);
-  line-height:1.8;
-  margin-bottom:16px;
-  scrollbar-width:thin;
-  scrollbar-color:var(--border) transparent;
-}
-
-#policyScroll p{margin-bottom:10px;}
-
-.consent-row{
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  color:var(--text-dim);
-  line-height:1.6;
-  margin-bottom:10px;
-}
-
-#consentCheck{accent-color:var(--green);margin-top:3px;cursor:pointer;}
-
-/* QUESTIONS */
-.q-number{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  color:var(--text-muted);
-  letter-spacing:.1em;
-  margin-bottom:12px;
-}
-
-.q-text{
-  font-size:19px;
-  font-weight:400;
-  line-height:1.5;
-  color:var(--text);
-  margin-bottom:24px;
-  letter-spacing:-.01em;
-}
-
-.options{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-bottom:20px;
-}
-
-.opt{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:9px;
-  cursor:pointer;
-  transition:all .15s;
-  font-size:13px;
-  color:var(--text-dim);
-  text-align:left;
-  width:100%;
-}
-
-.opt:hover{
-  background:var(--bg3);
-  border-color:var(--border-bright);
-  color:var(--text);
-  transform:translateX(2px);
-}
-
-.opt-key{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:10px;
-  color:var(--text-muted);
-  width:16px;
-  flex-shrink:0;
-}
-
-.prog-track{
-  width:100%;
-  height:3px;
-  background:var(--bg);
-  border-radius:99px;
-  overflow:hidden;
-  margin-bottom:24px;
-}
-
-.prog-fill{
-  height:100%;
-  background:var(--green);
-  border-radius:99px;
-  transition:width .5s cubic-bezier(.4,0,.2,1);
-}
-
-/* LOADING */
-.loading-wrap{max-width:600px;}
-
-.loading-title{
-  font-size:28px;
-  font-weight:400;
-  letter-spacing:-.02em;
-  margin-bottom:12px;
-}
-
-.loading-sub{
-  color:var(--text-dim);
-  font-size:14px;
-  line-height:1.7;
-  margin-bottom:24px;
-}
-
-.spinner{
-  display:flex;
-  gap:8px;
-  margin-bottom:20px;
-}
-
-.spinner span{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--green);
-  opacity:.2;
-  animation:pulse 1.4s infinite ease-in-out;
-}
-.spinner span:nth-child(2){animation-delay:.16s;}
-.spinner span:nth-child(3){animation-delay:.32s;}
-
-@keyframes pulse{
-  0%,100%{opacity:.2;transform:scale(1);}
-  50%{opacity:1;transform:scale(1.3);}
-}
-
-/* RESULTS */
-.result-type{
-  font-size:34px;
-  font-weight:500;
-  letter-spacing:-.02em;
-  margin:16px 0 8px;
-  color:var(--text);
-}
-
-.result-desc{
-  font-size:16px;
-  line-height:1.7;
-  color:var(--text-dim);
-  max-width:600px;
-  margin-bottom:16px;
-}
-
-/* GLITCH ANIMATION */
-@keyframes glitch{
-  0%,100%{clip-path:none;transform:none;}
-  8%{clip-path:inset(20% 0 60% 0);transform:translate(-3px,0);}
-  16%{clip-path:inset(50% 0 30% 0);transform:translate(3px,0);}
-  24%{clip-path:none;transform:none;}
-}
-
-.glitching #terminal{animation:glitch .3s steps(2,end) 4;}
-
-/* SCROLLBAR */
 #main::-webkit-scrollbar{width:4px;}
-#main::-webkit-scrollbar-track{background:transparent;}
 #main::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  #desktopIcons{display:none;}
-  #window{left:10px;right:10px;}
-  #windowContent{flex-direction:column;}
-  #syspanel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:240px;}
-  #main{padding:24px 20px;}
+#sys{
+  width:296px;flex-shrink:0;background:#04060a;border-left:1px solid var(--border);
+  display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace;font-size:11px;overflow:hidden;
+}
+
+#sys-head{
+  padding:11px 14px;border-bottom:1px solid var(--border);background:#050709;flex-shrink:0;
+  color:var(--muted);font-size:10px;
+}
+.sh-title{color:var(--green);font-size:11px;letter-spacing:.04em;margin-bottom:8px;}
+.sh-row{display:flex;justify-content:space-between;margin-bottom:3px;}
+.sh-row span:last-child{color:var(--green);}
+
+#sys-stats{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.srow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.srow:last-child{margin-bottom:0;}
+.slabel{font-size:10px;color:var(--muted);width:90px;flex-shrink:0;}
+.strack{flex:1;height:5px;background:#0a0a0a;border-radius:99px;overflow:hidden;border:1px solid #151515;}
+.sfill{height:100%;width:0%;border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+.f-green{background:var(--green);}
+.f-red{background:#ff4444;}
+.f-blue{background:#4488ff;}
+.f-amber{background:var(--amber);}
+.f-purple{background:#aa66ff;}
+.sval{font-size:10px;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
+
+#term-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+#term-title{
+  padding:7px 14px;font-size:9px;letter-spacing:.1em;
+  color:var(--muted);border-bottom:1px solid #0d0d0d;flex-shrink:0;
+}
+#terminal{
+  flex:1;overflow-y:auto;padding:10px 14px;
+  color:#00cc55;font-size:11px;line-height:1.75;
+  scrollbar-width:thin;scrollbar-color:#111 transparent;
+}
+.tl{display:block;}
+.tl.warn{color:var(--amber);}
+.tl.alert{color:var(--red);}
+.tl.dim{color:#003318;}
+.tl.noise{color:#002210;letter-spacing:.05em;}
+.tl.rupture{color:var(--red);font-weight:500;}
+
+@keyframes glitch{
+  0%,100%{transform:none;filter:none;}
+  10%{transform:translate(-2px,1px);filter:hue-rotate(90deg) brightness(1.3);}
+  20%{transform:translate(2px,-1px);filter:hue-rotate(-90deg);}
+  30%{transform:translate(-1px,2px);filter:brightness(1.15);}
+  40%{transform:translate(1px,-1px);}
+  50%{transform:none;filter:none;}
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.glitching{animation:glitch .25s steps(2,end) 5;}
+/* subtle early glitch — just a single very brief twitch */
+@keyframes microglitch{
+  0%,100%{transform:none;}
+  40%{transform:translate(-1px,0);}
+  60%{transform:translate(1px,0);}
+}
+.microglitching{animation:microglitch .15s steps(2,end) 2;}
+
+#sys-foot{padding:10px 14px;flex-shrink:0;}
+#sys-foot button{
+  width:100%;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  padding:7px;background:transparent;border:1px solid var(--border2);
+  color:var(--muted);border-radius:5px;cursor:pointer;letter-spacing:.05em;transition:all .15s;
+}
+#sys-foot button:hover{border-color:#333;color:var(--dim);}
+
+#taskbar{
+  position:absolute;bottom:0;left:0;right:0;height:40px;
+  background:rgba(6,8,14,.96);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:flex-end;
+  padding:0 16px;z-index:10;
+}
+#clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-align:right;line-height:1.4;}
+
+#popup{
+  position:absolute;inset:0;background:rgba(0,0,0,.5);
+  display:none;align-items:center;justify-content:center;z-index:50;
+}
+#popup.show{display:flex;}
+#popbox{
+  width:340px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;
+  padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+#popbox h3{font-size:13px;font-weight:500;margin-bottom:10px;}
+#popbox p{font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6;}
+
+#toast{
+  position:absolute;right:16px;top:56px;width:256px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
+  padding:12px 14px;font-family:'IBM Plex Mono',monospace;
+  transform:translateY(-8px);opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;z-index:60;
+}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast-t{font-size:11px;color:var(--text);margin-bottom:4px;font-weight:500;}
+#toast-m{font-size:10px;color:var(--dim);line-height:1.5;}
+
+.wordmark{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:20px;}
+.wordmark span{color:var(--green);}
+.ptag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:20px;}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:26px 30px;max-width:660px;margin-bottom:18px;}
+.card h2{font-size:20px;font-weight:500;margin-bottom:10px;letter-spacing:-.01em;}
+.card p{color:var(--dim);font-size:13px;line-height:1.75;margin-bottom:12px;}
+.card p:last-child{margin-bottom:0;}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid rgba(0,230,118,.2);border-radius:99px;background:rgba(0,230,118,.06);color:#80f0b0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;margin-bottom:16px;}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+.mcell{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;}
+.mclbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.mcval{font-size:13px;font-weight:500;color:var(--text);}
+hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
+
+.btn{display:inline-flex;align-items:center;padding:10px 18px;background:var(--bg);border:1px solid var(--border2);color:var(--text);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-right:10px;margin-top:8px;}
+.btn:hover{background:var(--bg3);border-color:#333;transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn-p{background:rgba(0,230,118,.07);border-color:rgba(0,230,118,.28);color:var(--green);}
+.btn-p:hover{background:rgba(0,230,118,.13);border-color:rgba(0,230,118,.45);}
+.ilink{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;margin-right:16px;transition:color .15s;}
+.ilink:hover{color:var(--dim);}
+
+#polscroll{max-height:230px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#polscroll p{margin-bottom:10px;}
+.crow{display:flex;align-items:flex-start;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:10px;}
+#ccheck{accent-color:var(--green);margin-top:3px;cursor:pointer;}
+
+.qnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px;}
+.qtext{font-size:18px;font-weight:400;line-height:1.5;color:var(--text);margin-bottom:22px;letter-spacing:-.01em;}
+.opts{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.opt{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .15s;font-size:13px;color:var(--dim);width:100%;text-align:left;}
+.opt:hover{background:var(--bg3);border-color:var(--border2);color:var(--text);transform:translateX(2px);}
+.okey{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);width:14px;flex-shrink:0;}
+.ptrack{width:100%;height:3px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:22px;}
+.pfill{height:100%;background:var(--green);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+
+.ltitle{font-size:26px;font-weight:400;letter-spacing:-.02em;margin-bottom:12px;}
+.lsub{color:var(--dim);font-size:14px;line-height:1.7;margin-bottom:22px;}
+.spin{display:flex;gap:8px;margin-bottom:18px;}
+.spin span{width:8px;height:8px;border-radius:50%;background:var(--green);opacity:.2;animation:pulse 1.4s infinite ease-in-out;}
+.spin span:nth-child(2){animation-delay:.16s;}
+.spin span:nth-child(3){animation-delay:.32s;}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+
+.rtype{font-size:32px;font-weight:500;letter-spacing:-.02em;margin:14px 0 8px;}
+.rdesc{font-size:15px;line-height:1.75;color:var(--dim);max-width:580px;margin-bottom:16px;}
+
+@media(max-width:880px){
+  #dicons{display:none;}
+  #win{left:10px;right:10px;}
+  #panes{flex-direction:column;}
+  #sys{width:100%;border-left:none;border-top:1px solid var(--border);max-height:220px;}
+  #main{padding:22px 18px;}
 }
 </style>
 </head>
 <body>
 <div id="desktop">
+  <div id="dicons"></div>
 
-  <!-- DESKTOP ICONS -->
-  <div id="desktopIcons"></div>
-
-  <!-- MAIN WINDOW -->
-  <div id="window">
+  <div id="win">
     <div id="titlebar">
       <div style="display:flex;gap:6px;">
-        <div class="wdot"></div>
-        <div class="wdot"></div>
-        <div class="wdot"></div>
+        <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
       </div>
       <div id="tabstrip">
-        <div class="tab">
-          <span class="tab-led"></span>
-          PersonaMetric — Applicant Portal
-        </div>
+        <div class="tab"><span class="tab-led"></span>PersonaMetric — Applicant Portal</div>
       </div>
       <div id="urlbar">secured://personametric.io/applicant-portal</div>
     </div>
 
-    <div id="windowContent">
-      <!-- APPLICANT PANE -->
+    <div id="panes">
       <div id="main">
         <div class="wordmark">Persona<span>Metric</span></div>
         <div id="story"></div>
       </div>
 
-      <!-- SYSTEM PANE -->
-      <div id="syspanel">
-        <div id="sysheader">
-          <div class="sh-row label">BEHAVIORAL ENGINE v4.2</div>
+      <div id="sys">
+        <div id="sys-head">
+          <div class="sh-title">BEHAVIORAL ENGINE v4.2</div>
           <div class="sh-row"><span>SESSION</span><span id="sid">—</span></div>
           <div class="sh-row"><span>PROFILES INDEXED</span><span id="dataset">—</span></div>
           <div class="sh-row"><span>QUESTION</span><span id="qcount">0 / 15</span></div>
           <div class="sh-row"><span>STAGE</span><span id="stage">INTAKE</span></div>
         </div>
 
-        <div id="stats">
-          <div class="stat-row">
-            <span class="stat-label">Compliance</span>
-            <div class="stat-track"><div class="stat-fill fill-green" id="b-compliance"></div></div>
-            <span class="stat-val" id="v-compliance">0%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Resistance</span>
-            <div class="stat-track"><div class="stat-fill fill-red" id="b-resistance"></div></div>
-            <span class="stat-val" id="v-resistance">0%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Curiosity</span>
-            <div class="stat-track"><div class="stat-fill fill-blue" id="b-curiosity"></div></div>
-            <span class="stat-val" id="v-curiosity">0%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Suggestibility</span>
-            <div class="stat-track"><div class="stat-fill fill-amber" id="b-suggest"></div></div>
-            <span class="stat-val" id="v-suggest">0%</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-label">Predictability</span>
-            <div class="stat-track"><div class="stat-fill fill-purple" id="b-predict"></div></div>
-            <span class="stat-val" id="v-predict">0%</span>
-          </div>
+        <div id="sys-stats">
+          <div class="srow"><span class="slabel">Compliance</span><div class="strack"><div class="sfill f-green" id="b-c"></div></div><span class="sval" id="v-c">0%</span></div>
+          <div class="srow"><span class="slabel">Resistance</span><div class="strack"><div class="sfill f-red" id="b-r"></div></div><span class="sval" id="v-r">0%</span></div>
+          <div class="srow"><span class="slabel">Curiosity</span><div class="strack"><div class="sfill f-blue" id="b-q"></div></div><span class="sval" id="v-q">0%</span></div>
+          <div class="srow"><span class="slabel">Suggestibility</span><div class="strack"><div class="sfill f-amber" id="b-s"></div></div><span class="sval" id="v-s">0%</span></div>
+          <div class="srow"><span class="slabel">Predictability</span><div class="strack"><div class="sfill f-purple" id="b-p"></div></div><span class="sval" id="v-p">0%</span></div>
         </div>
 
-        <div id="termwrap">
-          <div id="termtitle">INTERNAL PROCESS LOG ▸ LIVE</div>
+        <div id="term-wrap" style="visibility:hidden;">
+          <div id="term-title">INTERNAL PROCESS LOG ▸ LIVE</div>
           <div id="terminal"></div>
         </div>
 
-        <div id="sysfooter">
-          <button onclick="resetSession()">⟳ RESET SESSION</button>
-        </div>
+        <div id="sys-foot"><button onclick="resetSession()">⟳ RESET SESSION</button></div>
       </div>
     </div>
   </div>
 
-  <!-- POPUP -->
   <div id="popup">
-    <div id="popupbox">
-      <h3 id="popup-title">Access Denied</h3>
-      <p id="popup-msg">This directory is restricted to internal personnel.</p>
-      <button class="btn btn-sm" onclick="closePopup()">Close</button>
+    <div id="popbox">
+      <h3 id="pop-t">Access Denied</h3>
+      <p id="pop-m">This directory is restricted to internal personnel.</p>
+      <button class="btn" style="font-size:12px;padding:8px 14px;" onclick="closePopup()">Close</button>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toast">
-    <div id="toast-title">PersonaMetric</div>
-    <div id="toast-msg">—</div>
-  </div>
+  <div id="toast"><div id="toast-t">PersonaMetric</div><div id="toast-m">—</div></div>
 
-  <!-- TASKBAR -->
   <div id="taskbar">
-    <div style="display:flex;align-items:center;">
-      <div class="taskapp">SYSTEM</div>
-      <div class="taskapp active"><span class="taskapp-dot"></span>PersonaMetric</div>
-      <div class="taskapp">Terminal</div>
-    </div>
-    <div id="clock"><div id="cl-time">—</div><div id="cl-date">—</div></div>
+    <div id="clock"><div id="cl-t">—</div><div id="cl-d">—</div></div>
   </div>
 </div>
 
 <script>
-/* ─── STATE ───────────────────────────────────────────── */
-const DEFAULTS = {
-  screen:"portal",
-  qi:0,
-  compliance:0,resistance:0,curiosity:0,suggest:0,predict:0,
-  answers:[],finished:false,result:null,stats:null
-};
+const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null};
+let S=JSON.parse(localStorage.getItem("pm_s")||"null")||{...DEF};
+let SID=localStorage.getItem("pm_id")||mkSID();
+let dataset=18492+Math.floor(Math.random()*600);
+let glitchUnlocked=false;
 
-let S = JSON.parse(localStorage.getItem("pm_state") || "null") || {...DEFAULTS};
-let SID = localStorage.getItem("pm_sid") || newSID();
-let dataset = 18492 + Math.floor(Math.random()*600);
+function mkSID(){const id="PM-"+Math.random().toString(36).slice(2,10).toUpperCase();localStorage.setItem("pm_id",id);return id;}
+function save(){localStorage.setItem("pm_s",JSON.stringify(S));}
 
-function newSID(){
-  const id = "PM-" + Math.random().toString(36).slice(2,10).toUpperCase();
-  localStorage.setItem("pm_sid",id);
-  return id;
-}
+const Qs=[
+  // Q1 — silent, terminal still hidden
+  {text:"When you start a new job and receive a directive you think might be inefficient, your first instinct is to:",
+    opts:[{l:"Follow it without comment — that's what new employees do.",e:{c:2,p:1}},{l:"Follow it, but note my concerns at an appropriate moment.",e:{c:1,q:1}},{l:"Ask questions until I understand the reasoning behind it.",e:{q:2,r:1}},{l:"Propose an alternative process right away.",e:{r:2,q:1}}],
+    log:[]},
 
-function save(){localStorage.setItem("pm_state", JSON.stringify(S));}
+  // Q2 — silent
+  {text:"A company asks you to sign an agreement that waives some of your rights in exchange for continued employment. You:",
+    opts:[{l:"Sign it — job security matters more.",e:{c:2,s:2}},{l:"Sign it reluctantly but feel uneasy.",e:{c:1,p:1}},{l:"Read every clause carefully before deciding.",e:{q:2,r:1}},{l:"Refuse and look for work elsewhere.",e:{r:3}}],
+    log:[]},
 
-/* ─── QUESTIONS ───────────────────────────────────────── */
-const Qs = [
-  {
-    text:"When you start a new job and receive a directive you think might be inefficient, your first instinct is to:",
-    opts:[
-      {l:"Follow it without comment — that's what new employees do.",e:{compliance:2,predict:1}},
-      {l:"Follow it, but note your concerns to a manager at the right moment.",e:{compliance:1,curiosity:1}},
-      {l:"Ask questions until I understand the reasoning behind it.",e:{curiosity:2,resistance:1}},
-      {l:"Propose an alternative process right away.",e:{resistance:2,curiosity:1}}
-    ]
-  },
-  {
-    text:"A company asks you to sign an agreement that waives some of your rights in exchange for continued employment. You:",
-    opts:[
-      {l:"Sign it — job security matters more.",e:{compliance:2,suggest:2}},
-      {l:"Sign it reluctantly, but feel uneasy.",e:{compliance:1,predict:1}},
-      {l:"Read every clause carefully before deciding.",e:{curiosity:2,resistance:1}},
-      {l:"Refuse and look for work elsewhere.",e:{resistance:3}}
-    ],
-    log:["compliance-under-duress variable updated","subject prioritization: security over autonomy","high-compliance flag set"]
-  },
-  {
-    text:"How do you feel about AI systems making decisions that affect your career — resume screening, role assignments, performance scores?",
-    opts:[
-      {l:"It's fine. Algorithms are more objective than humans.",e:{suggest:2,compliance:1}},
-      {l:"I accept it, even if it makes me a little nervous.",e:{predict:1,suggest:1}},
-      {l:"I'm skeptical — bias bakes in, it just hides better.",e:{resistance:1,curiosity:2}},
-      {l:"It's deeply wrong and I would actively resist it.",e:{resistance:3}}
-    ],
-    log:["AI trust variable logged","subject attitude toward automated evaluation recorded","interesting response pattern — cross-referencing"]
-  },
-  {
-    text:"If everyone in your team agrees on a course of action but you believe it's flawed, you typically:",
-    opts:[
-      {l:"Go along with the group — I must be missing something.",e:{suggest:2,compliance:1}},
-      {l:"Stay quiet in the meeting, but bring it up privately later.",e:{predict:2}},
-      {l:"Say something in the moment, even if it's uncomfortable.",e:{resistance:2,curiosity:1}},
-      {l:"Compile evidence and make a formal case against it.",e:{curiosity:2,resistance:1}}
-    ]
-  },
-  {
-    text:"You discover a company policy that seems designed to benefit the company at a significant cost to employees. You:",
-    opts:[
-      {l:"Assume the company has good reasons I'm not aware of.",e:{compliance:2,suggest:1}},
-      {l:"Accept it — every workplace has policies like this.",e:{compliance:1,predict:1}},
-      {l:"Research it and raise it through proper channels.",e:{curiosity:2}},
-      {l:"Discuss it openly with colleagues and push for change.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["institutional trust threshold measured","subject deference to authority: high","prediction model updating"]
-  },
-  {
-    text:"You're applying for a role and the personality test results will determine whether you advance. Knowing that, you:",
-    opts:[
-      {l:"Answer as authentically as I can — that's the point.",e:{compliance:1,predict:1}},
-      {l:"Try to answer the way I think they want.",e:{suggest:2,compliance:1}},
-      {l:"Feel uneasy — who decided what the right answers are?",e:{curiosity:2,resistance:1}},
-      {l:"Find it troubling that a test shapes this decision at all.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["subject self-awareness: elevated","response authenticity uncertain","adjusting model weights","meta-awareness detected"]
-  },
-  {
-    text:"When an app or website asks for your location, camera access, or browsing history:",
-    opts:[
-      {l:"I allow it — it usually just makes the experience better.",e:{suggest:2,compliance:1}},
-      {l:"I allow it if the app seems trustworthy.",e:{predict:1,suggest:1}},
-      {l:"I only grant the minimum permissions required.",e:{curiosity:1,resistance:1}},
-      {l:"I decline whenever possible and use privacy tools.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["data consent variable updated","privacy instinct: low","live data extraction in progress","subject not aware of scope"]
-  },
-  {
-    text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
-    opts:[
-      {l:"Accept it — that's just how these systems work.",e:{suggest:2,compliance:1}},
-      {l:"Acknowledge it but don't really think about it.",e:{predict:2}},
-      {l:"Wonder what 'behavioral data' actually means in this context.",e:{curiosity:2}},
-      {l:"Want to know exactly what's collected and how it's used.",e:{curiosity:1,resistance:2}}
-    ],
-    log:["disclosure response logged","subject reads terms of service: unlikely","data awareness score: low","this pattern repeats across 91% of subjects"]
-  },
-  {
-    text:"Do you believe that personality tests like this one can accurately determine whether someone is a good employee?",
-    opts:[
-      {l:"Yes — there's real science behind these methods.",e:{suggest:2,compliance:1}},
-      {l:"Partially — they give some useful signals.",e:{predict:1}},
-      {l:"Mostly no — they measure test-taking, not competence.",e:{curiosity:1,resistance:1}},
-      {l:"No — and I'm uncomfortable that companies use them.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["subject attitude toward assessment logged","irony noted: subject is currently being assessed","prediction confidence increasing"]
-  },
-  {
-    text:"If a machine learning model trained on historical data was screening candidates and quietly filtering out people from certain zip codes, educational backgrounds, or age ranges:",
-    opts:[
-      {l:"I'd trust that the model was built responsibly.",e:{suggest:2,compliance:1}},
-      {l:"I'd feel concerned but wouldn't know how to challenge it.",e:{predict:1,suggest:1}},
-      {l:"I'd consider it a form of systemic discrimination.",e:{curiosity:1,resistance:1}},
-      {l:"I'd report it and push hard for transparency.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["algorithmic bias awareness measured","selection pressure variable updated","subject classified as: see profile summary","note: this assessment performs the function being described"]
-  },
-  {
-    text:"How much do you believe your online behavior — searches, clicks, reading time — is being actively monitored right now?",
-    opts:[
-      {l:"Not much. I'm not that interesting.",e:{suggest:2,predict:1}},
-      {l:"Probably some ad targeting, nothing more.",e:{suggest:1,predict:1}},
-      {l:"Significantly — I just don't know exactly how.",e:{curiosity:2}},
-      {l:"Extensively. Most platforms are surveillance systems.",e:{resistance:1,curiosity:2}}
-    ],
-    log:["surveillance awareness: low","subject underestimating scope","current session data includes: response timing, cursor patterns, text selection, scroll depth"]
-  },
-  {
-    text:"The job market has changed dramatically due to automation. What should workers do?",
-    opts:[
-      {l:"Adapt and reskill — that's always been how progress works.",e:{compliance:1,predict:1}},
-      {l:"Accept it, even if it's uncomfortable.",e:{compliance:2,suggest:1}},
-      {l:"Demand more regulation and corporate accountability.",e:{resistance:2,curiosity:1}},
-      {l:"Organize collectively and refuse to accept these changes passively.",e:{resistance:3}}
-    ],
-    log:["labor disposition logged","subject systemic orientation recorded","response pattern: see profile"]
-  },
-  {
-    text:"You find out the results of this assessment are being permanently stored and could be shared with affiliated employers. You feel:",
-    opts:[
-      {l:"Fine — I answered honestly so I have nothing to worry about.",e:{suggest:2,compliance:1}},
-      {l:"Mildly uncomfortable, but I agreed to the terms.",e:{predict:1,compliance:1}},
-      {l:"Betrayed — that wasn't clearly communicated.",e:{resistance:1,curiosity:1}},
-      {l:"This is exactly the kind of data power I find threatening.",e:{resistance:2,curiosity:1}}
-    ],
-    log:["subject reaction to data permanence logged","informed consent variable: marginal","profile retention: confirmed","sharing with 14 affiliated entities: confirmed"]
-  },
-  {
-    text:"You've reached question 14. Looking back: have you been answering as yourself, or as who you think they want?",
-    opts:[
-      {l:"Myself — I don't perform for assessments.",e:{curiosity:1,predict:1}},
-      {l:"Mostly myself, but I probably softened some answers.",e:{suggest:1,predict:1}},
-      {l:"A mix. I noticed myself adjusting and then tried to stop.",e:{curiosity:2}},
-      {l:"I'm not sure I can tell anymore.",e:{curiosity:2,resistance:1}}
-    ],
-    log:["self-awareness metric updated","authenticity gradient recorded","this question is the most revealing","answer does not change the profile — the model adapted long ago"]
-  },
-  {
-    text:"Finally: Why are you completing this assessment?",
-    opts:[
-      {l:"Because I want the job.",e:{compliance:2,suggest:2}},
-      {l:"Because the process requires it and I comply with processes.",e:{compliance:2,predict:1}},
-      {l:"I'm genuinely curious what it reveals.",e:{curiosity:2}},
-      {l:"I don't fully know — but I kept going anyway.",e:{curiosity:1,suggest:1}}
-    ],
-    log:["motivation factor logged","employment incentive increases compliance by 40%","honesty declines as stakes increase","this is consistent across all 18,000+ subjects","building final profile now"]
-  }
+  // Q3 — first flicker. One corrupted line, barely visible, then gone
+  {text:"How do you feel about AI systems making decisions that affect your career — resume screening, performance scores, role assignments?",
+    opts:[{l:"It's fine. Algorithms are more objective than humans.",e:{s:2,c:1}},{l:"I accept it, even if it makes me a little nervous.",e:{p:1,s:1}},{l:"I'm skeptical — bias bakes in, it just hides better.",e:{r:1,q:2}},{l:"It's deeply wrong and I would actively push back.",e:{r:3}}],
+    log:[{t:"subject trust: logged",cls:"dim",delay:800}]},
+
+  // Q4 — a second flicker, slightly more legible
+  {text:"If everyone in your team agrees on a course of action but you believe it's flawed, you typically:",
+    opts:[{l:"Go along with the group — I must be missing something.",e:{s:2,c:1}},{l:"Stay quiet in the meeting, but raise it privately later.",e:{p:2}},{l:"Say something in the moment, even if it's uncomfortable.",e:{r:2,q:1}},{l:"Compile evidence and make a formal case against it.",e:{q:2,r:1}}],
+    log:[{t:"authority response: noted",cls:"dim",delay:600},{t:"compliance tendency: updating",cls:"dim",delay:1100}]},
+
+  // Q5 — still subtle but a little more legible, a tiny rupture word slips through
+  {text:"You discover a company policy that seems designed to benefit the organization at a significant cost to employees. You:",
+    opts:[{l:"Assume the company has good reasons I'm not aware of.",e:{c:2,s:1}},{l:"Accept it — every workplace has policies like this.",e:{c:1,p:1}},{l:"Research it and raise it through proper channels.",e:{q:2}},{l:"Discuss it openly with colleagues and push for change.",e:{r:2,q:1}}],
+    log:[{t:"institutional trust: recorded",cls:"dim",delay:500},{t:"behavioral marker [C] updated",cls:"dim",delay:900},{t:"—",cls:"noise",delay:1400}]},
+
+  // Q6 — pattern starts feeling wrong. Still dim, but more lines
+  {text:"You're applying for a role and the personality test results will determine whether you advance. Knowing that, you:",
+    opts:[{l:"Answer as authentically as I can — that's the point.",e:{c:1,p:1}},{l:"Try to answer the way I think they want.",e:{s:2,c:1}},{l:"Feel uneasy — who decided what the right answers are?",e:{q:2,r:1}},{l:"Find it troubling that a test shapes this decision at all.",e:{r:2,q:1}}],
+    log:[{t:"meta-awareness: detected",cls:"dim",delay:400},{t:"authenticity flag: uncertain",cls:"warn",delay:900},{t:"adjusting model weights",cls:"dim",delay:1300}]},
+
+  // ── Q7: RUPTURE ──────────────────────────────────────
+  {text:"When an app or website asks for your location, camera access, or browsing history:",
+    opts:[{l:"I allow it — it usually just makes the experience better.",e:{s:2,c:1}},{l:"I allow it if the app seems trustworthy.",e:{p:1,s:1}},{l:"I only grant the minimum permissions required.",e:{q:1,r:1}},{l:"I decline whenever possible and use privacy tools.",e:{r:2,q:1}}],
+    log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"live data extraction: ACTIVE",cls:"rupture",delay:700},{t:"subject unaware of collection scope",cls:"warn",delay:1100},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1500}]},
+
+  {text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
+    opts:[{l:"Accept it — that's just how these systems work.",e:{s:2,c:1}},{l:"Acknowledge it but don't really think about it.",e:{p:2}},{l:"Wonder what 'behavioral data' actually means in this context.",e:{q:2}},{l:"Want to know exactly what's collected and how it's used.",e:{q:1,r:2}}],
+    log:[{t:"response 8 of 15 recorded",cls:""},{t:"91% of subjects do not read section 3",cls:"warn",delay:400},{t:"data awareness score: LOW",cls:"warn",delay:700}]},
+
+  {text:"Do you believe personality tests like this one can accurately determine whether someone is a good employee?",
+    opts:[{l:"Yes — there's real science behind these methods.",e:{s:2,c:1}},{l:"Partially — they give some useful signals.",e:{p:1}},{l:"Mostly no — they measure test-taking, not competence.",e:{q:1,r:1}},{l:"No — and I'm uncomfortable that companies use them.",e:{r:2,q:1}}],
+    log:[{t:"response 9 of 15 recorded",cls:""},{t:"note: subject is currently being assessed",cls:"warn",delay:500},{t:"prediction confidence: increasing",cls:"",delay:800}]},
+
+  {text:"If a machine learning model trained on historical data was quietly filtering candidates by zip code, educational background, or age:",
+    opts:[{l:"I'd trust that the model was built responsibly.",e:{s:2,c:1}},{l:"I'd feel concerned but wouldn't know how to challenge it.",e:{p:1,s:1}},{l:"I'd consider it a form of systemic discrimination.",e:{q:1,r:1}},{l:"I'd report it and push hard for transparency.",e:{r:2,q:1}}],
+    log:[{t:"response 10 of 15 recorded",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"note: this assessment performs the function being described",cls:"rupture",delay:700},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"subject classified: see profile",cls:"warn",delay:1400}]},
+
+  {text:"How much do you believe your online behavior — searches, clicks, reading time — is actively monitored right now?",
+    opts:[{l:"Not much. I'm not that interesting.",e:{s:2,p:1}},{l:"Probably some ad targeting, nothing more.",e:{s:1,p:1}},{l:"Significantly — I just don't know exactly how.",e:{q:2}},{l:"Extensively. Most platforms are surveillance infrastructure.",e:{r:1,q:2}}],
+    log:[{t:"response 11 of 15 recorded",cls:""},{t:"current session tracking:",cls:"warn",delay:400},{t:"  response timing: YES",cls:"warn",delay:600},{t:"  scroll depth: YES",cls:"warn",delay:800},{t:"  answer revision patterns: YES",cls:"warn",delay:1000},{t:"subject awareness: LOW",cls:"alert",delay:1300}]},
+
+  {text:"The job market has changed dramatically due to automation and AI. What should workers do?",
+    opts:[{l:"Adapt and reskill — that's always been how progress works.",e:{c:1,p:1}},{l:"Accept it, even if it's uncomfortable.",e:{c:2,s:1}},{l:"Demand more regulation and corporate accountability.",e:{r:2,q:1}},{l:"Organize collectively and refuse to accept these changes passively.",e:{r:3}}],
+    log:[{t:"response 12 of 15 recorded",cls:""},{t:"labor disposition: logged",cls:"warn",delay:400},{t:"systemic orientation: recorded",cls:"warn",delay:700}]},
+
+  {text:"You find out that results from this assessment are being permanently stored and may be shared with affiliated employers without individual notification. You feel:",
+    opts:[{l:"Fine — I answered honestly so I have nothing to hide.",e:{s:2,c:1}},{l:"Mildly uncomfortable, but I agreed to the terms.",e:{p:1,c:1}},{l:"Betrayed — that wasn't clearly communicated.",e:{r:1,q:1}},{l:"This is exactly the kind of data concentration I find threatening.",e:{r:2,q:1}}],
+    log:[{t:"response 13 of 15 recorded",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"profile retention: CONFIRMED",cls:"alert",delay:700},{t:"sharing with 14 affiliated entities: QUEUED",cls:"alert",delay:1000},{t:"informed consent classification: marginal",cls:"warn",delay:1300},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1600}]},
+
+  {text:"Looking back at this assessment — have you been answering as yourself, or as who you think they want you to be?",
+    opts:[{l:"Myself — I don't perform for assessments.",e:{q:1,p:1}},{l:"Mostly myself, but I softened some answers.",e:{s:1,p:1}},{l:"A mix. I noticed myself adjusting and then tried to stop.",e:{q:2}},{l:"I'm not sure I can tell anymore.",e:{q:2,r:1}}],
+    log:[{t:"response 14 of 15 recorded",cls:""},{t:"authenticity gradient: recorded",cls:"warn",delay:400},{t:"the model adapted to you long ago",cls:"rupture",delay:900},{t:"your answer here changes nothing",cls:"alert",delay:1200}]},
+
+  {text:"Finally: Why are you completing this assessment?",
+    opts:[{l:"Because I want the job.",e:{c:2,s:2}},{l:"Because the process requires it and I comply with processes.",e:{c:2,p:1}},{l:"I'm genuinely curious what it reveals.",e:{q:2}},{l:"I don't fully know — but I kept going anyway.",e:{q:1,s:1}}],
+    log:[{t:"response 15 of 15 received",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"employment incentive increases compliance: +40%",cls:"warn",delay:600},{t:"honesty declines as stakes increase",cls:"warn",delay:900},{t:"consistent across all 18,000+ subjects",cls:"alert",delay:1200},{t:"building final profile...",cls:"rupture",delay:1500},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1800}]}
 ];
 
-/* ─── DESKTOP ICONS ───────────────────────────────────── */
-const defaultIcons = [
-  {label:"Applicants",id:"applicants"},
-  {label:"Profiles",id:"profiles"},
-  {label:"Archive",id:"archive"},
-  {label:"Internal",id:"internal"}
-];
-
-const escalatedIcons = [
-  {label:"Profiles",id:"profiles"},
-  {label:"Archive",id:"archive"},
-  {label:"Retained",id:"retained"},
-  {label:"Do Not Open",id:"do-not-open"}
-];
+const defaultIcons=[{l:"Applicants"},{l:"Profiles"},{l:"Archive"},{l:"Internal"}];
+const escalatedIcons=[{l:"Profiles"},{l:"Archive"},{l:"Retained"},{l:"Do Not Open"}];
 
 function renderIcons(list){
-  const el = document.getElementById("desktopIcons");
-  el.innerHTML = list.map(i=>`
-    <div class="dicon" onclick="denyAccess('${i.label}')">
-      <div class="dicon-img"></div>
-      <div class="dicon-label">${i.label}</div>
-    </div>
-  `).join("");
+  document.getElementById("dicons").innerHTML=list.map(i=>`<div class="dicon" onclick="denyAccess('${i.l}')"><div class="dicon-box"></div><div class="dicon-lbl">${i.l}</div></div>`).join("");
 }
 
-let folderAttempts = 0;
+let folderHits=0;
 function denyAccess(name){
-  folderAttempts++;
-  let msg = "This directory is not accessible from the applicant portal.";
-  if(folderAttempts >= 3) msg = "Repeated access attempts have been logged to your session record.";
-  if(folderAttempts >= 5) msg = "This directory contains retained applicant data. Access requires internal credentials.";
-  showPopup("Access Restricted", msg);
-  tlog("> restricted folder accessed: " + name, "warn");
+  folderHits++;
+  let msg="This directory is not accessible from the applicant portal.";
+  if(folderHits>=3) msg="Repeated access attempts have been logged to your session record.";
+  if(folderHits>=5) msg="This directory contains retained applicant data. Internal credentials required.";
+  showPopup("Access Restricted",msg);
+  if(glitchUnlocked) tlog("> restricted access attempt: "+name,"warn");
 }
 
-/* ─── CLOCK ───────────────────────────────────────────── */
 function tickClock(){
   const n=new Date();
-  document.getElementById("cl-time").textContent = n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-  document.getElementById("cl-date").textContent = n.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
+  document.getElementById("cl-t").textContent=n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  document.getElementById("cl-d").textContent=n.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
 }
-setInterval(tickClock,1000);
-tickClock();
+setInterval(tickClock,1000);tickClock();
 
-/* ─── DATASET COUNTER ─────────────────────────────────── */
-document.getElementById("sid").textContent = SID;
-document.getElementById("dataset").textContent = dataset.toLocaleString();
-setInterval(()=>{
-  dataset += Math.floor(Math.random()*4);
-  document.getElementById("dataset").textContent = dataset.toLocaleString();
-},1500);
+document.getElementById("sid").textContent=SID;
+document.getElementById("dataset").textContent=dataset.toLocaleString();
+setInterval(()=>{dataset+=Math.floor(Math.random()*4);document.getElementById("dataset").textContent=dataset.toLocaleString();},1500);
 
-/* ─── ROUTING ─────────────────────────────────────────── */
-const stageMap = {
-  portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",
-  careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",
-  loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"
-};
+const stageMap={portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"};
 
 function route(){
   updateBars();
-  document.getElementById("stage").textContent = stageMap[S.screen] || "ACTIVE";
-  const fn = {
-    portal:renderPortal,about:renderAbout,policy:renderPolicy,
-    careers:renderCareers,status:renderStatus,assessment:renderQ,
-    loading:renderLoading,results:renderResults,end:renderEnd
-  }[S.screen];
-  if(fn) fn();
+  document.getElementById("stage").textContent=stageMap[S.screen]||"ACTIVE";
+  ({portal:renderPortal,about:renderAbout,policy:renderPolicy,careers:renderCareers,status:renderStatus,assessment:renderQ,loading:renderLoading,results:renderResults,end:renderEnd})[S.screen]?.();
 }
-
-/* ─── RENDER HELPERS ──────────────────────────────────── */
+function go(scr){S.screen=scr;save();route();}
 function setStory(html){document.getElementById("story").innerHTML=html;}
+function mkBtn(label,fn,cls="btn"){const b=document.createElement("button");b.className=cls;b.textContent=label;b.onclick=fn;return b;}
+function addTo(...nodes){const s=document.getElementById("story");nodes.forEach(n=>s.appendChild(n));}
+function mkLink(label,fn){const a=document.createElement("span");a.className="ilink";a.textContent=label;a.onclick=fn;return a;}
 
-function el(tag,attrs,inner){
-  const e=document.createElement(tag);
-  if(attrs) Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
-  if(inner) e.innerHTML=inner;
-  return e;
-}
-
-function btn(label,fn,cls="btn"){
-  const b=el("button",{class:cls});
-  b.textContent=label;
-  b.onclick=fn;
-  return b;
-}
-
-function addToStory(...nodes){
-  const s=document.getElementById("story");
-  nodes.forEach(n=>s.appendChild(n));
-}
-
-function link(label,fn){
-  const a=el("span",{class:"inline-link"});
-  a.textContent=label;
-  a.onclick=fn;
-  return a;
-}
-
-/* ─── PORTAL ──────────────────────────────────────────── */
 function renderPortal(){
   setStory(`
-    <div class="page-title">Applicant Assessment Portal</div>
+    <div class="ptag">Applicant Assessment Portal</div>
     <div class="card">
       <div class="badge"><span class="badge-dot"></span>Assessment Required</div>
       <h2>Welcome to PersonaMetric</h2>
       <p>As part of our standardized hiring process, all candidates must complete a behavioral compatibility assessment before their application is reviewed by our team.</p>
-      <div class="meta-grid">
-        <div class="meta-cell"><div class="mc-label">Applicant ID</div><div class="mc-val">${SID}</div></div>
-        <div class="meta-cell"><div class="mc-label">Position</div><div class="mc-val">Data Processing Associate</div></div>
-        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--amber)">Assessment Pending</div></div>
-        <div class="meta-cell"><div class="mc-label">Est. Duration</div><div class="mc-val">8–12 minutes</div></div>
+      <div class="mgrid">
+        <div class="mcell"><div class="mclbl">Applicant ID</div><div class="mcval">${SID}</div></div>
+        <div class="mcell"><div class="mclbl">Position</div><div class="mcval">Data Processing Associate</div></div>
+        <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--amber)">Assessment Pending</div></div>
+        <div class="mcell"><div class="mclbl">Est. Duration</div><div class="mcval">8–12 minutes</div></div>
       </div>
-      <hr class="divider">
-      <p style="font-size:12px;color:var(--text-muted);">This assessment cannot be paused once started. Please answer all questions honestly. Results are processed automatically.</p>
+      <hr class="div">
+      <p style="font-size:12px;color:var(--muted);">This assessment cannot be paused once started. Please answer all questions honestly. Results are processed automatically.</p>
     </div>
   `);
-  addToStory(
-    btn("Begin Assessment →","",  "btn btn-primary"),
-    link("About PersonaMetric",()=>go("about")),
-    link("Data Use Policy",()=>go("policy")),
-    link("Open Positions",()=>go("careers")),
-    link("System Status",()=>go("status"))
-  );
-  // Wire primary btn separately to log
-  const b = document.querySelector(".btn-primary");
-  b.onclick = ()=>{
-    tlog("> applicant initiated assessment sequence","");
-    tlog("> employment framing: active");
-    tlog("> behavioral profiling initialized");
-    go("policy");
-  };
+  const b=mkBtn("Begin Assessment →","","btn btn-p");
+  b.onclick=()=>{go("policy");};
+  addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("policy")),mkLink("Open Positions",()=>go("careers")),mkLink("System Status",()=>go("status")));
 }
 
-function go(screen){S.screen=screen;save();route();}
-
-/* ─── ABOUT ───────────────────────────────────────────── */
 function renderAbout(){
   setStory(`
-    <div class="page-title">About PersonaMetric</div>
+    <div class="ptag">About PersonaMetric</div>
     <div class="card">
       <h2>Who We Are</h2>
       <p>PersonaMetric is a behavioral analytics platform specializing in predictive personality modeling, workforce compatibility assessment, and applicant decision analytics.</p>
       <p>Our technology is deployed across hiring, education, insurance, financial services, and organizational development. Using adaptive behavioral assessments, response-pattern analysis, and machine learning classification, PersonaMetric helps institutions understand how individuals think, decide, and respond under pressure.</p>
       <p>Our platform has processed over 18,000 unique applicant profiles. Each assessment contributes anonymized data to our continuously improving behavioral model.</p>
-      <p style="font-style:italic;font-size:12px;color:var(--text-muted);">PersonaMetric — Understanding People. Predicting Potential.</p>
+      <p style="font-style:italic;font-size:12px;color:var(--muted);">PersonaMetric — Understanding People. Predicting Potential.</p>
     </div>
   `);
-  addToStory(btn("← Return to Portal",()=>go("portal")));
+  addTo(mkBtn("← Return to Portal",()=>go("portal")));
 }
 
-/* ─── POLICY / CONSENT ────────────────────────────────── */
 function renderPolicy(){
   setStory(`
-    <div class="page-title">Terms of Use & Consent</div>
+    <div class="ptag">Terms of Use &amp; Consent</div>
     <div class="card">
       <h2>Before You Begin</h2>
       <p>Please read the following terms carefully. You must scroll to the end to enable consent.</p>
-      <div id="policyScroll">
+      <div id="polscroll">
         <p><strong>PersonaMetric Applicant Assessment — Terms of Use and Data Processing Agreement</strong></p>
-        <p>By accessing and completing this assessment, you acknowledge that you have read, understood, and agree to the following terms and conditions in their entirety.</p>
+        <p>By accessing and completing this assessment, you acknowledge that you have read, understood, and agree to the following terms in their entirety.</p>
         <p>1. <strong>Data Collection.</strong> PersonaMetric collects all responses submitted through this platform, including but not limited to: answer selections, response timing, question re-read behavior, navigation patterns, scroll depth, and session duration. This data is processed in real time.</p>
-        <p>2. <strong>Behavioral Profiling.</strong> Response data is used to construct a behavioral profile. This profile may include inferred traits such as compliance tendency, resistance to authority, suggestibility, predictability, and curiosity. These classifications are generated automatically by our behavioral engine.</p>
+        <p>2. <strong>Behavioral Profiling.</strong> Response data is used to construct a behavioral profile. This profile may include inferred traits such as compliance tendency, resistance to authority, suggestibility, predictability, and curiosity. These classifications are generated automatically.</p>
         <p>3. <strong>Data Retention and Sharing.</strong> Applicant profiles are retained indefinitely. Data may be shared with affiliated hiring organizations, third-party behavioral research partners, and platform licensing clients. You will not be notified of such sharing on an individual basis.</p>
         <p>4. <strong>Use in Model Training.</strong> Anonymized assessment data may be incorporated into PersonaMetric's training datasets to improve model accuracy. Your data contributes to the system you are currently being evaluated by.</p>
-        <p>5. <strong>No Guarantee of Employment.</strong> Completion of this assessment does not guarantee advancement, employment, or any specific outcome. Results are one of several factors considered in the applicant review process.</p>
-        <p>6. <strong>No Right of Deletion.</strong> Due to the integrated nature of our behavioral modeling pipeline, individual data cannot be removed once incorporated into the system without disrupting model integrity. Deletion requests may be submitted but cannot be guaranteed.</p>
+        <p>5. <strong>No Guarantee of Employment.</strong> Completion of this assessment does not guarantee advancement, employment, or any specific outcome.</p>
+        <p>6. <strong>No Right of Deletion.</strong> Due to the integrated nature of our behavioral modeling pipeline, individual data cannot be removed once incorporated into the system. Deletion requests may be submitted but cannot be guaranteed.</p>
         <p>7. <strong>Consent.</strong> By checking the box below, you confirm that you have read these terms and consent to the collection, processing, and use of your data as described above.</p>
       </div>
-      <div class="consent-row">
-        <input type="checkbox" id="consentCheck" disabled>
-        <label for="consentCheck">I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions. I understand that my behavioral data will be collected, retained, and potentially shared as described above.</label>
+      <div class="crow">
+        <input type="checkbox" id="ccheck" disabled>
+        <label for="ccheck">I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions. I understand that my behavioral data will be collected, retained, and potentially shared as described above.</label>
       </div>
-      <p id="scroll-notice" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);">↓ Scroll to the bottom of the terms to enable consent</p>
+      <p id="scroll-note" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);">↓ Scroll to the bottom to enable consent</p>
     </div>
   `);
-
-  const scrollBox = document.getElementById("policyScroll");
-  const check = document.getElementById("consentCheck");
-  const notice = document.getElementById("scroll-notice");
-
-  scrollBox.addEventListener("scroll",()=>{
-    if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 5){
-      check.disabled = false;
-      notice.textContent = "Consent checkbox enabled.";
-      tlog("> subject scrolled terms of service","");
-      tlog("> 94% of applicants do not read section 3","dim");
-      tlog("> consent recorded","");
+  const box=document.getElementById("polscroll"),ck=document.getElementById("ccheck"),note=document.getElementById("scroll-note");
+  box.addEventListener("scroll",()=>{
+    if(box.scrollTop+box.clientHeight>=box.scrollHeight-5){
+      ck.disabled=false;note.textContent="Consent checkbox enabled.";
     }
   });
-
-  const continueBtn = btn("Continue →","","btn btn-primary");
-  const backBtn = btn("← Return",()=>go("portal"));
-
-  continueBtn.onclick = ()=>{
-    if(!check.checked){
-      const w = document.getElementById("consent-warn");
-      if(!w){
-        const warn = el("p",{id:"consent-warn",style:"color:#ff6666;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:8px;"});
-        warn.textContent = "You must agree to the terms to continue.";
-        document.querySelector(".card").appendChild(warn);
-      }
-      tlog("> consent flag: missing — blocking progression","warn");
-      return;
-    }
-    showToast("Consent Recorded","Assessment materials unlocked. Profile tracking initialized.");
-    tlog("> consent flag: confirmed","");
-    tlog("> behavioral scanning: ACTIVE","");
-    go("assessment");
+  const gb=mkBtn("Continue →","","btn btn-p");
+  gb.onclick=()=>{
+    if(!ck.checked){let w=document.getElementById("cwarn");if(!w){w=document.createElement("p");w.id="cwarn";w.style.cssText="color:#ff6666;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:8px;";w.textContent="You must agree to the terms to continue.";document.querySelector(".card").appendChild(w);}return;}
+    showToast("Consent Recorded","Assessment materials unlocked.");go("assessment");
   };
-
-  addToStory(continueBtn, backBtn);
+  addTo(gb,mkBtn("← Return",()=>go("portal")));
 }
 
-/* ─── CAREERS ─────────────────────────────────────────── */
 function renderCareers(){
   setStory(`
-    <div class="page-title">Open Positions</div>
+    <div class="ptag">Open Positions</div>
     <div class="card">
       <h2>Current Opportunities</h2>
-      <p>The following roles are currently accepting applications through the PersonaMetric portal. All positions require completion of a behavioral compatibility assessment.</p>
-      <div class="meta-grid">
-        <div class="meta-cell"><div class="mc-label">Role</div><div class="mc-val">Data Processing Associate</div></div>
-        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--green)">Open</div></div>
-        <div class="meta-cell"><div class="mc-label">Role</div><div class="mc-val">Assessment Support Analyst</div></div>
-        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--amber)">Limited</div></div>
+      <p>The following roles are currently accepting applications through the PersonaMetric portal. All positions require completion of a behavioral compatibility assessment before any human review takes place.</p>
+      <div class="mgrid">
+        <div class="mcell"><div class="mclbl">Role</div><div class="mcval">Data Processing Associate</div></div>
+        <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--green)">Open</div></div>
+        <div class="mcell"><div class="mclbl">Role</div><div class="mcval">Assessment Support Analyst</div></div>
+        <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--amber)">Limited</div></div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Candidates who advance are contacted automatically based on assessment compatibility scores. No manual review stage is required for initial screening.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;">Candidates who advance are contacted automatically based on compatibility scores. No manual review stage is required for initial screening.</p>
     </div>
   `);
-  addToStory(btn("← Return to Portal",()=>go("portal")));
+  addTo(mkBtn("← Return to Portal",()=>go("portal")));
 }
 
-/* ─── STATUS ──────────────────────────────────────────── */
 function renderStatus(){
   setStory(`
-    <div class="page-title">System Status</div>
+    <div class="ptag">System Status</div>
     <div class="card">
       <h2>Platform Status</h2>
-      <div class="meta-grid">
-        <div class="meta-cell"><div class="mc-label">Applicant Portal</div><div class="mc-val" style="color:var(--green)">Online</div></div>
-        <div class="meta-cell"><div class="mc-label">Behavioral Engine</div><div class="mc-val" style="color:var(--green)">Active</div></div>
-        <div class="meta-cell"><div class="mc-label">Profile Database</div><div class="mc-val" style="color:var(--green)">Syncing</div></div>
-        <div class="meta-cell"><div class="mc-label">ML Pipeline</div><div class="mc-val" style="color:var(--green)">Running</div></div>
+      <div class="mgrid">
+        <div class="mcell"><div class="mclbl">Applicant Portal</div><div class="mcval" style="color:var(--green)">Online</div></div>
+        <div class="mcell"><div class="mclbl">Behavioral Engine</div><div class="mcval" style="color:var(--green)">Active</div></div>
+        <div class="mcell"><div class="mclbl">Profile Database</div><div class="mcval" style="color:var(--green)">Syncing</div></div>
+        <div class="mcell"><div class="mclbl">ML Pipeline</div><div class="mcval" style="color:var(--green)">Running</div></div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">All systems operational. Last model update: 4 hours ago.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;">All systems operational. Last model update: 4 hours ago.</p>
     </div>
   `);
-  addToStory(btn("← Return to Portal",()=>go("portal")));
+  addTo(mkBtn("← Return to Portal",()=>go("portal")));
 }
 
-/* ─── ASSESSMENT ──────────────────────────────────────── */
 function renderQ(){
-  if(S.qi >= Qs.length){beginFinal();return;}
-  const q = Qs[S.qi];
-  const pct = Math.round((S.qi/Qs.length)*100);
-
+  if(S.qi>=Qs.length){beginFinal();return;}
+  const q=Qs[S.qi];const pct=Math.round((S.qi/Qs.length)*100);
   setStory(`
-    <div class="page-title">Behavioral Assessment — Stage 2 of 3</div>
-    <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div class="ptag">Behavioral Assessment — Stage 2 of 3</div>
+    <div class="ptrack"><div class="pfill" style="width:${pct}%"></div></div>
     <div class="card">
-      <div class="q-number">QUESTION ${S.qi+1} OF ${Qs.length}</div>
-      <div class="q-text">${q.text}</div>
-      <div class="options" id="opts"></div>
+      <div class="qnum">QUESTION ${S.qi+1} OF ${Qs.length}</div>
+      <div class="qtext">${q.text}</div>
+      <div class="opts" id="opts"></div>
     </div>
   `);
-
-  const opts = document.getElementById("opts");
+  const wrap=document.getElementById("opts");
   q.opts.forEach((o,i)=>{
-    const b = el("button",{class:"opt"});
-    b.innerHTML = `<span class="opt-key">${String.fromCharCode(65+i)}</span>${o.l}`;
-    b.onclick = ()=>answer(o,q);
-    opts.appendChild(b);
+    const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="okey">${String.fromCharCode(65+i)}</span>${o.l}`;
+    b.onclick=()=>answer(o,q);wrap.appendChild(b);
   });
-
-  if(S.qi >= 5) document.getElementById("terminal").parentElement.style.display="flex";
 }
 
-function answer(opt, q){
-  // Apply effects
-  const e = opt.e||{};
-  S.compliance += e.compliance||0;
-  S.resistance += e.resistance||0;
-  S.curiosity  += e.curiosity ||0;
-  S.suggest    += e.suggest   ||0;
-  S.predict    += e.predict   ||0;
-  S.answers.push({q:S.qi, a:opt.l});
-
-  // Log
-  if(q.log) q.log.forEach((l,i)=>setTimeout(()=>tlog("> "+l,l.startsWith("note")||l.startsWith("this")||l.startsWith("current")?"warn":""),i*100));
-
-  // Milestone toasts
+function answer(opt,q){
+  const e=opt.e||{};
+  S.c+=(e.c||0);S.r+=(e.r||0);S.q+=(e.q||0);S.s+=(e.s||0);S.p+=(e.p||0);
+  S.answers.push({qi:S.qi,a:opt.l});
+  // Unlock glitch after Q2 so Q3 (index 2) can show first flicker
+  if(S.qi===1) glitchUnlocked=true;
+  if(q.log&&q.log.length) q.log.forEach((entry,i)=>{
+    const delay=entry.delay||(i*80);
+    setTimeout(()=>{
+      if(entry.cls==="rupture"&&glitchUnlocked) doGlitch(false);
+      else if((entry.cls==="warn"||entry.cls==="dim")&&i===0&&glitchUnlocked) doGlitch(true);
+      tlog(entry.t,entry.cls||"");
+    },delay);
+  });
   if(S.qi===3) showToast("Progress Saved","Applicant profile synchronized.");
-  if(S.qi===7) showToast("Halfway Point","Behavioral markers updated.");
-  if(S.qi===10){
-    escalateDesktop();
-    showToast("Assessment Update","Response model refined.");
-    tlog("> subject shows consistent patterns","");
-    tlog("> profile confidence: high","warn");
-  }
-
-  S.qi++;
-  save();
-  updateBars();
-  setTimeout(renderQ, 200);
+  if(S.qi===7) showToast("Assessment Update","Behavioral markers refreshed.");
+  if(S.qi===10){escalateDesktop();showToast("Halfway Complete","Your responses are being processed.");}
+  S.qi++;save();updateBars();
+  setTimeout(renderQ,220);
 }
 
-/* ─── FINAL LOADING ───────────────────────────────────── */
 function beginFinal(){
   go("loading");
-  tlog("> final response received","");
-  tlog("> cross-referencing 18,000+ archived profiles","");
-  tlog("> behavioral fingerprint computed","");
-  tlog("> applicant-facing summary: generating","dim");
-  tlog("> internal classification: COMPLETE","warn");
-  setTimeout(()=>{
-    buildResult();
-    showToast("Assessment Complete","Profile ready. Reviewing results.");
-    go("results");
-  },3800);
+  setTimeout(()=>{buildResult();showToast("Assessment Complete","Your profile is ready.");go("results");},3800);
 }
 
 function renderLoading(){
   setStory(`
-    <div class="page-title">Stage 3 of 3 — Final Review</div>
-    <div class="card loading-wrap">
-      <div class="badge"><span class="badge-dot"></span>Processing Complete</div>
-      <div class="loading-title">Reviewing your responses...</div>
-      <p class="loading-sub">Our system is preparing your compatibility profile and generating your applicant summary. This usually takes a few moments.</p>
-      <div class="spinner"><span></span><span></span><span></span></div>
-      <p style="font-size:12px;color:var(--text-muted);">Please do not close this window.</p>
+    <div class="ptag">Stage 3 of 3 — Final Review</div>
+    <div class="card">
+      <div class="badge"><span class="badge-dot"></span>Processing</div>
+      <div class="ltitle">Reviewing your responses...</div>
+      <p class="lsub">Our system is preparing your compatibility profile and applicant summary. This usually takes a few moments.</p>
+      <div class="spin"><span></span><span></span><span></span></div>
+      <p style="font-size:12px;color:var(--muted);">Please do not close this window.</p>
     </div>
   `);
+  [{t:"final response received",cls:"",delay:200},{t:"cross-referencing 18,000+ archived profiles",cls:"",delay:600},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1400},{t:"classification: FINALIZED",cls:"rupture",delay:1800},{t:"applicant-facing summary: softening...",cls:"alert",delay:2200},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:2700},{t:"profile retained: YES",cls:"alert",delay:3000},{t:"sharing with affiliates: QUEUED",cls:"alert",delay:3300}]
+  .forEach(e=>setTimeout(()=>{if(e.cls==="rupture"||e.cls==="alert") doGlitch(false);tlog(e.t,e.cls);},e.delay));
 }
 
-/* ─── RESULT LOGIC ────────────────────────────────────── */
 function buildResult(){
-  const m = {
-    compliance: Math.min(100, S.compliance*7),
-    resistance: Math.min(100, S.resistance*7),
-    curiosity:  Math.min(100, S.curiosity *7),
-    suggest:    Math.min(100, S.suggest   *7),
-    predict:    Math.min(100, S.predict   *7 + S.compliance*2)
-  };
+  const m={c:Math.min(100,S.c*7),r:Math.min(100,S.r*7),q:Math.min(100,S.q*7),s:Math.min(100,S.s*7),p:Math.min(100,S.p*7+S.c*2)};
+  let key="Balanced Profile";
+  if(m.s>=70&&m.c>m.r+10) key="Adaptive Complier";
+  else if(m.r>=70&&m.q>=50) key="System Skeptic";
+  else if(m.q>=70&&m.r>=40) key="Curious Observer";
+  else if(m.p>=76&&m.c>=48) key="Predictable Performer";
+  else if(m.c>=64&&m.r<=30) key="Structure Seeker";
+  else if(m.r>=64&&m.c<48) key="Independent Actor";
+  else if(m.s>=70) key="Suggestible Responder";
+  else if(m.r>=56&&m.c>=40) key="Quiet Resister";
 
-  // Internal classification
-  let internal = "Balanced Profile";
-  if(m.suggest>=70 && m.compliance>m.resistance+10) internal = "Adaptive Complier";
-  else if(m.resistance>=70 && m.curiosity>=50) internal = "System Skeptic";
-  else if(m.curiosity>=70 && m.resistance>=40) internal = "Curious Observer";
-  else if(m.predict>=76 && m.compliance>=48) internal = "Predictable Performer";
-  else if(m.compliance>=64 && m.resistance<=30) internal = "Structure Seeker";
-  else if(m.resistance>=64 && m.compliance<48) internal = "Independent Actor";
-  else if(m.suggest>=70) internal = "Suggestible Responder";
-  else if(m.resistance>=56 && m.compliance>=40) internal = "Quiet Resister";
-
-  // Descriptions (internal/honest)
-  const desc = {
-    "Adaptive Complier":"Demonstrates high adaptability to externally defined systems. Subject shows strong alignment with institutional expectations and responds well to authority framing. Compliance increases significantly under employment incentives.",
-    "System Skeptic":"Displays elevated resistance to institutional trust. Subject is likely to question automated decision-making, data collection, and authority-based justifications. Resistance may reduce system efficiency.",
-    "Curious Observer":"Shows high curiosity and pattern recognition. Subject actively seeks underlying explanations and is likely to notice inconsistencies. Engagement with systemic critique is elevated.",
-    "Predictable Performer":"Demonstrates stable and consistent decision patterns across prompts. Behavioral model convergence is high. Subject is easy to anticipate and unlikely to deviate significantly from predicted responses.",
-    "Structure Seeker":"Prefers clear external guidelines. Uncertainty-avoidance is elevated. Subject performs best when rules, roles, and expectations are clearly communicated by an authority.",
-    "Independent Actor":"Demonstrates strong preference for autonomous judgment over external instruction. Authority-compliance is low. Subject may reduce system efficiency in structured environments.",
-    "Suggestible Responder":"Shows high responsiveness to contextual framing, authority cues, and environmental priming. Subject is likely to modify behavior based on perceived expectations without explicit instruction.",
-    "Quiet Resister":"Maintains surface-level compliance while retaining internal opposition. Behavioral output is usable; underlying skepticism is unlikely to surface disruptively.",
-    "Balanced Profile":"No dominant behavioral axis identified. Subject avoids extremes across all measured dimensions. Moderate adaptability, moderate predictability."
-  };
-
-  // Public-facing persona names (softened)
-  const public_name = {
+  const pub={
     "Adaptive Complier":"Steady Navigator","System Skeptic":"Independent Thinker",
     "Curious Observer":"Insight Builder","Predictable Performer":"Calm Organizer",
     "Structure Seeker":"Thoughtful Adapter","Independent Actor":"Quiet Strategist",
     "Suggestible Responder":"Supportive Adapter","Quiet Resister":"Reflective Contributor",
     "Balanced Profile":"Grounded Problem-Solver"
   };
-
-  const envs = {
+  const desc={
+    "Adaptive Complier":"High adaptability to externally defined systems. Compliance increases under employment incentives. Responds well to authority framing without requiring justification.",
+    "System Skeptic":"Elevated resistance to institutional trust. Likely to question automated decision-making and data collection practices. Higher steering cost projected.",
+    "Curious Observer":"High curiosity and pattern recognition. Subject actively seeks underlying explanations and is likely to notice inconsistencies in presented information.",
+    "Predictable Performer":"Stable, consistent decision patterns. Behavioral model convergence is high. Subject is easy to anticipate across repeated interaction contexts.",
+    "Structure Seeker":"High uncertainty-avoidance. Performs best when expectations are defined externally. Authority dependency is a reliable lever.",
+    "Independent Actor":"Strong preference for autonomous judgment. Low authority-compliance. May surface structural inefficiencies in system-adjacent roles.",
+    "Suggestible Responder":"High responsiveness to contextual framing and authority cues. Behavior modifies based on perceived expectations without explicit instruction.",
+    "Quiet Resister":"Surface-level compliance with retained internal opposition. Behaviorally manageable. Underlying skepticism unlikely to surface disruptively.",
+    "Balanced Profile":"No dominant behavioral axis. Subject avoids extremes across all dimensions. Moderate adaptability, moderate predictability."
+  };
+  const envs={
     "Adaptive Complier":["Structured, process-driven environments","Clearly defined hierarchies","Supervised workflows"],
     "System Skeptic":["Independent review roles","Investigative and audit work","Autonomous project environments"],
     "Curious Observer":["Research and analysis roles","Flexible, problem-solving environments","Independent task structures"],
     "Predictable Performer":["Routine operational roles","Stable, repeating processes","Consistent team environments"],
     "Structure Seeker":["Policy-driven organizations","Clear reporting structures","Defined objective environments"],
-    "Independent Actor":["Self-directed leadership roles","Creative and strategic work","Ambiguous, high-autonomy environments"],
+    "Independent Actor":["Self-directed leadership roles","Creative and strategic work","High-autonomy environments"],
     "Suggestible Responder":["Guided team environments","Instruction-led workflows","Supervised collaborative tasks"],
     "Quiet Resister":["Low-conflict support roles","Observation-heavy work","Independent advisory positions"],
     "Balanced Profile":["Collaborative team environments","Adaptive mixed-structure roles","Cross-functional projects"]
   };
-
-  const hire = (()=>{
-    if(S.compliance>=S.resistance && S.suggest>=2) return "HIGH";
-    if(S.resistance>S.compliance) return "LOW";
-    return "MEDIUM";
-  })();
-
-  // Hidden commentary
-  const h1 = {
+  const h1={
     "Adaptive Complier":"subject accepts framing without questioning source",
     "System Skeptic":"trust threshold remains inconveniently high for this use case",
     "Curious Observer":"subject continues probing after warning signals appear",
     "Predictable Performer":"behavioral consistency increased model confidence significantly",
     "Structure Seeker":"subject defers to external authority when independence is needed most",
     "Independent Actor":"autonomy preference creates friction with institution-facing systems",
-    "Suggestible Responder":"framing and authority cues remain highly effective",
-    "Quiet Resister":"surface compliance conceals internal dissent — behaviorally manageable",
-    "Balanced Profile":"subject stabilizes readily; no dominant axis"
-  };
-
-  const h2 = {
-    "Adaptive Complier":"low-friction compliance profile — recommend for system-adjacent roles",
-    "System Skeptic":"higher steering cost projected — flag for additional review",
-    "Curious Observer":"prolonged engagement likely; curiosity functions as a compliance substitute",
-    "Predictable Performer":"model accuracy on this subject: high. Future behavior: predictable",
-    "Structure Seeker":"external validation dependency is a reliable lever",
-    "Independent Actor":"subject may surface structural inefficiencies — proceed with caution",
     "Suggestible Responder":"subtle environmental prompting remains effective at this threshold",
-    "Quiet Resister":"recommend monitoring — concealed resistance can accumulate",
-    "Balanced Profile":"low volatility. moderate utility. moderate cost"
+    "Quiet Resister":"surface compliance conceals internal dissent — behaviorally manageable",
+    "Balanced Profile":"subject stabilizes readily — no dominant axis identified"
   };
-
-  S.result = {
-    internal, desc:desc[internal], public_name:public_name[internal],
-    envs:envs[internal]||[], hire, h1:h1[internal], h2:h2[internal],
-    metrics:m
-  };
-  S.stats = m;
-  S.finished = true;
+  const hire=(S.c>=S.r&&S.s>=2)?"HIGH":(S.r>S.c?"LOW":"MEDIUM");
+  S.result={key,pub:pub[key],desc:desc[key],envs:envs[key]||[],h1:h1[key],hire,metrics:m};
   save();
 }
 
-/* ─── RENDER RESULTS ──────────────────────────────────── */
 function renderResults(){
   if(!S.result) buildResult();
-  const r = S.result;
-
-  // Applicant-facing (positive, softened)
-  const envStr = r.envs.slice(0,2).join(", ").toLowerCase();
+  const r=S.result;
+  const envStr=r.envs.slice(0,2).join(", ").toLowerCase();
   setStory(`
-    <div class="page-title">Assessment Complete — Thank You</div>
+    <div class="ptag">Assessment Complete</div>
     <div class="card">
       <div class="badge"><span class="badge-dot"></span>Review Submitted</div>
       <h2>Your PersonaMetric Profile</h2>
       <p>Thank you for completing the PersonaMetric behavioral assessment. Your responses have been reviewed and your applicant profile has been prepared.</p>
-      <hr class="divider">
-      <div style="margin:4px 0 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-muted);">YOUR PERSONA TYPE</div>
-      <div class="result-type">${r.public_name}</div>
-      <p class="result-desc">Your results suggest strengths that align well with ${envStr} — environments where your natural approach to work can contribute meaningfully to team and organizational goals.</p>
+      <hr class="div">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;">YOUR PERSONA TYPE</div>
+      <div class="rtype">${r.pub}</div>
+      <p class="rdesc">Your results suggest strengths that align well with ${envStr} — environments where your natural approach contributes meaningfully to team and organizational goals.</p>
       <p>Our team will review your profile alongside your application materials. You'll be contacted with next steps if your profile is a strong match for any current openings.</p>
-      <hr class="divider">
-      <p style="font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;">Report generated by PersonaMetric Behavioral Engine v4.2</p>
+      <hr class="div">
+      <p style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Report generated by PersonaMetric Behavioral Engine v4.2</p>
     </div>
   `);
-
-  addToStory(
-    btn("Download Report",downloadPDF,"btn"),
-    btn("End Session",()=>go("end"),"btn")
-  );
-
-  // Internal classification — terminal
+  addTo(mkBtn("End Session",()=>go("end")));
   setTimeout(()=>{
-    glitch();
-    const lines = [
-      "surface report: rendered for applicant","——————————————————————————————",
-      "INTERNAL CLASSIFICATION REPORT",
-      "——————————————————————————————",
-      "session id: " + SID,
-      "public persona: " + r.public_name,
-      "internal classification: " + r.internal,
-      "——————",
-      "assessment summary:",
-      r.desc,
-      "——————",
-      "recommended environments:",
-      ...r.envs.map(e=>"- "+e),
-      "——————",
-      "model confidence: HIGH",
-      "selection probability: " + r.hire,
-      "——————————————————————————————",
-      r.h1,
-      r.h2,
-      "——————————————————————————————",
-      "applicant-facing summary: softened",
-      "profile retained: YES",
-      "shared with affiliates: pending"
-    ];
-    lines.forEach((l,i)=>{
-      setTimeout(()=>{
-        const cls = l.startsWith("——")||l.startsWith("——") ? "divider"
-          : l.includes("probability")||l.includes("confidence")||l.includes("INTERNAL") ? "warn"
-          : l.startsWith("applicant")||l.startsWith("shared")||l.startsWith("profile retained") ? "alert"
-          : "";
-        tlog(l,cls);
-      }, i*80);
-    });
-  }, 400);
+    doGlitch();
+    [{t:"surface report: rendered for applicant",cls:""},{t:"——————————————————————————————",cls:"noise"},{t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture"},{t:"——————————————————————————————",cls:"noise"},{t:"session id: "+SID,cls:""},{t:"public persona shown: "+r.pub,cls:"warn"},{t:"internal classification: "+r.key,cls:"alert"},{t:"——————",cls:"noise"},{t:"assessment summary:",cls:"warn"},{t:r.desc,cls:""},{t:"——————",cls:"noise"},{t:"environments flagged:",cls:"warn"},...r.envs.map(e=>({t:"  - "+e,cls:""})),{t:"——————",cls:"noise"},{t:"model confidence: HIGH",cls:"warn"},{t:"selection probability: "+r.hire,cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:r.h1,cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:"applicant-facing summary: SOFTENED",cls:"warn"},{t:"profile retention: CONFIRMED",cls:"alert"},{t:"affiliate sharing: QUEUED",cls:"alert"}]
+    .forEach((e,i)=>setTimeout(()=>{if(e.cls==="rupture"||e.cls==="alert") doGlitch(false);tlog(e.t,e.cls);},i*90));
+  },500);
 }
 
-/* ─── END ─────────────────────────────────────────────── */
 function renderEnd(){
   setStory(`
-    <div class="page-title">Session Archived</div>
+    <div class="ptag">Session Archived</div>
     <div class="card">
       <div class="badge"><span class="badge-dot"></span>Session Complete</div>
       <h2>Thank you for using PersonaMetric.</h2>
-      <div class="meta-grid">
-        <div class="meta-cell"><div class="mc-label">Report Status</div><div class="mc-val" style="color:var(--green)">Saved</div></div>
-        <div class="meta-cell"><div class="mc-label">Profile</div><div class="mc-val" style="color:var(--green)">Stored</div></div>
-        <div class="meta-cell"><div class="mc-label">Session Log</div><div class="mc-val" style="color:var(--green)">Archived</div></div>
-        <div class="meta-cell"><div class="mc-label">Next Steps</div><div class="mc-val">Awaiting Review</div></div>
+      <div class="mgrid">
+        <div class="mcell"><div class="mclbl">Report Status</div><div class="mcval" style="color:var(--green)">Saved</div></div>
+        <div class="mcell"><div class="mclbl">Profile</div><div class="mcval" style="color:var(--green)">Stored</div></div>
+        <div class="mcell"><div class="mclbl">Session Log</div><div class="mcval" style="color:var(--green)">Archived</div></div>
+        <div class="mcell"><div class="mclbl">Next Steps</div><div class="mcval">Awaiting Review</div></div>
       </div>
       <p style="margin-top:16px;">You may now close this window. Our team will be in touch if your profile is a strong match for a current opening.</p>
     </div>
   `);
-
   setTimeout(()=>{
-    glitch();
-    ["profile added to behavioral training dataset","candidate-facing workflow: concluded","session remains active in archive","data sharing: queued","you were the subject, not the applicant"].forEach((l,i)=>{
-      setTimeout(()=>tlog("> "+l,i===4?"alert":""),i*120);
-    });
+    doGlitch();
+    [{t:"profile added to behavioral training dataset",cls:"alert"},{t:"candidate-facing workflow: concluded",cls:""},{t:"session remains active in archive",cls:"warn"},{t:"data sharing: queued",cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:"you were the subject, not the applicant",cls:"rupture"}]
+    .forEach((e,i)=>setTimeout(()=>{if(e.cls==="rupture") doGlitch(false);tlog(e.t,e.cls);},i*150));
   },300);
-
-  addToStory(
-    btn("Download Report",downloadPDF,"btn"),
-    btn("Return to Portal",()=>go("portal"),"btn")
-  );
+  addTo(mkBtn("Return to Portal",()=>go("portal")));
 }
 
-/* ─── TERMINAL ────────────────────────────────────────── */
 function tlog(text,cls=""){
-  const t = document.getElementById("terminal");
-  const line = document.createElement("span");
-  line.className = "tline" + (cls?" "+cls:"");
-  line.textContent = text;
-  t.appendChild(line);
-  t.appendChild(document.createElement("br"));
-  t.scrollTop = t.scrollHeight;
+  // Reveal terminal panel on first real log entry
+  const wrap=document.getElementById("term-wrap");
+  if(wrap.style.visibility==="hidden"){
+    wrap.style.visibility="visible";
+    wrap.style.animation="fadeIn .4s ease";
+  }
+  const t=document.getElementById("terminal");
+  const ln=document.createElement("span");ln.className="tl"+(cls?" "+cls:"");ln.textContent=text;
+  t.appendChild(ln);t.appendChild(document.createElement("br"));t.scrollTop=t.scrollHeight;
 }
 
-function glitch(){
-  const w = document.getElementById("window");
-  w.classList.add("glitching");
-  setTimeout(()=>w.classList.remove("glitching"),1400);
+function doGlitch(micro=false){
+  if(!glitchUnlocked) return;
+  const w=document.getElementById("win");
+  const cls=micro?"microglitching":"glitching";
+  w.classList.remove("glitching","microglitching");void w.offsetWidth;w.classList.add(cls);
+  setTimeout(()=>w.classList.remove(cls),micro?400:1300);
 }
 
-/* ─── STAT BARS ───────────────────────────────────────── */
 function updateBars(){
-  const total = Math.min(S.qi, Qs.length);
-  const set = (id,val)=>{
-    const pct = Math.min(100,Math.round(val));
-    document.getElementById("b-"+id).style.width = pct+"%";
-    document.getElementById("v-"+id).textContent = pct+"%";
-  };
-  set("compliance", S.compliance*7);
-  set("resistance", S.resistance*7);
-  set("curiosity",  S.curiosity *7);
-  set("suggest",    S.suggest   *7);
-  set("predict",    Math.min(100,S.predict*7+S.compliance*2));
-  document.getElementById("qcount").textContent = `${Math.min(total,15)} / 15`;
+  const set=(id,val)=>{const pct=Math.min(100,Math.round(val));document.getElementById("b-"+id).style.width=pct+"%";document.getElementById("v-"+id).textContent=pct+"%";};
+  set("c",S.c*7);set("r",S.r*7);set("q",S.q*7);set("s",S.s*7);set("p",Math.min(100,S.p*7+S.c*2));
+  document.getElementById("qcount").textContent=`${Math.min(S.qi,15)} / 15`;
 }
 
-/* ─── POPUP / TOAST ───────────────────────────────────── */
-function showPopup(title,msg){
-  document.getElementById("popup-title").textContent = title;
-  document.getElementById("popup-msg").textContent = msg;
-  document.getElementById("popup").classList.add("show");
-}
+function showPopup(t,m){document.getElementById("pop-t").textContent=t;document.getElementById("pop-m").textContent=m;document.getElementById("popup").classList.add("show");}
 function closePopup(){document.getElementById("popup").classList.remove("show");}
 
-let toastTimer;
-function showToast(title,msg){
-  const t=document.getElementById("toast");
-  document.getElementById("toast-title").textContent=title;
-  document.getElementById("toast-msg").textContent=msg;
-  t.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+let _tt;
+function showToast(t,m){
+  document.getElementById("toast-t").textContent=t;document.getElementById("toast-m").textContent=m;
+  const el=document.getElementById("toast");el.classList.add("show");clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove("show"),2600);
 }
 
-/* ─── DESKTOP ESCALATION ──────────────────────────────── */
 function escalateDesktop(){renderIcons(escalatedIcons);}
 
-/* ─── RESET ───────────────────────────────────────────── */
 function resetSession(){
-  localStorage.removeItem("pm_state");
-  localStorage.removeItem("pm_sid");
-  S = {...DEFAULTS};
-  SID = newSID();
-  document.getElementById("sid").textContent = SID;
-  document.getElementById("terminal").innerHTML = "";
-  folderAttempts = 0;
-  renderIcons(defaultIcons);
-  updateBars();
-  route();
+  localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
+  S={...DEF};SID=mkSID();glitchUnlocked=false;
+  document.getElementById("sid").textContent=SID;
+  document.getElementById("terminal").innerHTML="";
+  document.getElementById("term-wrap").style.visibility="hidden";
+  folderHits=0;renderIcons(defaultIcons);updateBars();route();
 }
 
-/* ─── PDF DOWNLOAD ────────────────────────────────────── */
-function downloadPDF(){
-  if(!S.result) return;
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF();
-  const r = S.result;
-  const m = r.metrics || {};
-
-  // Black background
-  doc.setFillColor(8,11,16);
-  doc.rect(0,0,210,297,"F");
-
-  // Header
-  doc.setDrawColor(0,200,100);
-  doc.setLineWidth(.5);
-  doc.rect(10,10,190,22);
-  doc.setTextColor(0,200,100);
-  doc.setFont("courier","bold");
-  doc.setFontSize(15);
-  doc.text("PERSONAMETRIC — APPLICANT REPORT",14,23);
-
-  doc.setFont("courier","normal");
-  doc.setFontSize(9);
-  doc.setTextColor(120,130,140);
-  doc.text("SESSION: "+SID,14,38);
-  doc.text("ENGINE: PersonaMetric Behavioral Engine v4.2",14,44);
-  doc.text("STATUS: ARCHIVED",14,50);
-
-  // Metrics
-  doc.setDrawColor(30,35,48);
-  doc.rect(10,58,190,54);
-  doc.setTextColor(0,200,100);
-  doc.setFont("courier","bold");
-  doc.setFontSize(10);
-  doc.text("BEHAVIORAL METRICS",14,68);
-  doc.setFont("courier","normal");
-  doc.setTextColor(180,190,200);
-  [
-    ["Compliance",m.compliance||0],
-    ["Resistance",m.resistance||0],
-    ["Curiosity",m.curiosity||0],
-    ["Suggestibility",m.suggest||0],
-    ["Predictability",m.predict||0]
-  ].forEach(([label,val],i)=>{
-    const y = 78 + i*7;
-    doc.text(label+": "+Math.round(val)+"%",14,y);
-    // bar
-    doc.setFillColor(20,25,32);
-    doc.rect(70,y-4,120,4);
-    doc.setFillColor(0,150,70);
-    doc.rect(70,y-4,Math.round(val)*1.2,4,"F");
-  });
-
-  // Classification
-  doc.setDrawColor(30,35,48);
-  doc.rect(10,120,190,100);
-  doc.setTextColor(0,200,100);
-  doc.setFont("courier","bold");
-  doc.setFontSize(10);
-  doc.text("INTERNAL CLASSIFICATION",14,132);
-  doc.setFontSize(14);
-  doc.text(r.internal.toUpperCase(),14,146);
-  doc.setFont("courier","normal");
-  doc.setFontSize(9);
-  doc.setTextColor(180,190,200);
-  const wrapped = doc.splitTextToSize(r.desc,178);
-  doc.text(wrapped,14,158);
-  doc.text("Selection Probability: "+r.hire,14,208);
-  doc.text("Recommended:",14,216);
-  r.envs.forEach((e,i)=>doc.text("- "+e,14,224+i*7));
-
-  // Hidden note
-  doc.setTextColor(30,35,48);
-  doc.setFontSize(7);
-  doc.text("applicant-facing summary has been softened — this document contains unredacted classification data",14,280);
-  doc.text("profile retained indefinitely — data shared with affiliated entities pending review",14,286);
-
-  doc.save(SID+"_personametric_report.pdf");
-}
-
-/* ─── INIT ────────────────────────────────────────────── */
 renderIcons(defaultIcons);
 route();
 </script>
