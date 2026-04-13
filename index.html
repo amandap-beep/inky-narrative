@@ -513,13 +513,6 @@ hr{
   min-width:150px;
 }
 
-.green-report{
-  color:#00ff88;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:14px;
-  line-height:1.8;
-}
-
 .loading-wrap{
   max-width:720px;
 }
@@ -1220,7 +1213,7 @@ function beginResultSequence(){
   setTimeout(()=>{
     buildResult();
     showToast("Assessment Complete", "Applicant profile ready for review.");
-    ();
+    showResults();
   }, 3200);
 }
 
@@ -1399,32 +1392,25 @@ function showResults(){
     </div>
   `);
 
-logTerminalGlitch([
-  "surface report prepared for applicant view",
-
-  "-------------------------------------",
-  "INTERNAL CLASSIFICATION REPORT",
-  "-------------------------------------",
-
-  "applicant id: " + sessionID,
-  "persona type: " + personaType,
-  "behavioral classification: " + r.title,
-
-  "assessment summary:",
-  r.description,
-
-  "recommended environments:",
-  "- " + r.environments.join(", "),
-
-  "assessment confidence: " + r.confidence,
-  "selection probability: " + getHireLikelihood(),
-
-  "-------------------------------------",
-
-  getHiddenLine1(r.title),
-  getHiddenLine2(r.title),
-  getHiddenLine3(r.title)
-]);
+  logTerminalGlitch([
+    "surface report prepared for applicant view",
+    "-------------------------------------",
+    "INTERNAL CLASSIFICATION REPORT",
+    "-------------------------------------",
+    "applicant id: " + sessionID,
+    "persona type: " + personaType,
+    "behavioral classification: " + r.title,
+    "assessment summary:",
+    r.description,
+    "recommended work environments:",
+    "- " + r.environments.join(", "),
+    "assessment confidence: " + r.confidence,
+    "selection probability: " + getHireLikelihood(),
+    "-------------------------------------",
+    getHiddenLine1(r.title),
+    getHiddenLine2(r.title),
+    getHiddenLine3(r.title)
+  ]);
 
   const story = document.getElementById("story");
   story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
