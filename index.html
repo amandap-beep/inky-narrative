@@ -957,7 +957,7 @@ function route(){
   if(state.screen === "status") return renderStatus();
   if(state.screen === "assessment") return renderQuestion();
   if(state.screen === "loading") return renderLoadingScreen();
-  if(state.screen === "results") return ();
+  if(state.screen === "results") return showResults();
   if(state.screen === "end") return endSession();
 }
 
@@ -1399,16 +1399,28 @@ function showResults(){
     </div>
   `);
 
- logTerminalGlitch([
+logTerminalGlitch([
   "surface report prepared for applicant view",
+
+  "-------------------------------------",
+  "INTERNAL CLASSIFICATION REPORT",
+  "-------------------------------------",
+
   "applicant id: " + sessionID,
   "persona type: " + personaType,
   "behavioral classification: " + r.title,
-  "assessment summary: " + r.description,
-  "recommended work environments:",
+
+  "assessment summary:",
+  r.description,
+
+  "recommended environments:",
   "- " + r.environments.join(", "),
+
   "assessment confidence: " + r.confidence,
   "selection probability: " + getHireLikelihood(),
+
+  "-------------------------------------",
+
   getHiddenLine1(r.title),
   getHiddenLine2(r.title),
   getHiddenLine3(r.title)
