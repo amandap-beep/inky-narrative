@@ -774,7 +774,7 @@ function route(){
   if(state.screen === "careers") return renderCareers();
   if(state.screen === "status") return renderStatus();
   if(state.screen === "assessment") return renderQuestion();
-  if(state.screen === "results") return ();
+  if(state.screen === "results") return showResults();
   if(state.screen === "end") return endSession();
 }
 
@@ -1233,7 +1233,7 @@ function getHiddenLine3(title){
   return lines[title] || "applicant-facing summary softened";
 }
 
-  function getHireLikelihood(){
+function getHireLikelihood(){
   const c = state.compliance;
   const r = state.resistance;
   const h = state.hiddenInfluence;
@@ -1246,7 +1246,7 @@ function getHiddenLine3(title){
     return "MEDIUM";
   }
 }
-  
+
 function endSession(){
   setStory(`
     <div class="card">
@@ -1329,12 +1329,10 @@ function downloadProfile(){
 
 function updateDesktopClock(){
   const now = new Date();
-
   const time = now.toLocaleTimeString([], {
     hour: 'numeric',
     minute: '2-digit'
   });
-
   const date = now.toLocaleDateString([], {
     weekday: 'short',
     month: 'short',
