@@ -1020,7 +1020,7 @@ function buildResult(){
 
   let result = {
     title:"Balanced Profile",
-    description:"You demonstrate a balance between independence and cooperation. You are capable of following structure when necessary while maintaining personal judgment.",
+    description:"Demonstrates a balance between independence and cooperation. Shows the ability to follow structure when needed while maintaining personal judgment.",
     confidence:"Medium",
     environments:["Mixed structure","Collaborative teams","Adaptive roles"]
   };
@@ -1028,56 +1028,56 @@ function buildResult(){
   if(metrics.suggestibility >= 72 && metrics.compliance >= metrics.resistance + 10){
     result = {
       title:"Adaptive Complier",
-      description:"You demonstrate a high ability to adapt to existing systems and expectations. You respond well to clear instructions and external guidance.",
+      description:"Demonstrates strong adaptability to existing systems, expectations, and externally defined processes. Likely to respond well to clear instructions and consistent guidance.",
       confidence:"High",
       environments:["Structured environments","Process-driven teams","Defined workflows"]
     };
   } else if(metrics.resistance >= 72 && metrics.curiosity >= 48){
     result = {
       title:"System Skeptic",
-      description:"You demonstrate low trust in systems and automated decision-making. You are more likely to question authority, data collection, and system motives.",
+      description:"Demonstrates lower baseline trust in systems and automated decision-making. More likely to question authority, data collection practices, and institutional motives.",
       confidence:"High",
       environments:["Autonomous roles","Independent review work","Investigative tasks"]
     };
   } else if(metrics.curiosity >= 72 && metrics.resistance >= 40){
     result = {
       title:"Curious Observer",
-      description:"You display a high level of curiosity and pattern recognition. You are likely to question systems, explore alternatives, and seek to understand how things work.",
+      description:"Displays high curiosity, pattern recognition, and interest in underlying systems. Likely to explore alternatives and seek deeper understanding before accepting conclusions.",
       confidence:"Medium",
       environments:["Flexible structure","Problem-solving roles","Independent tasks"]
     };
   } else if(metrics.predictability >= 76 && metrics.compliance >= 48){
     result = {
       title:"Predictable Performer",
-      description:"Your responses indicate consistent decision-making patterns and stable preferences. You tend to respond predictably in structured environments.",
+      description:"Shows stable decision-making patterns and consistent preferences across prompts. Likely to perform reliably in structured environments with repeated processes.",
       confidence:"High",
       environments:["Routine operations","Consistent process work","Stable organizational roles"]
     };
   } else if(metrics.compliance >= 64 && metrics.resistance <= 32){
     result = {
       title:"Structure Seeker",
-      description:"You prefer clear expectations, defined systems, and predictable environments. You perform best when rules and goals are clearly communicated.",
+      description:"Prefers clear expectations, defined systems, and predictable environments. Most likely to perform effectively when rules and goals are communicated clearly.",
       confidence:"Medium",
       environments:["Clear hierarchies","Stable teams","Policy-driven roles"]
     };
   } else if(metrics.resistance >= 64 && metrics.compliance < 48){
     result = {
       title:"Independent Actor",
-      description:"You prioritize personal judgment over external instruction. You are comfortable making decisions without guidance and may challenge systems that feel inefficient.",
+      description:"Prioritizes personal judgment over external instruction. More likely to make decisions independently and challenge systems perceived as inefficient.",
       confidence:"Medium",
       environments:["Self-directed work","Leadership under ambiguity","Creative problem solving"]
     };
   } else if(metrics.suggestibility >= 72){
     result = {
       title:"Suggestible Responder",
-      description:"You are highly responsive to external guidance and environmental cues. Your decisions may be influenced by framing, authority, or perceived expectations.",
+      description:"Shows high responsiveness to external guidance, framing, and environmental cues. Decision-making may be influenced by perceived authority and contextual presentation.",
       confidence:"High",
       environments:["Guided teams","Supervised workflows","Instruction-led tasks"]
     };
   } else if(metrics.resistance >= 56 && metrics.compliance >= 40){
     result = {
       title:"Quiet Resister",
-      description:"You tend to question systems internally but do not always express resistance outwardly. You may comply in action while maintaining independent thought.",
+      description:"Tends to question systems internally without consistently expressing resistance outwardly. Likely to comply behaviorally while maintaining independent internal judgment.",
       confidence:"Medium",
       environments:["Low-drama teams","Independent support roles","Observation-heavy work"]
     };
