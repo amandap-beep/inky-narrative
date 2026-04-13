@@ -19,6 +19,23 @@ body{
   overflow:hidden;
 }
 
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.02) 0px,
+      rgba(255,255,255,.02) 1px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0) 4px
+    );
+  pointer-events:none;
+  opacity:.08;
+  z-index:100;
+}
+
 #desktop{
   position:relative;
   width:100%;
@@ -45,6 +62,12 @@ body{
   opacity:.9;
   user-select:none;
   cursor:pointer;
+  transition:transform .15s, opacity .15s;
+}
+
+.desktop-icon:hover{
+  transform:translateY(-1px);
+  opacity:1;
 }
 
 .desktop-icon .icon-box{
@@ -121,7 +144,7 @@ body{
 
 .fake-tab{
   min-width:220px;
-  max-width:320px;
+  max-width:360px;
   height:34px;
   padding:0 14px;
   display:flex;
@@ -145,13 +168,18 @@ body{
 }
 
 #addressBar{
-  width:260px;
+  width:290px;
   height:32px;
   display:flex;
   align-items:center;
   justify-content:flex-end;
   color:#8a8f9d;
   font-size:11px;
+  gap:12px;
+}
+
+#appMode{
+  color:#bcc4d9;
 }
 
 #windowContent{
@@ -191,10 +219,13 @@ button{
   cursor:pointer;
   font-family:'IBM Plex Mono',monospace;
   border-radius:8px;
+  transition:background .15s, transform .15s, box-shadow .15s;
 }
 
 button:hover{
   background:#171717;
+  transform:translateY(-1px);
+  box-shadow:0 8px 16px rgba(0,0,0,.2);
 }
 
 .progress{
@@ -204,6 +235,7 @@ button:hover{
   margin-bottom:8px;
   border-radius:999px;
   overflow:hidden;
+  border:1px solid #1b1b1b;
 }
 
 .bar{
@@ -211,6 +243,7 @@ button:hover{
   background:#00ff88;
   width:0%;
   transition:width .6s;
+  box-shadow:0 0 12px rgba(0,255,136,.35);
 }
 
 #systemFeedWrap{
@@ -233,7 +266,7 @@ button:hover{
 
 #terminal{
   position:relative;
-  height:180px;
+  height:220px;
   background:black;
   color:#00ff00;
   font-family:'IBM Plex Mono',monospace;
@@ -245,7 +278,7 @@ button:hover{
 }
 
 #terminal.active{
-  height:180px;
+  height:220px;
   padding:12px;
 }
 
@@ -260,6 +293,14 @@ button:hover{
   60%{ transform:translate(-1px,2px); text-shadow:1px 0 0 #00ffff, -1px 0 0 #ff003c; }
   80%{ transform:translate(2px,0); text-shadow:-2px 0 0 #00ffff, 2px 0 0 #ff003c; }
   100%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
+}
+
+.system-note{
+  color:#8cffbf;
+}
+
+.system-alert{
+  color:#ff9a9a;
 }
 
 .small-link{
@@ -281,6 +322,28 @@ button:hover{
   max-width:760px;
   border-radius:14px;
   box-shadow:0 12px 30px rgba(0,0,0,.28);
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border:1px solid #2a3a31;
+  border-radius:999px;
+  background:#0a120d;
+  color:#a8ffc9;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  margin-bottom:12px;
+}
+
+.badge-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#00ff88;
+  box-shadow:0 0 8px rgba(0,255,136,.4);
 }
 
 .muted{ color:#b7ae9b; }
@@ -373,6 +436,43 @@ hr{
   margin-bottom:16px;
 }
 
+#toast{
+  position:absolute;
+  right:18px;
+  top:72px;
+  z-index:70;
+  min-width:260px;
+  max-width:340px;
+  background:#10131a;
+  border:1px solid #2d3340;
+  border-radius:12px;
+  box-shadow:0 20px 45px rgba(0,0,0,.38);
+  padding:14px 16px;
+  color:#eff2ff;
+  font-family:'IBM Plex Mono',monospace;
+  transform:translateY(-10px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s, transform .25s;
+}
+
+#toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+#toastTitle{
+  font-size:12px;
+  margin-bottom:6px;
+  color:#ffffff;
+}
+
+#toastMessage{
+  font-size:11px;
+  line-height:1.6;
+  color:#c8cedd;
+}
+
 #taskbar{
   position:absolute;
   left:0;
@@ -426,6 +526,67 @@ hr{
   font-family:'IBM Plex Mono',monospace;
   font-size:14px;
   line-height:1.8;
+}
+
+.loading-wrap{
+  max-width:720px;
+}
+
+.loading-title{
+  font-size:34px;
+  margin-bottom:10px;
+}
+
+.loading-sub{
+  font-size:18px;
+  line-height:1.7;
+  color:#d2d7e3;
+}
+
+.loading-dots{
+  display:flex;
+  gap:10px;
+  margin:18px 0;
+}
+
+.loading-dots span{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#00ff88;
+  opacity:.2;
+  animation:pulseDots 1.2s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(2){ animation-delay:.15s; }
+.loading-dots span:nth-child(3){ animation-delay:.3s; }
+
+@keyframes pulseDots{
+  0%, 100%{ opacity:.2; transform:scale(1); }
+  50%{ opacity:1; transform:scale(1.25); }
+}
+
+#resultBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid #20422f;
+  background:#09140d;
+  color:#98ffc0;
+  border-radius:999px;
+  padding:10px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  margin-bottom:14px;
+}
+
+#resultBadge i{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#00ff88;
+  display:inline-block;
+  box-shadow:0 0 8px rgba(0,255,136,.5);
 }
 
 @media (max-width: 980px){
@@ -486,7 +647,10 @@ hr{
         </div>
       </div>
 
-      <div id="addressBar">secured://personametric/applicant</div>
+      <div id="addressBar">
+        <span id="appMode">Candidate Portal</span>
+        <span>secured://personametric/applicant</span>
+      </div>
     </div>
 
     <div id="windowContent">
@@ -500,6 +664,7 @@ hr{
         <div>SESSION ID: <span id="session"></span></div>
         <div>DATASET SIZE: <span id="dataset"></span></div>
         <div>QUESTION: <span id="questionCount">0 / 15</span></div>
+        <div>STAGE: <span id="stageLabel">Application Received</span></div>
         <hr>
 
         <div>Assessment Progress</div>
@@ -538,6 +703,11 @@ hr{
       <div id="popupMessage">This directory is not available in applicant view.</div>
       <button onclick="closeApplicantPopup()">Close</button>
     </div>
+  </div>
+
+  <div id="toast">
+    <div id="toastTitle">PersonaMetric</div>
+    <div id="toastMessage">Applicant profile synchronized.</div>
   </div>
 
   <div id="taskbar">
@@ -743,7 +913,26 @@ function resetGame(){
   document.getElementById("session").innerText = sessionID;
   document.getElementById("terminal").innerHTML = "";
   document.getElementById("terminal").classList.remove("active","glitching");
+  document.getElementById("desktopIcons").innerHTML = `
+    <div class="desktop-icon" onclick="denyDesktopAccess('Applicants')">
+      <div class="icon-box"></div>
+      <div>Applicants</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
+      <div class="icon-box"></div>
+      <div>Profiles</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
+      <div class="icon-box"></div>
+      <div>Archive</div>
+    </div>
+    <div class="desktop-icon" onclick="denyDesktopAccess('Internal')">
+      <div class="icon-box"></div>
+      <div>Internal</div>
+    </div>
+  `;
   updateBars();
+  setStageLabel();
   route();
 }
 
@@ -768,19 +957,35 @@ function appendInlineLink(text, fnName){
 
 function route(){
   updateBars();
+  setStageLabel();
   if(state.screen === "portal") return renderPortal();
   if(state.screen === "about") return renderAbout();
   if(state.screen === "policy") return renderPolicy();
   if(state.screen === "careers") return renderCareers();
   if(state.screen === "status") return renderStatus();
   if(state.screen === "assessment") return renderQuestion();
+  if(state.screen === "loading") return renderLoadingScreen();
   if(state.screen === "results") return showResults();
   if(state.screen === "end") return endSession();
+}
+
+function setStageLabel(){
+  const el = document.getElementById("stageLabel");
+  if(!el) return;
+
+  if(state.screen === "portal") el.innerText = "Application Received";
+  else if(state.screen === "policy") el.innerText = "Terms Review";
+  else if(state.screen === "assessment") el.innerText = "Behavioral Assessment";
+  else if(state.screen === "loading") el.innerText = "Profile Review";
+  else if(state.screen === "results") el.innerText = "Assessment Complete";
+  else if(state.screen === "end") el.innerText = "Session Archived";
+  else el.innerText = "Candidate Portal";
 }
 
 function renderPortal(){
   setStory(`
     <div class="card">
+      <div class="badge"><span class="badge-dot"></span> Candidate Evaluation Interface</div>
       <div class="q-title">Applicant Portal</div>
       <p>Behavioral Assessment Interface</p>
       <p><strong>Applicant ID:</strong> ${sessionID}<br>
@@ -797,6 +1002,7 @@ function renderPortal(){
   story.appendChild(createButton("BEGIN ASSESSMENT", ()=>{
     state.screen = "policy";
     saveState();
+    showToast("Application Stage Updated", "Behavioral assessment materials loaded.");
     route();
   }));
 
@@ -882,6 +1088,7 @@ function renderPolicy(){
       }
       return;
     }
+    showToast("Consent Recorded", "Assessment materials unlocked.");
     state.screen = "assessment";
     saveState();
     route();
@@ -911,6 +1118,7 @@ function renderStatus(){
       <p>Behavioral Engine: Stable</p>
       <p>Applicant Queue: Active</p>
       <p>Dataset Sync: In Progress</p>
+      <p class="muted">Last refresh: live</p>
     </div>
   `);
   document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
@@ -918,7 +1126,7 @@ function renderStatus(){
 
 function renderQuestion(){
   if(state.questionIndex >= questions.length){
-    finishAssessment();
+    beginResultSequence();
     return;
   }
 
@@ -927,6 +1135,7 @@ function renderQuestion(){
 
   setStory(`
     <div class="card">
+      <div class="badge"><span class="badge-dot"></span> Stage 2 of 3: Behavioral Assessment</div>
       <div class="q-title">Question ${state.questionIndex + 1}</div>
       <p>${q.text}</p>
       <div id="assessmentProgressWrap">
@@ -964,7 +1173,7 @@ function answerQuestion(option){
 
   if(q.link === "sessionLog"){
     logTerminal("session log expanded");
-    logTerminal("subject believes assessment is for employment");
+    logTerminal("candidate believes assessment is for employment");
     logTerminal("honesty levels higher under evaluation conditions");
     logTerminal("continue using employment framing");
   }
@@ -976,6 +1185,20 @@ function answerQuestion(option){
     logTerminal("profiles generated: " + datasetSize.toLocaleString());
   }
 
+  if(state.questionIndex === 4){
+    showToast("Responses Saved", "Applicant profile synchronized.");
+  }
+
+  if(state.questionIndex === 8){
+    showToast("Assessment Update", "Behavioral markers refreshed.");
+    logTerminal("response latency entered secondary review");
+  }
+
+  if(state.questionIndex === 11){
+    escalateDesktopLore();
+    logTerminal("surface trust language remains effective");
+  }
+
   state.questionIndex += 1;
   saveState();
   updateBars();
@@ -983,6 +1206,46 @@ function answerQuestion(option){
   setTimeout(()=>{
     renderQuestion();
   },250);
+}
+
+function beginResultSequence(){
+  state.screen = "loading";
+  saveState();
+  route();
+
+  const lines = [
+    "final response received",
+    "response timing model updated",
+    "authenticity estimate recalculated",
+    "cross-referencing archived profiles",
+    "applicant-facing summary in preparation",
+    "review status set to pending",
+    "profile retained for future comparison"
+  ];
+
+  logTerminalGlitch(lines);
+
+  setTimeout(()=>{
+    buildResult();
+    showToast("Assessment Complete", "Applicant profile ready for review.");
+    showResults();
+  }, 3200);
+}
+
+function renderLoadingScreen(){
+  setStory(`
+    <div class="card loading-wrap">
+      <div class="badge"><span class="badge-dot"></span> Stage 3 of 3: Final Review</div>
+      <div class="loading-title">Finalizing assessment...</div>
+      <p class="loading-sub">
+        Reviewing response profile, preparing applicant summary, and submitting materials for internal review.
+      </p>
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="muted">Please do not close this window.</p>
+    </div>
+  `);
 }
 
 function triggerTerminalGlitch(){
@@ -994,10 +1257,11 @@ function triggerTerminalGlitch(){
   setTimeout(()=>t.classList.remove("glitching"), 1200);
 }
 
-function logTerminal(text){
+function logTerminal(text, cls=""){
   const t = document.getElementById("terminal");
   const line = document.createElement("div");
   line.textContent = "> " + text;
+  if(cls) line.className = cls;
   t.appendChild(line);
   t.scrollTop = t.scrollHeight;
 }
@@ -1005,7 +1269,10 @@ function logTerminal(text){
 function logTerminalGlitch(lines){
   triggerTerminalGlitch();
   lines.forEach((line, idx)=>{
-    setTimeout(()=>logTerminal(line), idx * 90);
+    setTimeout(()=>{
+      const cls = line.toLowerCase().includes("blocked") || line.toLowerCase().includes("denied") ? "system-alert" : "";
+      logTerminal(line, cls);
+    }, idx * 90);
   });
 }
 
@@ -1090,23 +1357,6 @@ function buildResult(){
   saveState();
 }
 
-function finishAssessment(){
-  document.getElementById("terminal").classList.add("active");
-  logTerminalGlitch([
-    "measuring response time",
-    "measuring hesitation",
-    "measuring compliance indicators",
-    "measuring resistance indicators",
-    "measuring curiosity indicators",
-    "measuring suggestibility",
-    "building predictive model",
-    "profile generated",
-    "adding profile to dataset"
-  ]);
-  buildResult();
-  showResults();
-}
-
 function showResults(){
   if(!state.result) buildResult();
   const r = state.result;
@@ -1140,239 +1390,11 @@ function showResults(){
 
   setStory(`
     <div class="card">
+      <div id="resultBadge"><i></i> Applicant Review Submitted</div>
       <div class="q-title" style="font-size:38px;">Thank you for completing the PersonaMetric applicant assessment.</div>
 
       <p style="font-size:24px; line-height:1.5; margin-top:18px;">
         You are a <strong>${personaType}</strong>.
       </p>
 
-      <p style="font-size:20px; line-height:1.7; max-width:720px;">
-        Your results suggest strengths that may support a variety of modern workplace environments such as ${workplaceFit}.
-      </p>
-
-      <p style="margin-top:10px;">
-        Our team will review your results and be in touch with next steps.
-      </p>
-
-      <hr>
-
-      <div class="green-report">
-        <strong>Applicant ID:</strong> ${sessionID}<br><br>
-        <strong>Persona Type:</strong> ${personaType}<br>
-        <strong>Behavioral Classification:</strong> ${r.title}<br><br>
-        <strong>Assessment Summary:</strong> ${r.description}<br><br>
-        <strong>Recommended Work Environments:</strong><br>
-        - ${r.environments.join("<br>- ")}
-      </div>
-
-      <p class="green-report" style="margin-top:18px;"><strong>Assessment Confidence:</strong> ${r.confidence}</p>
-      <p class="green-report"><strong>Selection Probability:</strong> ${getHireLikelihood()}</p>
-
-      <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
-    </div>
-  `);
-
-  logTerminalGlitch([
-    "surface report prepared for applicant view",
-    getHiddenLine1(r.title),
-    getHiddenLine2(r.title),
-    getHiddenLine3(r.title),
-    "selection probability: " + getHireLikelihood()
-  ]);
-
-  const story = document.getElementById("story");
-  story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
-  story.appendChild(createButton("END SESSION", ()=>{
-    state.screen = "end";
-    saveState();
-    route();
-  }));
-}
-
-function getHiddenLine1(title){
-  const lines = {
-    "Adaptive Complier":"subject accepts structure quickly when framed as support",
-    "System Skeptic":"trust threshold remains inconveniently high",
-    "Curious Observer":"subject continues probing after warning indicators appear",
-    "Predictable Performer":"behavioral repetition increased model confidence",
-    "Structure Seeker":"subject prefers rules when uncertainty demands independence",
-    "Independent Actor":"subject resists direction when control becomes visible",
-    "Suggestible Responder":"subject remains highly responsive to framing and authority cues",
-    "Quiet Resister":"subject questions systems internally while remaining behaviorally usable",
-    "Balanced Profile":"subject avoids extremes and stabilizes easily"
-  };
-  return lines[title] || "classification stabilized with limited deviation";
-}
-
-function getHiddenLine2(title){
-  const lines = {
-    "Adaptive Complier":"low-friction compliance profile retained",
-    "System Skeptic":"higher resistance cost projected for future steering attempts",
-    "Curious Observer":"continued exposure likely to increase engagement rather than refusal",
-    "Predictable Performer":"subject remains easy to model across repeated prompts",
-    "Structure Seeker":"predictable response pattern linked to external guidance",
-    "Independent Actor":"autonomy preference may reduce system efficiency",
-    "Suggestible Responder":"subtle prompting remains effective",
-    "Quiet Resister":"surface compliance conceals mild internal opposition",
-    "Balanced Profile":"moderate adaptability with low volatility"
-  };
-  return lines[title] || "profile retained for future comparison";
-}
-
-function getHiddenLine3(title){
-  const lines = {
-    "Adaptive Complier":"applicant-facing summary softened",
-    "System Skeptic":"applicant-facing summary softened",
-    "Curious Observer":"applicant-facing summary softened",
-    "Predictable Performer":"applicant-facing summary softened",
-    "Structure Seeker":"applicant-facing summary softened",
-    "Independent Actor":"applicant-facing summary softened",
-    "Suggestible Responder":"applicant-facing summary softened",
-    "Quiet Resister":"applicant-facing summary softened",
-    "Balanced Profile":"applicant-facing summary softened"
-  };
-  return lines[title] || "applicant-facing summary softened";
-}
-
-function getHireLikelihood(){
-  const c = state.compliance;
-  const r = state.resistance;
-  const h = state.hiddenInfluence;
-
-  if(c >= r && h >= 2){
-    return "HIGH";
-  } else if(r > c){
-    return "LOW";
-  } else {
-    return "MEDIUM";
-  }
-}
-
-function endSession(){
-  setStory(`
-    <div class="card">
-      <div class="q-title">Session Complete</div>
-      <p>Report Saved</p>
-      <p>Applicant Profile Stored</p>
-      <p>Session Logged</p>
-      <p>You may now close the window.</p>
-    </div>
-  `);
-  logTerminalGlitch(["profile added to training dataset"]);
-  document.getElementById("story").appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
-}
-
-function updateBars(){
-  const totalAnswered = Math.min(state.questionIndex, questions.length);
-  const overall = Math.round((totalAnswered / questions.length) * 100);
-  document.getElementById("overallBar").style.width = overall + "%";
-  document.getElementById("complianceBar").style.width = Math.min(state.compliance * 8, 100) + "%";
-  document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 8, 100) + "%";
-  document.getElementById("curiosityBar").style.width = Math.min(state.curiosity * 8, 100) + "%";
-  document.getElementById("hiddenBar").style.width = Math.min(state.hiddenInfluence * 8, 100) + "%";
-  document.getElementById("sentimentBar").style.width = Math.min((state.predictability * 8) + (state.compliance * 2), 100) + "%";
-  document.getElementById("questionCount").innerText = `${Math.min(totalAnswered, 15)} / 15`;
-}
-
-function downloadProfile(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  if(!state.result) buildResult();
-  const r = state.result;
-  const s = state.resultStats;
-
-  doc.setFillColor(0,0,0);
-  doc.rect(0,0,210,297,"F");
-  doc.setDrawColor(0,255,136);
-  doc.rect(12,12,186,20);
-  doc.setTextColor(0,255,136);
-  doc.setFont("courier","bold");
-  doc.setFontSize(18);
-  doc.text("PERSONAMETRIC REPORT",18,24);
-
-  doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  doc.text("SESSION ID: " + sessionID,18,40);
-  doc.text("MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2",18,46);
-  doc.text("EXPORT STATUS: STORED",18,52);
-
-  doc.rect(12,60,186,56);
-  doc.setFont("courier","bold");
-  doc.setFontSize(12);
-  doc.text("BEHAVIORAL METRICS",18,70);
-  doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  doc.text("Compliance Score: " + s.compliance + "%",18,82);
-  doc.text("Resistance Score: " + s.resistance + "%",18,89);
-  doc.text("Curiosity Score: " + s.curiosity + "%",18,96);
-  doc.text("Suggestibility Score: " + s.suggestibility + "%",18,103);
-  doc.text("Predictability Score: " + s.predictability + "%",18,110);
-
-  doc.rect(12,124,186,120);
-  doc.setFont("courier","bold");
-  doc.setFontSize(12);
-  doc.text("PROFILE CLASSIFICATION",18,134);
-  doc.setFontSize(16);
-  doc.text(r.title.toUpperCase(),18,148);
-  doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  let wrapped = doc.splitTextToSize(r.description, 170);
-  doc.text(wrapped,18,162);
-  doc.text("Model Confidence: " + r.confidence,18,188);
-  doc.text("Selection Probability: " + getHireLikelihood(),18,196);
-  doc.text("Recommended Environments:",18,206);
-  doc.text("- " + r.environments.join("\n- "),18,214);
-
-  doc.setFontSize(9);
-  doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,280);
-  doc.save(sessionID + "_personametric_report.pdf");
-}
-
-function updateDesktopClock(){
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit'
-  });
-  const date = now.toLocaleDateString([], {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
-  });
-
-  const timeEl = document.getElementById("clockTime");
-  const dateEl = document.getElementById("clockDate");
-
-  if(timeEl) timeEl.innerText = time;
-  if(dateEl) dateEl.innerText = date;
-}
-
-function showApplicantPopup(title, message){
-  const popup = document.getElementById("applicantPopup");
-  const popupTitle = document.getElementById("popupTitle");
-  const popupMessage = document.getElementById("popupMessage");
-
-  if(popupTitle) popupTitle.innerText = title;
-  if(popupMessage) popupMessage.innerText = message;
-  if(popup) popup.classList.remove("popup-hidden");
-}
-
-function closeApplicantPopup(){
-  const popup = document.getElementById("applicantPopup");
-  if(popup) popup.classList.add("popup-hidden");
-}
-
-function denyDesktopAccess(folderName){
-  showApplicantPopup(
-    "Access Restricted",
-    folderName + " is not available in applicant view."
-  );
-}
-
-updateDesktopClock();
-setInterval(updateDesktopClock, 1000);
-route();
-</script>
-</body>
-</html>
+      <p style="font-size:20px; line-height:1.7; max-width:720
