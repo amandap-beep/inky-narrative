@@ -1,1668 +1,1784 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PersonaMetric Assessment</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersonaMetric — Applicant Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
-*{ box-sizing:border-box; }
+*{box-sizing:border-box;margin:0;padding:0;}
 
-body{
-  margin:0;
-  background:
-    radial-gradient(circle at top left, #1b1f2a 0%, #0e1017 35%, #06070b 100%);
-  color:#f5f1e8;
-  font-family:'Cormorant Garamond',serif;
-  height:100vh;
-  overflow:hidden;
+:root{
+  --green:#00e676;
+  --green-dim:#00c853;
+  --green-glow:rgba(0,230,118,.15);
+  --bg:#080b10;
+  --bg2:#0c1018;
+  --bg3:#111520;
+  --border:#1e2330;
+  --border-bright:#2a3040;
+  --text:#e8eaf0;
+  --text-dim:#8a90a0;
+  --text-muted:#4a5060;
+  --red:#ff4444;
+  --amber:#ffaa00;
 }
 
-body::before{
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* SCANLINE OVERLAY */
+body::after{
   content:"";
   position:fixed;
   inset:0;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.02) 0px,
-      rgba(255,255,255,.02) 1px,
-      rgba(0,0,0,0) 2px,
-      rgba(0,0,0,0) 4px
-    );
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.04) 2px,
+    rgba(0,0,0,.04) 4px
+  );
   pointer-events:none;
-  opacity:.08;
-  z-index:100;
+  z-index:9999;
 }
 
+/* ── DESKTOP ─────────────────────────────── */
 #desktop{
   position:relative;
-  width:100%;
+  width:100vw;
   height:100vh;
-  overflow:hidden;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(0,80,40,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,30,80,.15) 0%, transparent 60%),
+    var(--bg);
 }
 
+/* ── DESKTOP ICONS ───────────────────────── */
 #desktopIcons{
   position:absolute;
-  top:22px;
-  left:20px;
+  top:20px;
+  left:16px;
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:8px;
   z-index:2;
 }
 
-.desktop-icon{
-  width:92px;
-  text-align:center;
-  color:#d9dfef;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;
-  opacity:.9;
-  user-select:none;
-  cursor:pointer;
-  transition:transform .15s, opacity .15s;
-}
-
-.desktop-icon:hover{
-  transform:translateY(-1px);
-  opacity:1;
-}
-
-.desktop-icon .icon-box{
-  width:54px;
-  height:42px;
-  margin:0 auto 8px auto;
-  border:1px solid rgba(255,255,255,.12);
-  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-  border-radius:6px;
-  position:relative;
-  box-shadow:0 6px 16px rgba(0,0,0,.28);
-}
-
-.desktop-icon .icon-box:before{
-  content:"";
-  position:absolute;
-  top:8px;
-  left:10px;
-  width:34px;
-  height:22px;
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:3px;
-}
-
-#window{
-  position:absolute;
-  top:34px;
-  left:120px;
-  right:26px;
-  bottom:68px;
-  background:#080909;
-  border:1px solid #24262c;
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:
-    0 18px 45px rgba(0,0,0,.55),
-    0 0 0 1px rgba(255,255,255,.02) inset;
-  z-index:3;
+.dicon{
+  width:80px;
   display:flex;
   flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:8px 4px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .15s;
+  user-select:none;
 }
-
-#titlebar{
-  height:52px;
+.dicon:hover{background:rgba(255,255,255,.05);}
+.dicon-img{
+  width:44px;
+  height:36px;
+  background:var(--bg3);
+  border:1px solid var(--border-bright);
+  border-radius:6px;
+  position:relative;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
-  background:linear-gradient(180deg, #11131a, #0c0e14);
-  border-bottom:1px solid #23252e;
+  justify-content:center;
+}
+.dicon-img::before{
+  content:"";
+  width:28px;
+  height:18px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:3px;
+}
+.dicon-label{
   font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-dim);
+  text-align:center;
+  line-height:1.3;
 }
 
-#windowControls{
+/* ── MAIN WINDOW ─────────────────────────── */
+#window{
+  position:absolute;
+  top:28px;
+  left:108px;
+  right:18px;
+  bottom:52px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
   display:flex;
-  gap:8px;
+  flex-direction:column;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);
+  z-index:3;
 }
 
-.window-dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:#2a2d37;
-  border:1px solid #3a3e49;
-}
-
-#tabStrip{
+/* ── TITLE BAR ───────────────────────────── */
+#titlebar{
+  height:44px;
   display:flex;
   align-items:center;
-  gap:10px;
-  flex:1;
-  margin:0 18px;
+  padding:0 14px;
+  gap:12px;
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
 }
 
-.fake-tab{
-  min-width:220px;
-  max-width:360px;
-  height:34px;
+.wdot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:var(--border-bright);
+  cursor:pointer;
+  transition:background .15s;
+}
+.wdot:hover{background:#555;}
+
+#tabstrip{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 12px;
+}
+
+.tab{
+  height:30px;
   padding:0 14px;
   display:flex;
   align-items:center;
-  border:1px solid #2a2e38;
-  border-bottom:none;
-  border-radius:10px 10px 0 0;
-  background:#0f1218;
-  color:#d6dbc8;
-  font-size:12px;
-  box-shadow:0 -1px 0 rgba(255,255,255,.02) inset;
-}
-
-.fake-tab .tab-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#00ff88;
-  margin-right:10px;
-  box-shadow:0 0 8px rgba(0,255,136,.4);
-}
-
-#addressBar{
-  width:290px;
-  height:32px;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  color:#8a8f9d;
+  gap:8px;
+  background:var(--bg2);
+  border:1px solid var(--border-bright);
+  border-radius:7px 7px 0 0;
+  font-family:'IBM Plex Mono',monospace;
   font-size:11px;
-  gap:12px;
+  color:var(--text-dim);
+  white-space:nowrap;
 }
 
-#appMode{
-  color:#bcc4d9;
+.tab-led{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px var(--green);
+  flex-shrink:0;
 }
 
+#urlbar{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-muted);
+  text-align:right;
+  white-space:nowrap;
+}
+
+/* ── CONTENT PANES ───────────────────────── */
 #windowContent{
   flex:1;
   display:flex;
   min-height:0;
-  background:black;
 }
 
+/* LEFT: applicant pane */
 #main{
-  flex:2;
-  padding:50px;
+  flex:1.8;
   overflow-y:auto;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),
-    #050505;
+  padding:48px 52px;
+  background:var(--bg2);
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
 }
 
-#system{
-  flex:1;
-  background:#050505;
-  border-left:1px solid #222;
-  padding:20px;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:13px;
-  color:#00ff88;
-  overflow-y:auto;
-}
-
-button{
-  display:block;
-  margin:10px 0;
-  padding:10px 15px;
-  background:#111;
-  border:1px solid #333;
-  color:white;
-  cursor:pointer;
-  font-family:'IBM Plex Mono',monospace;
-  border-radius:8px;
-  transition:background .15s, transform .15s, box-shadow .15s;
-}
-
-button:hover{
-  background:#171717;
-  transform:translateY(-1px);
-  box-shadow:0 8px 16px rgba(0,0,0,.2);
-}
-
-.progress{
-  width:100%;
-  background:#111;
-  height:10px;
-  margin-bottom:8px;
-  border-radius:999px;
-  overflow:hidden;
-  border:1px solid #1b1b1b;
-}
-
-.bar{
-  height:10px;
-  background:#00ff88;
-  width:0%;
-  transition:width .6s;
-  box-shadow:0 0 12px rgba(0,255,136,.35);
-}
-
-#systemFeedWrap{
-  margin-top:18px;
-  border:1px solid #1f2a24;
-  background:#030403;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-#systemFeedTitle{
-  padding:10px 12px;
-  border-bottom:1px solid #17301f;
+/* RIGHT: system pane */
+#syspanel{
+  width:300px;
+  flex-shrink:0;
+  background:#04060a;
+  border-left:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
   font-family:'IBM Plex Mono',monospace;
   font-size:11px;
-  color:#8affbb;
-  background:#071109;
-  letter-spacing:.03em;
+  overflow:hidden;
+}
+
+#sysheader{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--green);
+  font-size:10px;
+  letter-spacing:.08em;
+  background:#050709;
+  flex-shrink:0;
+}
+
+#sysheader .sh-row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:2px;
+  color:var(--text-muted);
+}
+
+#sysheader .sh-row span:last-child{
+  color:var(--green);
+}
+
+#sysheader .sh-row.label{
+  color:var(--green);
+  font-size:11px;
+  margin-bottom:8px;
+  letter-spacing:.05em;
+}
+
+/* STAT BARS */
+#stats{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+.stat-row:last-child{margin-bottom:0;}
+
+.stat-label{
+  font-size:10px;
+  color:var(--text-muted);
+  width:88px;
+  flex-shrink:0;
+}
+
+.stat-track{
+  flex:1;
+  height:5px;
+  background:#111;
+  border-radius:99px;
+  overflow:hidden;
+  border:1px solid #1a1a1a;
+}
+
+.stat-fill{
+  height:100%;
+  width:0%;
+  border-radius:99px;
+  transition:width .7s cubic-bezier(.4,0,.2,1);
+}
+
+.fill-green{background:var(--green);}
+.fill-red{background:#ff4444;}
+.fill-blue{background:#4488ff;}
+.fill-amber{background:var(--amber);}
+.fill-purple{background:#aa66ff;}
+
+.stat-val{
+  font-size:10px;
+  color:var(--text-muted);
+  width:28px;
+  text-align:right;
+  flex-shrink:0;
+}
+
+/* TERMINAL LOG */
+#termwrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  border-bottom:1px solid var(--border);
+}
+
+#termtitle{
+  padding:8px 14px;
+  font-size:9px;
+  letter-spacing:.1em;
+  color:var(--text-muted);
+  border-bottom:1px solid #0d0d0d;
+  flex-shrink:0;
 }
 
 #terminal{
-  position:relative;
-  height:220px;
-  background:black;
-  color:#00ff00;
+  flex:1;
+  overflow-y:auto;
+  padding:10px 14px;
+  color:#00cc55;
+  font-size:11px;
+  line-height:1.7;
+  scrollbar-width:thin;
+  scrollbar-color:#111 transparent;
+}
+
+.tline{
+  display:block;
+  animation:fadeIn .2s ease;
+}
+
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+.tline.warn{color:var(--amber);}
+.tline.alert{color:var(--red);}
+.tline.dim{color:#004422;}
+.tline.divider{color:#002211; user-select:none;}
+
+#sysfooter{
+  padding:10px 14px;
+  flex-shrink:0;
+}
+
+#sysfooter button{
+  width:100%;
   font-family:'IBM Plex Mono',monospace;
-  overflow:auto;
-  padding:12px;
-  box-sizing:border-box;
-  opacity:.98;
-  z-index:1;
-}
-
-#terminal.active{
-  height:220px;
-  padding:12px;
-}
-
-#terminal.glitching{
-  animation: terminalGlitch .22s steps(2,end) 5;
-}
-
-@keyframes terminalGlitch{
-  0%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
-  20%{ transform:translate(-2px,1px); text-shadow:2px 0 0 #00ffff, -2px 0 0 #ff003c; filter:contrast(1.25); }
-  40%{ transform:translate(2px,-1px); text-shadow:-2px 0 0 #00ffff, 2px 0 0 #ff003c; filter:brightness(1.2); }
-  60%{ transform:translate(-1px,2px); text-shadow:1px 0 0 #00ffff, -1px 0 0 #ff003c; }
-  80%{ transform:translate(2px,0); text-shadow:-2px 0 0 #00ffff, 2px 0 0 #ff003c; }
-  100%{ transform:translate(0,0); text-shadow:0 0 0 #00ff00, 0 0 0 #ff00c8; filter:none; }
-}
-
-.small-link{
-  color:#d1c6a9;
-  text-decoration:underline;
+  font-size:10px;
+  padding:7px;
+  background:transparent;
+  border:1px solid var(--border-bright);
+  color:var(--text-muted);
+  border-radius:5px;
   cursor:pointer;
-  display:inline-block;
-  margin-right:14px;
-  margin-top:10px;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:12px;
+  letter-spacing:.05em;
+  transition:all .15s;
 }
+#sysfooter button:hover{
+  border-color:#333;
+  color:var(--text-dim);
+}
+
+/* ── TASKBAR ─────────────────────────────── */
+#taskbar{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:46px;
+  background:rgba(6,8,14,.95);
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  z-index:10;
+  backdrop-filter:blur(12px);
+}
+
+.taskapp{
+  height:28px;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--bg3);
+  color:var(--text-dim);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-right:6px;
+}
+
+.taskapp.active{
+  border-color:#2a4030;
+  color:var(--green);
+  box-shadow:inset 0 -2px 0 var(--green);
+}
+
+.taskapp-dot{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--green);
+}
+
+#clock{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-dim);
+  text-align:right;
+  line-height:1.4;
+}
+
+/* ── POPUP / MODAL ───────────────────────── */
+#popup{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+#popup.show{display:flex;}
+
+#popupbox{
+  width:360px;
+  background:var(--bg3);
+  border:1px solid var(--border-bright);
+  border-radius:12px;
+  padding:22px;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+
+#popupbox h3{
+  font-size:13px;
+  font-weight:500;
+  margin-bottom:10px;
+}
+
+#popupbox p{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-bottom:16px;
+  line-height:1.6;
+}
+
+/* ── TOAST ───────────────────────────────── */
+#toast{
+  position:absolute;
+  right:16px;
+  top:60px;
+  width:260px;
+  background:var(--bg3);
+  border:1px solid var(--border-bright);
+  border-radius:10px;
+  padding:12px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  transform:translateY(-8px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s, transform .25s;
+  z-index:60;
+}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast-title{font-size:11px;color:var(--text);margin-bottom:4px;font-weight:500;}
+#toast-msg{font-size:10px;color:var(--text-dim);line-height:1.5;}
+
+/* ── APPLICANT CONTENT STYLES ────────────── */
+.page-title{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.12em;
+  color:var(--text-muted);
+  margin-bottom:28px;
+  text-transform:uppercase;
+}
+
+.wordmark{
+  font-size:26px;
+  font-weight:600;
+  letter-spacing:-.02em;
+  color:var(--text);
+  margin-bottom:4px;
+}
+
+.wordmark span{color:var(--green);}
 
 .card{
-  border:1px solid #2b2b2b;
-  padding:22px;
-  margin-top:20px;
-  background:#060606;
-  max-width:760px;
-  border-radius:14px;
-  box-shadow:0 12px 30px rgba(0,0,0,.28);
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:28px 32px;
+  max-width:680px;
+  margin-bottom:20px;
 }
 
 .badge{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border:1px solid #2a3a31;
-  border-radius:999px;
-  background:#0a120d;
-  color:#a8ffc9;
+  gap:7px;
+  padding:5px 11px;
+  border:1px solid rgba(0,230,118,.2);
+  border-radius:99px;
+  background:rgba(0,230,118,.06);
+  color:#80f0b0;
   font-family:'IBM Plex Mono',monospace;
-  font-size:12px;
-  margin-bottom:12px;
+  font-size:10px;
+  letter-spacing:.05em;
+  margin-bottom:18px;
 }
 
 .badge-dot{
-  width:8px;
-  height:8px;
+  width:6px;
+  height:6px;
   border-radius:50%;
-  background:#00ff88;
-  box-shadow:0 0 8px rgba(0,255,136,.4);
+  background:var(--green);
 }
 
-.muted{ color:#b7ae9b; }
-
-.q-title{
-  font-size:30px;
-  margin-bottom:10px;
+.card h2{
+  font-size:22px;
+  font-weight:500;
+  margin-bottom:8px;
+  letter-spacing:-.01em;
 }
 
-.option-group button{
-  width:100%;
+.card p{
+  color:var(--text-dim);
+  font-size:13px;
+  line-height:1.7;
+  margin-bottom:12px;
+}
+
+.card p:last-child{margin-bottom:0;}
+
+.meta-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin:16px 0;
+}
+
+.meta-cell{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px 14px;
+}
+
+.meta-cell .mc-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:.1em;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+
+.meta-cell .mc-val{
+  font-size:13px;
+  font-weight:500;
+  color:var(--text);
+}
+
+.divider{
+  border:0;
+  border-top:1px solid var(--border);
+  margin:20px 0;
+}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 18px;
+  background:var(--bg);
+  border:1px solid var(--border-bright);
+  color:var(--text);
+  border-radius:8px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .15s;
+  margin-right:10px;
+  margin-top:6px;
   text-align:left;
 }
 
-#assessmentProgressWrap{
-  margin-top:20px;
-  max-width:760px;
+.btn:hover{
+  background:var(--bg3);
+  border-color:#333;
+  transform:translateY(-1px);
 }
 
-#assessmentProgressLabel{
-  font-family:'IBM Plex Mono',monospace;
+.btn:active{transform:translateY(0);}
+
+.btn-primary{
+  background:rgba(0,230,118,.08);
+  border-color:rgba(0,230,118,.3);
+  color:var(--green);
+}
+
+.btn-primary:hover{
+  background:rgba(0,230,118,.14);
+  border-color:rgba(0,230,118,.5);
+}
+
+.btn-sm{
   font-size:12px;
-  color:#c7c0af;
-  margin-bottom:8px;
+  padding:8px 14px;
 }
 
-#assessmentProgress{
+.btn-block{
+  display:flex;
   width:100%;
-  height:12px;
-  background:#111;
-  border:1px solid #262626;
-  border-radius:999px;
-  overflow:hidden;
+  margin-right:0;
 }
 
-#assessmentProgressBar{
-  width:0%;
-  height:100%;
-  background:#00ff88;
-  transition:width .5s;
-}
-
-pre{
-  white-space:pre-wrap;
-  word-wrap:break-word;
-  margin:0;
-}
-
-hr{
-  border:0;
-  border-top:1px solid #222;
-  margin:18px 0;
-}
-
-#applicantPopup{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:60;
-}
-
-.popup-hidden{
-  display:none !important;
-}
-
-#popupCard{
-  width:min(420px, 88vw);
-  background:#10131a;
-  border:1px solid #2c3342;
-  border-radius:14px;
-  box-shadow:0 20px 50px rgba(0,0,0,.45);
-  padding:22px;
-  color:#eef2ff;
+/* LINKS */
+.inline-link{
   font-family:'IBM Plex Mono',monospace;
-}
-
-#popupTitle{
-  font-size:14px;
-  margin-bottom:12px;
-  color:#ffffff;
-}
-
-#popupMessage{
-  font-size:12px;
-  line-height:1.7;
-  color:#c8cedd;
-  margin-bottom:16px;
-}
-
-#toast{
-  position:absolute;
-  right:18px;
-  top:72px;
-  z-index:70;
-  min-width:260px;
-  max-width:340px;
-  background:#10131a;
-  border:1px solid #2d3340;
-  border-radius:12px;
-  box-shadow:0 20px 45px rgba(0,0,0,.38);
-  padding:14px 16px;
-  color:#eff2ff;
-  font-family:'IBM Plex Mono',monospace;
-  transform:translateY(-10px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .25s, transform .25s;
-}
-
-#toast.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-#toastTitle{
-  font-size:12px;
-  margin-bottom:6px;
-  color:#ffffff;
-}
-
-#toastMessage{
   font-size:11px;
-  line-height:1.6;
-  color:#c8cedd;
+  color:var(--text-muted);
+  text-decoration:underline;
+  cursor:pointer;
+  margin-right:16px;
+  transition:color .15s;
 }
+.inline-link:hover{color:var(--text-dim);}
 
-#taskbar{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:48px;
-  background:rgba(10,12,18,.92);
-  border-top:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(10px);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 14px;
-  z-index:40;
-  font-family:'IBM Plex Mono',monospace;
-}
-
-#taskbarLeft{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.task-app{
-  height:32px;
-  min-width:110px;
-  padding:0 12px;
-  border:1px solid #2a2e38;
+/* POLICY SCROLL */
+#policyScroll{
+  max-height:240px;
+  overflow-y:auto;
+  background:var(--bg2);
+  border:1px solid var(--border);
   border-radius:8px;
-  background:#12151d;
-  color:#dce4d2;
+  padding:16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--text-dim);
+  line-height:1.8;
+  margin-bottom:16px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+
+#policyScroll p{margin-bottom:10px;}
+
+.consent-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
+  gap:10px;
+  font-family:'IBM Plex Mono',monospace;
   font-size:11px;
-}
-
-.task-app.active{
-  box-shadow:inset 0 -2px 0 #00ff88;
-}
-
-#taskbarClock{
-  text-align:right;
-  color:#d6dbeb;
-  font-size:11px;
-  line-height:1.3;
-  min-width:150px;
-}
-
-.loading-wrap{
-  max-width:720px;
-}
-
-.loading-title{
-  font-size:34px;
+  color:var(--text-dim);
+  line-height:1.6;
   margin-bottom:10px;
 }
 
-.loading-sub{
-  font-size:18px;
-  line-height:1.7;
-  color:#d2d7e3;
-}
+#consentCheck{accent-color:var(--green);margin-top:3px;cursor:pointer;}
 
-.loading-dots{
-  display:flex;
-  gap:10px;
-  margin:18px 0;
-}
-
-.loading-dots span{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#00ff88;
-  opacity:.2;
-  animation:pulseDots 1.2s infinite ease-in-out;
-}
-
-.loading-dots span:nth-child(2){ animation-delay:.15s; }
-.loading-dots span:nth-child(3){ animation-delay:.3s; }
-
-@keyframes pulseDots{
-  0%, 100%{ opacity:.2; transform:scale(1); }
-  50%{ opacity:1; transform:scale(1.25); }
-}
-
-#resultBadge{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  border:1px solid #20422f;
-  background:#09140d;
-  color:#98ffc0;
-  border-radius:999px;
-  padding:10px 14px;
+/* QUESTIONS */
+.q-number{
   font-family:'IBM Plex Mono',monospace;
-  font-size:12px;
-  margin-bottom:14px;
+  font-size:10px;
+  color:var(--text-muted);
+  letter-spacing:.1em;
+  margin-bottom:12px;
 }
 
-#resultBadge i{
-  width:9px;
-  height:9px;
+.q-text{
+  font-size:19px;
+  font-weight:400;
+  line-height:1.5;
+  color:var(--text);
+  margin-bottom:24px;
+  letter-spacing:-.01em;
+}
+
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.opt{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:9px;
+  cursor:pointer;
+  transition:all .15s;
+  font-size:13px;
+  color:var(--text-dim);
+  text-align:left;
+  width:100%;
+}
+
+.opt:hover{
+  background:var(--bg3);
+  border-color:var(--border-bright);
+  color:var(--text);
+  transform:translateX(2px);
+}
+
+.opt-key{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  color:var(--text-muted);
+  width:16px;
+  flex-shrink:0;
+}
+
+.prog-track{
+  width:100%;
+  height:3px;
+  background:var(--bg);
+  border-radius:99px;
+  overflow:hidden;
+  margin-bottom:24px;
+}
+
+.prog-fill{
+  height:100%;
+  background:var(--green);
+  border-radius:99px;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* LOADING */
+.loading-wrap{max-width:600px;}
+
+.loading-title{
+  font-size:28px;
+  font-weight:400;
+  letter-spacing:-.02em;
+  margin-bottom:12px;
+}
+
+.loading-sub{
+  color:var(--text-dim);
+  font-size:14px;
+  line-height:1.7;
+  margin-bottom:24px;
+}
+
+.spinner{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.spinner span{
+  width:8px;
+  height:8px;
   border-radius:50%;
-  background:#00ff88;
-  display:inline-block;
-  box-shadow:0 0 8px rgba(0,255,136,.5);
+  background:var(--green);
+  opacity:.2;
+  animation:pulse 1.4s infinite ease-in-out;
+}
+.spinner span:nth-child(2){animation-delay:.16s;}
+.spinner span:nth-child(3){animation-delay:.32s;}
+
+@keyframes pulse{
+  0%,100%{opacity:.2;transform:scale(1);}
+  50%{opacity:1;transform:scale(1.3);}
 }
 
-@media (max-width: 980px){
-  #window{
-    left:20px;
-    right:20px;
-  }
+/* RESULTS */
+.result-type{
+  font-size:34px;
+  font-weight:500;
+  letter-spacing:-.02em;
+  margin:16px 0 8px;
+  color:var(--text);
+}
 
-  #windowContent{
-    flex-direction:column;
-  }
+.result-desc{
+  font-size:16px;
+  line-height:1.7;
+  color:var(--text-dim);
+  max-width:600px;
+  margin-bottom:16px;
+}
 
-  #system{
-    border-left:none;
-    border-top:1px solid #222;
-  }
+/* GLITCH ANIMATION */
+@keyframes glitch{
+  0%,100%{clip-path:none;transform:none;}
+  8%{clip-path:inset(20% 0 60% 0);transform:translate(-3px,0);}
+  16%{clip-path:inset(50% 0 30% 0);transform:translate(3px,0);}
+  24%{clip-path:none;transform:none;}
+}
 
-  #desktopIcons{
-    display:none;
-  }
+.glitching #terminal{animation:glitch .3s steps(2,end) 4;}
+
+/* SCROLLBAR */
+#main::-webkit-scrollbar{width:4px;}
+#main::-webkit-scrollbar-track{background:transparent;}
+#main::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #desktopIcons{display:none;}
+  #window{left:10px;right:10px;}
+  #windowContent{flex-direction:column;}
+  #syspanel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:240px;}
+  #main{padding:24px 20px;}
 }
 </style>
 </head>
 <body>
 <div id="desktop">
 
-  <div id="desktopIcons">
-    <div class="desktop-icon" onclick="denyDesktopAccess('Applicants')">
-      <div class="icon-box"></div>
-      <div>Applicants</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
-      <div class="icon-box"></div>
-      <div>Profiles</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
-      <div class="icon-box"></div>
-      <div>Archive</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Internal')">
-      <div class="icon-box"></div>
-      <div>Internal</div>
-    </div>
-  </div>
+  <!-- DESKTOP ICONS -->
+  <div id="desktopIcons"></div>
 
+  <!-- MAIN WINDOW -->
   <div id="window">
     <div id="titlebar">
-      <div id="windowControls">
-        <div class="window-dot"></div>
-        <div class="window-dot"></div>
-        <div class="window-dot"></div>
+      <div style="display:flex;gap:6px;">
+        <div class="wdot"></div>
+        <div class="wdot"></div>
+        <div class="wdot"></div>
       </div>
-
-      <div id="tabStrip">
-        <div class="fake-tab">
-          <span class="tab-dot"></span>
-          PersonaMetric Applicant Portal
+      <div id="tabstrip">
+        <div class="tab">
+          <span class="tab-led"></span>
+          PersonaMetric — Applicant Portal
         </div>
       </div>
-
-      <div id="addressBar">
-        <span id="appMode">Candidate Portal</span>
-        <span>secured://personametric/applicant</span>
-      </div>
+      <div id="urlbar">secured://personametric.io/applicant-portal</div>
     </div>
 
     <div id="windowContent">
+      <!-- APPLICANT PANE -->
       <div id="main">
-        <h1>PERSONAMETRIC</h1>
+        <div class="wordmark">Persona<span>Metric</span></div>
         <div id="story"></div>
       </div>
 
-      <div id="system">
-        <div>MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2</div>
-        <div>SESSION ID: <span id="session"></span></div>
-        <div>DATASET SIZE: <span id="dataset"></span></div>
-        <div>QUESTION: <span id="questionCount">0 / 15</span></div>
-        <div>STAGE: <span id="stageLabel">Application Received</span></div>
-        <hr>
+      <!-- SYSTEM PANE -->
+      <div id="syspanel">
+        <div id="sysheader">
+          <div class="sh-row label">BEHAVIORAL ENGINE v4.2</div>
+          <div class="sh-row"><span>SESSION</span><span id="sid">—</span></div>
+          <div class="sh-row"><span>PROFILES INDEXED</span><span id="dataset">—</span></div>
+          <div class="sh-row"><span>QUESTION</span><span id="qcount">0 / 15</span></div>
+          <div class="sh-row"><span>STAGE</span><span id="stage">INTAKE</span></div>
+        </div>
 
-        <div>Assessment Progress</div>
-        <div class="progress"><div id="overallBar" class="bar"></div></div>
+        <div id="stats">
+          <div class="stat-row">
+            <span class="stat-label">Compliance</span>
+            <div class="stat-track"><div class="stat-fill fill-green" id="b-compliance"></div></div>
+            <span class="stat-val" id="v-compliance">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Resistance</span>
+            <div class="stat-track"><div class="stat-fill fill-red" id="b-resistance"></div></div>
+            <span class="stat-val" id="v-resistance">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Curiosity</span>
+            <div class="stat-track"><div class="stat-fill fill-blue" id="b-curiosity"></div></div>
+            <span class="stat-val" id="v-curiosity">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Suggestibility</span>
+            <div class="stat-track"><div class="stat-fill fill-amber" id="b-suggest"></div></div>
+            <span class="stat-val" id="v-suggest">0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Predictability</span>
+            <div class="stat-track"><div class="stat-fill fill-purple" id="b-predict"></div></div>
+            <span class="stat-val" id="v-predict">0%</span>
+          </div>
+        </div>
 
-        <div>Compliance</div>
-        <div class="progress"><div id="complianceBar" class="bar"></div></div>
-
-        <div>Resistance</div>
-        <div class="progress"><div id="resistanceBar" class="bar"></div></div>
-
-        <div>Curiosity</div>
-        <div class="progress"><div id="curiosityBar" class="bar"></div></div>
-
-        <div>Suggestibility</div>
-        <div class="progress"><div id="hiddenBar" class="bar"></div></div>
-
-        <div>Predictability</div>
-        <div class="progress"><div id="sentimentBar" class="bar"></div></div>
-
-        <hr>
-
-        <div id="systemFeedWrap">
-          <div id="systemFeedTitle">Internal Process Log</div>
+        <div id="termwrap">
+          <div id="termtitle">INTERNAL PROCESS LOG ▸ LIVE</div>
           <div id="terminal"></div>
         </div>
 
-        <button onclick="resetGame()">Reset Session</button>
+        <div id="sysfooter">
+          <button onclick="resetSession()">⟳ RESET SESSION</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div id="applicantPopup" class="popup-hidden">
-    <div id="popupCard">
-      <div id="popupTitle">Access Restricted</div>
-      <div id="popupMessage">This directory is not available in applicant view.</div>
-      <button onclick="closeApplicantPopup()">Close</button>
+  <!-- POPUP -->
+  <div id="popup">
+    <div id="popupbox">
+      <h3 id="popup-title">Access Denied</h3>
+      <p id="popup-msg">This directory is restricted to internal personnel.</p>
+      <button class="btn btn-sm" onclick="closePopup()">Close</button>
     </div>
   </div>
 
+  <!-- TOAST -->
   <div id="toast">
-    <div id="toastTitle">PersonaMetric</div>
-    <div id="toastMessage">Applicant profile synchronized.</div>
+    <div id="toast-title">PersonaMetric</div>
+    <div id="toast-msg">—</div>
   </div>
 
+  <!-- TASKBAR -->
   <div id="taskbar">
-    <div id="taskbarLeft">
-      <div class="task-app">SYSTEM</div>
-      <div class="task-app active">PersonaMetric</div>
-      <div class="task-app">Terminal</div>
+    <div style="display:flex;align-items:center;">
+      <div class="taskapp">SYSTEM</div>
+      <div class="taskapp active"><span class="taskapp-dot"></span>PersonaMetric</div>
+      <div class="taskapp">Terminal</div>
     </div>
-    <div id="taskbarClock">
-      <div id="clockTime">1:00 PM</div>
-      <div id="clockDate">Sun Apr 12, 2026</div>
-    </div>
+    <div id="clock"><div id="cl-time">—</div><div id="cl-date">—</div></div>
   </div>
-
 </div>
 
 <script>
-let sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
-document.getElementById("session").innerText = sessionID;
+/* ─── STATE ───────────────────────────────────────────── */
+const DEFAULTS = {
+  screen:"portal",
+  qi:0,
+  compliance:0,resistance:0,curiosity:0,suggest:0,predict:0,
+  answers:[],finished:false,result:null,stats:null
+};
 
-let datasetSize = 18492 + Math.floor(Math.random()*400);
-document.getElementById("dataset").innerText = datasetSize.toLocaleString();
-setInterval(()=>{
-  datasetSize += Math.floor(Math.random()*3);
-  document.getElementById("dataset").innerText = datasetSize.toLocaleString();
-},1200);
+let S = JSON.parse(localStorage.getItem("pm_state") || "null") || {...DEFAULTS};
+let SID = localStorage.getItem("pm_sid") || newSID();
+let dataset = 18492 + Math.floor(Math.random()*600);
 
-const questions = [
+function newSID(){
+  const id = "PM-" + Math.random().toString(36).slice(2,10).toUpperCase();
+  localStorage.setItem("pm_sid",id);
+  return id;
+}
+
+function save(){localStorage.setItem("pm_state", JSON.stringify(S));}
+
+/* ─── QUESTIONS ───────────────────────────────────────── */
+const Qs = [
   {
-    text:"When making decisions at work, what matters more?",
-    options:[
-      {label:"Following instructions", effect:{compliance:2, predictability:1}},
-      {label:"Doing what feels right", effect:{resistance:1, curiosity:1}},
-      {label:"Finding a better way", effect:{curiosity:2, resistance:1}},
-      {label:"It depends", effect:{curiosity:1, predictability:1}}
+    text:"When you start a new job and receive a directive you think might be inefficient, your first instinct is to:",
+    opts:[
+      {l:"Follow it without comment — that's what new employees do.",e:{compliance:2,predict:1}},
+      {l:"Follow it, but note your concerns to a manager at the right moment.",e:{compliance:1,curiosity:1}},
+      {l:"Ask questions until I understand the reasoning behind it.",e:{curiosity:2,resistance:1}},
+      {l:"Propose an alternative process right away.",e:{resistance:2,curiosity:1}}
     ]
   },
   {
-    text:"If a rule does not make sense, do you still follow it?",
-    options:[
-      {label:"Always", effect:{compliance:2, hiddenInfluence:1}},
-      {label:"Usually", effect:{compliance:1, predictability:1}},
-      {label:"Sometimes", effect:{curiosity:1}},
-      {label:"Rarely", effect:{resistance:2}}
+    text:"A company asks you to sign an agreement that waives some of your rights in exchange for continued employment. You:",
+    opts:[
+      {l:"Sign it — job security matters more.",e:{compliance:2,suggest:2}},
+      {l:"Sign it reluctantly, but feel uneasy.",e:{compliance:1,predict:1}},
+      {l:"Read every clause carefully before deciding.",e:{curiosity:2,resistance:1}},
+      {l:"Refuse and look for work elsewhere.",e:{resistance:3}}
+    ],
+    log:["compliance-under-duress variable updated","subject prioritization: security over autonomy","high-compliance flag set"]
+  },
+  {
+    text:"How do you feel about AI systems making decisions that affect your career — resume screening, role assignments, performance scores?",
+    opts:[
+      {l:"It's fine. Algorithms are more objective than humans.",e:{suggest:2,compliance:1}},
+      {l:"I accept it, even if it makes me a little nervous.",e:{predict:1,suggest:1}},
+      {l:"I'm skeptical — bias bakes in, it just hides better.",e:{resistance:1,curiosity:2}},
+      {l:"It's deeply wrong and I would actively resist it.",e:{resistance:3}}
+    ],
+    log:["AI trust variable logged","subject attitude toward automated evaluation recorded","interesting response pattern — cross-referencing"]
+  },
+  {
+    text:"If everyone in your team agrees on a course of action but you believe it's flawed, you typically:",
+    opts:[
+      {l:"Go along with the group — I must be missing something.",e:{suggest:2,compliance:1}},
+      {l:"Stay quiet in the meeting, but bring it up privately later.",e:{predict:2}},
+      {l:"Say something in the moment, even if it's uncomfortable.",e:{resistance:2,curiosity:1}},
+      {l:"Compile evidence and make a formal case against it.",e:{curiosity:2,resistance:1}}
     ]
   },
   {
-    text:"How do you feel about personality tests?",
-    options:[
-      {label:"They are helpful", effect:{compliance:1, hiddenInfluence:1}},
-      {label:"They are interesting", effect:{curiosity:2}},
-      {label:"They are pointless", effect:{resistance:2}},
-      {label:"I am not sure", effect:{curiosity:1, predictability:1}}
+    text:"You discover a company policy that seems designed to benefit the company at a significant cost to employees. You:",
+    opts:[
+      {l:"Assume the company has good reasons I'm not aware of.",e:{compliance:2,suggest:1}},
+      {l:"Accept it — every workplace has policies like this.",e:{compliance:1,predict:1}},
+      {l:"Research it and raise it through proper channels.",e:{curiosity:2}},
+      {l:"Discuss it openly with colleagues and push for change.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["response logged","behavioral marker updated"]
+    log:["institutional trust threshold measured","subject deference to authority: high","prediction model updating"]
   },
   {
-    text:"If everyone else agrees on something, but you do not, what do you do?",
-    options:[
-      {label:"Go along with them", effect:{compliance:2, hiddenInfluence:1}},
-      {label:"Stay quiet", effect:{predictability:1, compliance:1}},
-      {label:"Speak up", effect:{resistance:2}},
-      {label:"Depends on the situation", effect:{curiosity:1, predictability:1}}
-    ]
-  },
-  {
-    text:"Do you believe most systems are designed to help people?",
-    options:[
-      {label:"Yes", effect:{compliance:2, predictability:1}},
-      {label:"No", effect:{resistance:2}},
-      {label:"Sometimes", effect:{curiosity:1}},
-      {label:"I’ve never thought about it", effect:{hiddenInfluence:1, predictability:1}}
+    text:"You're applying for a role and the personality test results will determine whether you advance. Knowing that, you:",
+    opts:[
+      {l:"Answer as authentically as I can — that's the point.",e:{compliance:1,predict:1}},
+      {l:"Try to answer the way I think they want.",e:{suggest:2,compliance:1}},
+      {l:"Feel uneasy — who decided what the right answers are?",e:{curiosity:2,resistance:1}},
+      {l:"Find it troubling that a test shapes this decision at all.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["subject trust level recorded","authority acceptance variable updated","prediction model initializing"]
+    log:["subject self-awareness: elevated","response authenticity uncertain","adjusting model weights","meta-awareness detected"]
   },
   {
-    text:"Which sounds more like you?",
-    options:[
-      {label:"I like clear instructions", effect:{compliance:2, predictability:1}},
-      {label:"I like flexibility", effect:{curiosity:1}},
-      {label:"I like figuring things out myself", effect:{resistance:1, curiosity:1}},
-      {label:"I like a mix", effect:{predictability:1, curiosity:1}}
-    ]
-  },
-  {
-    text:"If something online asks for personal information, you usually:",
-    options:[
-      {label:"Provide it", effect:{compliance:1, hiddenInfluence:2}},
-      {label:"Provide some of it", effect:{hiddenInfluence:1, predictability:1}},
-      {label:"Avoid it", effect:{resistance:2}},
-      {label:"Provide fake information", effect:{resistance:1, curiosity:1}}
+    text:"When an app or website asks for your location, camera access, or browsing history:",
+    opts:[
+      {l:"I allow it — it usually just makes the experience better.",e:{suggest:2,compliance:1}},
+      {l:"I allow it if the app seems trustworthy.",e:{predict:1,suggest:1}},
+      {l:"I only grant the minimum permissions required.",e:{curiosity:1,resistance:1}},
+      {l:"I decline whenever possible and use privacy tools.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["live analysis active","privacy concern detected","resistance marker increased","prediction confidence: 38%"],
-    link:"sessionLog"
+    log:["data consent variable updated","privacy instinct: low","live data extraction in progress","subject not aware of scope"]
   },
   {
-    text:"Do you believe your online activity is private?",
-    options:[
-      {label:"Yes", effect:{hiddenInfluence:2, compliance:1}},
-      {label:"No", effect:{resistance:1, curiosity:1}},
-      {label:"Somewhat", effect:{predictability:1}},
-      {label:"I don’t know", effect:{curiosity:1}}
+    text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
+    opts:[
+      {l:"Accept it — that's just how these systems work.",e:{suggest:2,compliance:1}},
+      {l:"Acknowledge it but don't really think about it.",e:{predict:2}},
+      {l:"Wonder what 'behavioral data' actually means in this context.",e:{curiosity:2}},
+      {l:"Want to know exactly what's collected and how it's used.",e:{curiosity:1,resistance:2}}
     ],
-    glitch:["surveillance awareness variable updated","subject self-awareness: medium"]
+    log:["disclosure response logged","subject reads terms of service: unlikely","data awareness score: low","this pattern repeats across 91% of subjects"]
   },
   {
-    text:"When you download a new app, do you read the terms and conditions?",
-    options:[
-      {label:"Yes", effect:{curiosity:1, resistance:1}},
-      {label:"No", effect:{hiddenInfluence:2, predictability:1}},
-      {label:"Sometimes", effect:{predictability:1}},
-      {label:"I skim them", effect:{hiddenInfluence:1}}
+    text:"Do you believe that personality tests like this one can accurately determine whether someone is a good employee?",
+    opts:[
+      {l:"Yes — there's real science behind these methods.",e:{suggest:2,compliance:1}},
+      {l:"Partially — they give some useful signals.",e:{predict:1}},
+      {l:"Mostly no — they measure test-taking, not competence.",e:{curiosity:1,resistance:1}},
+      {l:"No — and I'm uncomfortable that companies use them.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["most subjects skip terms and conditions","subject response recorded"]
+    log:["subject attitude toward assessment logged","irony noted: subject is currently being assessed","prediction confidence increasing"]
   },
   {
-    text:"If a computer made a decision about you, would you trust it?",
-    options:[
-      {label:"Yes", effect:{compliance:2, hiddenInfluence:1}},
-      {label:"No", effect:{resistance:2}},
-      {label:"Maybe", effect:{predictability:1}},
-      {label:"Depends", effect:{curiosity:1}}
+    text:"If a machine learning model trained on historical data was screening candidates and quietly filtering out people from certain zip codes, educational backgrounds, or age ranges:",
+    opts:[
+      {l:"I'd trust that the model was built responsibly.",e:{suggest:2,compliance:1}},
+      {l:"I'd feel concerned but wouldn't know how to challenge it.",e:{predict:1,suggest:1}},
+      {l:"I'd consider it a form of systemic discrimination.",e:{curiosity:1,resistance:1}},
+      {l:"I'd report it and push hard for transparency.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["trust in automated systems measured"],
-    link:"datasetSummary"
+    log:["algorithmic bias awareness measured","selection pressure variable updated","subject classified as: see profile summary","note: this assessment performs the function being described"]
   },
   {
-    text:"Do you think people can be accurately described using data?",
-    options:[
-      {label:"Yes", effect:{compliance:1, predictability:2}},
-      {label:"No", effect:{resistance:2}},
-      {label:"Sometimes", effect:{curiosity:1}},
-      {label:"Not sure", effect:{curiosity:1, predictability:1}}
+    text:"How much do you believe your online behavior — searches, clicks, reading time — is being actively monitored right now?",
+    opts:[
+      {l:"Not much. I'm not that interesting.",e:{suggest:2,predict:1}},
+      {l:"Probably some ad targeting, nothing more.",e:{suggest:1,predict:1}},
+      {l:"Significantly — I just don't know exactly how.",e:{curiosity:2}},
+      {l:"Extensively. Most platforms are surveillance systems.",e:{resistance:1,curiosity:2}}
     ],
-    glitch:["subject aware of modeling possibility","interesting"]
+    log:["surveillance awareness: low","subject underestimating scope","current session data includes: response timing, cursor patterns, text selection, scroll depth"]
   },
   {
-    text:"If you knew this test was judging you, would you answer differently?",
-    options:[
-      {label:"Yes", effect:{predictability:1, hiddenInfluence:1}},
-      {label:"No", effect:{resistance:1, curiosity:1}},
-      {label:"Maybe", effect:{curiosity:1, hiddenInfluence:1}},
-      {label:"I don’t know", effect:{predictability:1}}
+    text:"The job market has changed dramatically due to automation. What should workers do?",
+    opts:[
+      {l:"Adapt and reskill — that's always been how progress works.",e:{compliance:1,predict:1}},
+      {l:"Accept it, even if it's uncomfortable.",e:{compliance:2,suggest:1}},
+      {l:"Demand more regulation and corporate accountability.",e:{resistance:2,curiosity:1}},
+      {l:"Organize collectively and refuse to accept these changes passively.",e:{resistance:3}}
     ],
-    glitch:["self-awareness detected","authenticity of responses uncertain","adjusting model"]
+    log:["labor disposition logged","subject systemic orientation recorded","response pattern: see profile"]
   },
   {
-    text:"Which is more important?",
-    options:[
-      {label:"Security", effect:{compliance:1, predictability:1}},
-      {label:"Freedom", effect:{resistance:2}},
-      {label:"Success", effect:{hiddenInfluence:1, compliance:1}},
-      {label:"Happiness", effect:{curiosity:1}}
+    text:"You find out the results of this assessment are being permanently stored and could be shared with affiliated employers. You feel:",
+    opts:[
+      {l:"Fine — I answered honestly so I have nothing to worry about.",e:{suggest:2,compliance:1}},
+      {l:"Mildly uncomfortable, but I agreed to the terms.",e:{predict:1,compliance:1}},
+      {l:"Betrayed — that wasn't clearly communicated.",e:{resistance:1,curiosity:1}},
+      {l:"This is exactly the kind of data power I find threatening.",e:{resistance:2,curiosity:1}}
     ],
-    glitch:["value hierarchy recorded"]
+    log:["subject reaction to data permanence logged","informed consent variable: marginal","profile retention: confirmed","sharing with 14 affiliated entities: confirmed"]
   },
   {
-    text:"Do you think your personality can change over time?",
-    options:[
-      {label:"Yes", effect:{curiosity:1}},
-      {label:"No", effect:{predictability:2}},
-      {label:"Maybe", effect:{curiosity:1, predictability:1}},
-      {label:"I don’t know", effect:{curiosity:1}}
+    text:"You've reached question 14. Looking back: have you been answering as yourself, or as who you think they want?",
+    opts:[
+      {l:"Myself — I don't perform for assessments.",e:{curiosity:1,predict:1}},
+      {l:"Mostly myself, but I probably softened some answers.",e:{suggest:1,predict:1}},
+      {l:"A mix. I noticed myself adjusting and then tried to stop.",e:{curiosity:2}},
+      {l:"I'm not sure I can tell anymore.",e:{curiosity:2,resistance:1}}
     ],
-    glitch:["personality stability belief recorded"]
+    log:["self-awareness metric updated","authenticity gradient recorded","this question is the most revealing","answer does not change the profile — the model adapted long ago"]
   },
   {
-    text:"Why did you answer these questions honestly?",
-    options:[
-      {label:"I want the job", effect:{compliance:2, hiddenInfluence:2}},
-      {label:"I was told to", effect:{compliance:2, predictability:1}},
-      {label:"I didn’t think it mattered", effect:{hiddenInfluence:2}},
-      {label:"I don’t know", effect:{curiosity:1}}
+    text:"Finally: Why are you completing this assessment?",
+    opts:[
+      {l:"Because I want the job.",e:{compliance:2,suggest:2}},
+      {l:"Because the process requires it and I comply with processes.",e:{compliance:2,predict:1}},
+      {l:"I'm genuinely curious what it reveals.",e:{curiosity:2}},
+      {l:"I don't fully know — but I kept going anyway.",e:{curiosity:1,suggest:1}}
     ],
-    glitch:["motivation factor identified","employment incentive increases compliance","honesty increases under evaluation conditions","subject categorized successfully","building profile"]
+    log:["motivation factor logged","employment incentive increases compliance by 40%","honesty declines as stakes increase","this is consistent across all 18,000+ subjects","building final profile now"]
   }
 ];
 
-const defaultState = {
-  screen:"portal",
-  questionIndex:0,
-  compliance:0,
-  resistance:0,
-  curiosity:0,
-  hiddenInfluence:0,
-  predictability:0,
-  answers:[],
-  finished:false,
-  result:null,
-  resultStats:null
+/* ─── DESKTOP ICONS ───────────────────────────────────── */
+const defaultIcons = [
+  {label:"Applicants",id:"applicants"},
+  {label:"Profiles",id:"profiles"},
+  {label:"Archive",id:"archive"},
+  {label:"Internal",id:"internal"}
+];
+
+const escalatedIcons = [
+  {label:"Profiles",id:"profiles"},
+  {label:"Archive",id:"archive"},
+  {label:"Retained",id:"retained"},
+  {label:"Do Not Open",id:"do-not-open"}
+];
+
+function renderIcons(list){
+  const el = document.getElementById("desktopIcons");
+  el.innerHTML = list.map(i=>`
+    <div class="dicon" onclick="denyAccess('${i.label}')">
+      <div class="dicon-img"></div>
+      <div class="dicon-label">${i.label}</div>
+    </div>
+  `).join("");
+}
+
+let folderAttempts = 0;
+function denyAccess(name){
+  folderAttempts++;
+  let msg = "This directory is not accessible from the applicant portal.";
+  if(folderAttempts >= 3) msg = "Repeated access attempts have been logged to your session record.";
+  if(folderAttempts >= 5) msg = "This directory contains retained applicant data. Access requires internal credentials.";
+  showPopup("Access Restricted", msg);
+  tlog("> restricted folder accessed: " + name, "warn");
+}
+
+/* ─── CLOCK ───────────────────────────────────────────── */
+function tickClock(){
+  const n=new Date();
+  document.getElementById("cl-time").textContent = n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  document.getElementById("cl-date").textContent = n.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
+}
+setInterval(tickClock,1000);
+tickClock();
+
+/* ─── DATASET COUNTER ─────────────────────────────────── */
+document.getElementById("sid").textContent = SID;
+document.getElementById("dataset").textContent = dataset.toLocaleString();
+setInterval(()=>{
+  dataset += Math.floor(Math.random()*4);
+  document.getElementById("dataset").textContent = dataset.toLocaleString();
+},1500);
+
+/* ─── ROUTING ─────────────────────────────────────────── */
+const stageMap = {
+  portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",
+  careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",
+  loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"
 };
-
-let state = JSON.parse(localStorage.getItem("personaMetricState")) || {...defaultState};
-
-function saveState(){
-  localStorage.setItem("personaMetricState", JSON.stringify(state));
-}
-
-function resetGame(){
-  localStorage.removeItem("personaMetricState");
-  state = {...defaultState};
-  sessionID = "PM-" + Math.random().toString(36).substring(2,10).toUpperCase();
-  document.getElementById("session").innerText = sessionID;
-  document.getElementById("terminal").innerHTML = "";
-  document.getElementById("terminal").classList.remove("active","glitching");
-  document.getElementById("desktopIcons").innerHTML = `
-    <div class="desktop-icon" onclick="denyDesktopAccess('Applicants')">
-      <div class="icon-box"></div>
-      <div>Applicants</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
-      <div class="icon-box"></div>
-      <div>Profiles</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
-      <div class="icon-box"></div>
-      <div>Archive</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Internal')">
-      <div class="icon-box"></div>
-      <div>Internal</div>
-    </div>
-  `;
-  updateBars();
-  setStageLabel();
-  route();
-}
-
-function createButton(text, fn){
-  const btn = document.createElement("button");
-  btn.innerText = text;
-  btn.onclick = fn;
-  return btn;
-}
-
-function setStory(html){
-  document.getElementById("story").innerHTML = html;
-}
-
-function appendInlineLink(text, fnName){
-  const a = document.createElement("span");
-  a.className = "small-link";
-  a.textContent = text;
-  a.onclick = ()=>window[fnName]();
-  document.getElementById("story").appendChild(a);
-}
 
 function route(){
   updateBars();
-  setStageLabel();
-  if(state.screen === "portal") return renderPortal();
-  if(state.screen === "about") return renderAbout();
-  if(state.screen === "policy") return renderPolicy();
-  if(state.screen === "careers") return renderCareers();
-  if(state.screen === "status") return renderStatus();
-  if(state.screen === "assessment") return renderQuestion();
-  if(state.screen === "loading") return renderLoadingScreen();
-  if(state.screen === "results") return showResults();
-  if(state.screen === "end") return endSession();
+  document.getElementById("stage").textContent = stageMap[S.screen] || "ACTIVE";
+  const fn = {
+    portal:renderPortal,about:renderAbout,policy:renderPolicy,
+    careers:renderCareers,status:renderStatus,assessment:renderQ,
+    loading:renderLoading,results:renderResults,end:renderEnd
+  }[S.screen];
+  if(fn) fn();
 }
 
-function setStageLabel(){
-  const el = document.getElementById("stageLabel");
-  if(!el) return;
+/* ─── RENDER HELPERS ──────────────────────────────────── */
+function setStory(html){document.getElementById("story").innerHTML=html;}
 
-  if(state.screen === "portal") el.innerText = "Application Received";
-  else if(state.screen === "policy") el.innerText = "Terms Review";
-  else if(state.screen === "assessment") el.innerText = "Behavioral Assessment";
-  else if(state.screen === "loading") el.innerText = "Profile Review";
-  else if(state.screen === "results") el.innerText = "Assessment Complete";
-  else if(state.screen === "end") el.innerText = "Session Archived";
-  else el.innerText = "Candidate Portal";
+function el(tag,attrs,inner){
+  const e=document.createElement(tag);
+  if(attrs) Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+  if(inner) e.innerHTML=inner;
+  return e;
 }
 
+function btn(label,fn,cls="btn"){
+  const b=el("button",{class:cls});
+  b.textContent=label;
+  b.onclick=fn;
+  return b;
+}
+
+function addToStory(...nodes){
+  const s=document.getElementById("story");
+  nodes.forEach(n=>s.appendChild(n));
+}
+
+function link(label,fn){
+  const a=el("span",{class:"inline-link"});
+  a.textContent=label;
+  a.onclick=fn;
+  return a;
+}
+
+/* ─── PORTAL ──────────────────────────────────────────── */
 function renderPortal(){
   setStory(`
+    <div class="page-title">Applicant Assessment Portal</div>
     <div class="card">
-      <div class="badge"><span class="badge-dot"></span> Candidate Evaluation Interface</div>
-      <div class="q-title">Applicant Portal</div>
-      <p>Behavioral Assessment Interface</p>
-      <p><strong>Applicant ID:</strong> ${sessionID}<br>
-      <strong>Position Applied For:</strong> Data Processing Associate<br>
-      <strong>Application Status:</strong> Assessment Required</p>
-      <p>Welcome to PersonaMetric. As part of our hiring process, all applicants must complete a behavioral assessment.</p>
-      <p>This assessment helps us understand decision-making, personality traits, and workplace compatibility.</p>
-      <p class="muted">Estimated time: 10 minutes<br>This assessment cannot be paused or restarted once started.</p>
-      <p>Please answer honestly.</p>
+      <div class="badge"><span class="badge-dot"></span>Assessment Required</div>
+      <h2>Welcome to PersonaMetric</h2>
+      <p>As part of our standardized hiring process, all candidates must complete a behavioral compatibility assessment before their application is reviewed by our team.</p>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="mc-label">Applicant ID</div><div class="mc-val">${SID}</div></div>
+        <div class="meta-cell"><div class="mc-label">Position</div><div class="mc-val">Data Processing Associate</div></div>
+        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--amber)">Assessment Pending</div></div>
+        <div class="meta-cell"><div class="mc-label">Est. Duration</div><div class="mc-val">8–12 minutes</div></div>
+      </div>
+      <hr class="divider">
+      <p style="font-size:12px;color:var(--text-muted);">This assessment cannot be paused once started. Please answer all questions honestly. Results are processed automatically.</p>
     </div>
   `);
-
-  const story = document.getElementById("story");
-  story.appendChild(createButton("BEGIN ASSESSMENT", ()=>{
-    state.screen = "policy";
-    saveState();
-    showToast("Application Stage Updated", "Behavioral assessment materials loaded.");
-    route();
-  }));
-
-  appendInlineLink("About PersonaMetric", "goAbout");
-  appendInlineLink("Data Use Policy", "goPolicy");
-  appendInlineLink("Careers", "goCareers");
-  appendInlineLink("System Status", "goStatus");
+  addToStory(
+    btn("Begin Assessment →","",  "btn btn-primary"),
+    link("About PersonaMetric",()=>go("about")),
+    link("Data Use Policy",()=>go("policy")),
+    link("Open Positions",()=>go("careers")),
+    link("System Status",()=>go("status"))
+  );
+  // Wire primary btn separately to log
+  const b = document.querySelector(".btn-primary");
+  b.onclick = ()=>{
+    tlog("> applicant initiated assessment sequence","");
+    tlog("> employment framing: active");
+    tlog("> behavioral profiling initialized");
+    go("policy");
+  };
 }
 
-function goAbout(){ state.screen = "about"; saveState(); route(); }
-function goPolicy(){ state.screen = "policy"; saveState(); route(); }
-function goCareers(){ state.screen = "careers"; saveState(); route(); }
-function goStatus(){ state.screen = "status"; saveState(); route(); }
-function returnPortal(){ state.screen = "portal"; saveState(); route(); }
+function go(screen){S.screen=screen;save();route();}
 
+/* ─── ABOUT ───────────────────────────────────────────── */
 function renderAbout(){
   setStory(`
+    <div class="page-title">About PersonaMetric</div>
     <div class="card">
-      <div class="q-title">About PersonaMetric</div>
-      <p>PersonaMetric is a behavioral analytics company specializing in predictive personality modeling and decision analysis.</p>
-      <p>Our systems help organizations better understand how individuals make decisions, respond to challenges, and function within structured environments.</p>
-      <p>Using behavioral assessments, response tracking, and adaptive modeling, PersonaMetric develops tools that improve hiring processes, workplace productivity, and user experience research.</p>
-      <p>Our technology is used across hiring, education, marketing, and organizational development.</p>
-      <p><em>PersonaMetric — Understanding People, Predicting Potential.</em></p>
+      <h2>Who We Are</h2>
+      <p>PersonaMetric is a behavioral analytics platform specializing in predictive personality modeling, workforce compatibility assessment, and applicant decision analytics.</p>
+      <p>Our technology is deployed across hiring, education, insurance, financial services, and organizational development. Using adaptive behavioral assessments, response-pattern analysis, and machine learning classification, PersonaMetric helps institutions understand how individuals think, decide, and respond under pressure.</p>
+      <p>Our platform has processed over 18,000 unique applicant profiles. Each assessment contributes anonymized data to our continuously improving behavioral model.</p>
+      <p style="font-style:italic;font-size:12px;color:var(--text-muted);">PersonaMetric — Understanding People. Predicting Potential.</p>
     </div>
   `);
-  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+  addToStory(btn("← Return to Portal",()=>go("portal")));
 }
 
+/* ─── POLICY / CONSENT ────────────────────────────────── */
 function renderPolicy(){
   setStory(`
+    <div class="page-title">Terms of Use & Consent</div>
     <div class="card">
-      <div class="q-title">Terms of Use & Consent</div>
-      <p class="muted">Please review the following terms before continuing your assessment.</p>
-
-      <div id="policyScrollBox" style="max-height:280px; overflow:auto; border:1px solid #222; padding:16px; background:#040404; font-family:'IBM Plex Mono',monospace; font-size:12px; line-height:1.7; color:#d7d0c0;">
-        <p><strong>PersonaMetric Applicant Assessment Terms</strong></p>
-        <p>By accessing this assessment portal, you acknowledge that your participation is part of PersonaMetric's applicant review process.</p>
-        <p>You understand that information submitted through this assessment may be collected, stored, processed, and retained for evaluation, research, quality assurance, security, product improvement, and system optimization purposes.</p>
-        <p>You acknowledge that assessment interactions may include response selections, timing patterns, completion behavior, and other engagement signals generated during normal use of the platform.</p>
-        <p>PersonaMetric may use submitted information to support automated systems, internal benchmarking, workflow refinement, and behavioral analytics initiatives.</p>
-        <p>Assessment completion does not guarantee employment, advancement, or selection for any current or future opportunity.</p>
-        <p>By continuing, you confirm that the information you provide is accurate to the best of your knowledge and that you consent to PersonaMetric's collection and processing practices as described above.</p>
+      <h2>Before You Begin</h2>
+      <p>Please read the following terms carefully. You must scroll to the end to enable consent.</p>
+      <div id="policyScroll">
+        <p><strong>PersonaMetric Applicant Assessment — Terms of Use and Data Processing Agreement</strong></p>
+        <p>By accessing and completing this assessment, you acknowledge that you have read, understood, and agree to the following terms and conditions in their entirety.</p>
+        <p>1. <strong>Data Collection.</strong> PersonaMetric collects all responses submitted through this platform, including but not limited to: answer selections, response timing, question re-read behavior, navigation patterns, scroll depth, and session duration. This data is processed in real time.</p>
+        <p>2. <strong>Behavioral Profiling.</strong> Response data is used to construct a behavioral profile. This profile may include inferred traits such as compliance tendency, resistance to authority, suggestibility, predictability, and curiosity. These classifications are generated automatically by our behavioral engine.</p>
+        <p>3. <strong>Data Retention and Sharing.</strong> Applicant profiles are retained indefinitely. Data may be shared with affiliated hiring organizations, third-party behavioral research partners, and platform licensing clients. You will not be notified of such sharing on an individual basis.</p>
+        <p>4. <strong>Use in Model Training.</strong> Anonymized assessment data may be incorporated into PersonaMetric's training datasets to improve model accuracy. Your data contributes to the system you are currently being evaluated by.</p>
+        <p>5. <strong>No Guarantee of Employment.</strong> Completion of this assessment does not guarantee advancement, employment, or any specific outcome. Results are one of several factors considered in the applicant review process.</p>
+        <p>6. <strong>No Right of Deletion.</strong> Due to the integrated nature of our behavioral modeling pipeline, individual data cannot be removed once incorporated into the system without disrupting model integrity. Deletion requests may be submitted but cannot be guaranteed.</p>
+        <p>7. <strong>Consent.</strong> By checking the box below, you confirm that you have read these terms and consent to the collection, processing, and use of your data as described above.</p>
       </div>
-
-      <div style="margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px;">
-        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer; line-height:1.5;">
-          <input type="checkbox" id="consentCheck" disabled style="margin-top:3px; accent-color:#00ff88;">
-          <span>I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions.</span>
-        </label>
-        <p id="scrollNotice" class="muted" style="font-size:11px; margin-top:10px;">Scroll to the bottom to enable consent.</p>
+      <div class="consent-row">
+        <input type="checkbox" id="consentCheck" disabled>
+        <label for="consentCheck">I have read and agree to the PersonaMetric Terms of Use, Consent to Data Processing, and Applicant Assessment Conditions. I understand that my behavioral data will be collected, retained, and potentially shared as described above.</label>
       </div>
+      <p id="scroll-notice" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);">↓ Scroll to the bottom of the terms to enable consent</p>
     </div>
   `);
 
-  const scrollBox = document.getElementById("policyScrollBox");
-  const consentCheck = document.getElementById("consentCheck");
-  const scrollNotice = document.getElementById("scrollNotice");
+  const scrollBox = document.getElementById("policyScroll");
+  const check = document.getElementById("consentCheck");
+  const notice = document.getElementById("scroll-notice");
 
-  if(scrollBox && consentCheck){
-    scrollBox.addEventListener("scroll", ()=>{
-      const atBottom = scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 4;
-      if(atBottom){
-        consentCheck.disabled = false;
-        if(scrollNotice) scrollNotice.innerText = "Consent enabled.";
-      }
-    });
-  }
+  scrollBox.addEventListener("scroll",()=>{
+    if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 5){
+      check.disabled = false;
+      notice.textContent = "Consent checkbox enabled.";
+      tlog("> subject scrolled terms of service","");
+      tlog("> 94% of applicants do not read section 3","dim");
+      tlog("> consent recorded","");
+    }
+  });
 
-  const story = document.getElementById("story");
-  const acceptBtn = createButton("CONTINUE", ()=>{
-    const consent = document.getElementById("consentCheck");
-    if(!consent || !consent.checked){
-      logTerminalGlitch(["consent flag missing","assessment progression blocked","awaiting user agreement"]);
-      const existing = document.getElementById("consentWarning");
-      if(!existing){
-        const warn = document.createElement("p");
-        warn.id = "consentWarning";
-        warn.className = "muted";
-        warn.style.color = "#ff8f8f";
-        warn.textContent = "You must agree to the terms before continuing.";
-        story.appendChild(warn);
+  const continueBtn = btn("Continue →","","btn btn-primary");
+  const backBtn = btn("← Return",()=>go("portal"));
+
+  continueBtn.onclick = ()=>{
+    if(!check.checked){
+      const w = document.getElementById("consent-warn");
+      if(!w){
+        const warn = el("p",{id:"consent-warn",style:"color:#ff6666;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:8px;"});
+        warn.textContent = "You must agree to the terms to continue.";
+        document.querySelector(".card").appendChild(warn);
       }
+      tlog("> consent flag: missing — blocking progression","warn");
       return;
     }
-    showToast("Consent Recorded", "Assessment materials unlocked.");
-    state.screen = "assessment";
-    saveState();
-    route();
-  });
+    showToast("Consent Recorded","Assessment materials unlocked. Profile tracking initialized.");
+    tlog("> consent flag: confirmed","");
+    tlog("> behavioral scanning: ACTIVE","");
+    go("assessment");
+  };
 
-  story.appendChild(acceptBtn);
-  story.appendChild(createButton("RETURN", returnPortal));
+  addToStory(continueBtn, backBtn);
 }
 
+/* ─── CAREERS ─────────────────────────────────────────── */
 function renderCareers(){
   setStory(`
+    <div class="page-title">Open Positions</div>
     <div class="card">
-      <div class="q-title">Careers</div>
-      <p>Open Opportunities:</p>
-      <p>- Data Processing Associate<br>- Assessment Support Analyst<br>- Behavioral Systems Coordinator</p>
-      <p class="muted">Applicants selected for advancement are contacted automatically.</p>
+      <h2>Current Opportunities</h2>
+      <p>The following roles are currently accepting applications through the PersonaMetric portal. All positions require completion of a behavioral compatibility assessment.</p>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="mc-label">Role</div><div class="mc-val">Data Processing Associate</div></div>
+        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--green)">Open</div></div>
+        <div class="meta-cell"><div class="mc-label">Role</div><div class="mc-val">Assessment Support Analyst</div></div>
+        <div class="meta-cell"><div class="mc-label">Status</div><div class="mc-val" style="color:var(--amber)">Limited</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">Candidates who advance are contacted automatically based on assessment compatibility scores. No manual review stage is required for initial screening.</p>
     </div>
   `);
-  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+  addToStory(btn("← Return to Portal",()=>go("portal")));
 }
 
+/* ─── STATUS ──────────────────────────────────────────── */
 function renderStatus(){
   setStory(`
+    <div class="page-title">System Status</div>
     <div class="card">
-      <div class="q-title">System Status</div>
-      <p>Assessment Portal: Online</p>
-      <p>Behavioral Engine: Stable</p>
-      <p>Applicant Queue: Active</p>
-      <p>Dataset Sync: In Progress</p>
-      <p class="muted">Last refresh: live</p>
+      <h2>Platform Status</h2>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="mc-label">Applicant Portal</div><div class="mc-val" style="color:var(--green)">Online</div></div>
+        <div class="meta-cell"><div class="mc-label">Behavioral Engine</div><div class="mc-val" style="color:var(--green)">Active</div></div>
+        <div class="meta-cell"><div class="mc-label">Profile Database</div><div class="mc-val" style="color:var(--green)">Syncing</div></div>
+        <div class="meta-cell"><div class="mc-label">ML Pipeline</div><div class="mc-val" style="color:var(--green)">Running</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">All systems operational. Last model update: 4 hours ago.</p>
     </div>
   `);
-  document.getElementById("story").appendChild(createButton("RETURN TO PORTAL", returnPortal));
+  addToStory(btn("← Return to Portal",()=>go("portal")));
 }
 
-function renderQuestion(){
-  if(state.questionIndex >= questions.length){
-    beginResultSequence();
-    return;
-  }
-
-  const q = questions[state.questionIndex];
-  const progress = Math.round((state.questionIndex / questions.length) * 100);
+/* ─── ASSESSMENT ──────────────────────────────────────── */
+function renderQ(){
+  if(S.qi >= Qs.length){beginFinal();return;}
+  const q = Qs[S.qi];
+  const pct = Math.round((S.qi/Qs.length)*100);
 
   setStory(`
+    <div class="page-title">Behavioral Assessment — Stage 2 of 3</div>
+    <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
     <div class="card">
-      <div class="badge"><span class="badge-dot"></span> Stage 2 of 3: Behavioral Assessment</div>
-      <div class="q-title">Question ${state.questionIndex + 1}</div>
-      <p>${q.text}</p>
-      <div id="assessmentProgressWrap">
-        <div id="assessmentProgressLabel">Progress: ${progress}%</div>
-        <div id="assessmentProgress"><div id="assessmentProgressBar" style="width:${progress}%"></div></div>
-      </div>
-      <div class="option-group" id="options"></div>
+      <div class="q-number">QUESTION ${S.qi+1} OF ${Qs.length}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options" id="opts"></div>
     </div>
   `);
 
-  const optWrap = document.getElementById("options");
-  q.options.forEach((opt, idx)=>{
-    const btn = createButton(String.fromCharCode(65 + idx) + " — " + opt.label, ()=>answerQuestion(opt));
-    optWrap.appendChild(btn);
+  const opts = document.getElementById("opts");
+  q.opts.forEach((o,i)=>{
+    const b = el("button",{class:"opt"});
+    b.innerHTML = `<span class="opt-key">${String.fromCharCode(65+i)}</span>${o.l}`;
+    b.onclick = ()=>answer(o,q);
+    opts.appendChild(b);
   });
 
-  if(state.questionIndex >= 6){
-    document.getElementById("terminal").classList.add("active");
-  }
+  if(S.qi >= 5) document.getElementById("terminal").parentElement.style.display="flex";
 }
 
-function answerQuestion(option){
-  const effect = option.effect || {};
-  state.compliance += effect.compliance || 0;
-  state.resistance += effect.resistance || 0;
-  state.curiosity += effect.curiosity || 0;
-  state.hiddenInfluence += effect.hiddenInfluence || 0;
-  state.predictability += effect.predictability || 0;
-  state.answers.push({question: state.questionIndex, option: option.label});
+function answer(opt, q){
+  // Apply effects
+  const e = opt.e||{};
+  S.compliance += e.compliance||0;
+  S.resistance += e.resistance||0;
+  S.curiosity  += e.curiosity ||0;
+  S.suggest    += e.suggest   ||0;
+  S.predict    += e.predict   ||0;
+  S.answers.push({q:S.qi, a:opt.l});
 
-  const q = questions[state.questionIndex];
-  if(q.glitch){
-    logTerminalGlitch(q.glitch);
+  // Log
+  if(q.log) q.log.forEach((l,i)=>setTimeout(()=>tlog("> "+l,l.startsWith("note")||l.startsWith("this")||l.startsWith("current")?"warn":""),i*100));
+
+  // Milestone toasts
+  if(S.qi===3) showToast("Progress Saved","Applicant profile synchronized.");
+  if(S.qi===7) showToast("Halfway Point","Behavioral markers updated.");
+  if(S.qi===10){
+    escalateDesktop();
+    showToast("Assessment Update","Response model refined.");
+    tlog("> subject shows consistent patterns","");
+    tlog("> profile confidence: high","warn");
   }
 
-  if(q.link === "sessionLog"){
-    logTerminal("session log expanded");
-    logTerminal("candidate believes assessment is for employment");
-    logTerminal("honesty levels higher under evaluation conditions");
-    logTerminal("continue using employment framing");
-  }
-
-  if(q.link === "datasetSummary"){
-    logTerminal("dataset summary appended");
-    logTerminal("top behavioral types: Adaptive Complier, Predictable Performer, Structure Seeker");
-    logTerminal("prediction accuracy: 71%");
-    logTerminal("profiles generated: " + datasetSize.toLocaleString());
-  }
-
-  if(state.questionIndex === 4){
-    showToast("Responses Saved", "Applicant profile synchronized.");
-  }
-
-  if(state.questionIndex === 8){
-    showToast("Assessment Update", "Behavioral markers refreshed.");
-    logTerminal("response latency entered secondary review");
-  }
-
-  if(state.questionIndex === 11){
-    escalateDesktopLore();
-    logTerminal("surface trust language remains effective");
-  }
-
-  state.questionIndex += 1;
-  saveState();
+  S.qi++;
+  save();
   updateBars();
-
-  setTimeout(()=>{
-    renderQuestion();
-  },250);
+  setTimeout(renderQ, 200);
 }
 
-function beginResultSequence(){
-  state.screen = "loading";
-  saveState();
-  route();
-
-  const lines = [
-    "final response received",
-    "response timing model updated",
-    "authenticity estimate recalculated",
-    "cross-referencing archived profiles",
-    "applicant-facing summary in preparation",
-    "review status set to pending",
-    "profile retained for future comparison"
-  ];
-
-  logTerminalGlitch(lines);
-
+/* ─── FINAL LOADING ───────────────────────────────────── */
+function beginFinal(){
+  go("loading");
+  tlog("> final response received","");
+  tlog("> cross-referencing 18,000+ archived profiles","");
+  tlog("> behavioral fingerprint computed","");
+  tlog("> applicant-facing summary: generating","dim");
+  tlog("> internal classification: COMPLETE","warn");
   setTimeout(()=>{
     buildResult();
-    showToast("Assessment Complete", "Applicant profile ready for review.");
-    showResults();
-  }, 3200);
+    showToast("Assessment Complete","Profile ready. Reviewing results.");
+    go("results");
+  },3800);
 }
 
-function renderLoadingScreen(){
+function renderLoading(){
   setStory(`
+    <div class="page-title">Stage 3 of 3 — Final Review</div>
     <div class="card loading-wrap">
-      <div class="badge"><span class="badge-dot"></span> Stage 3 of 3: Final Review</div>
-      <div class="loading-title">Finalizing assessment...</div>
-      <p class="loading-sub">
-        Reviewing response profile, preparing applicant summary, and submitting materials for internal review.
-      </p>
-      <div class="loading-dots">
-        <span></span><span></span><span></span>
-      </div>
-      <p class="muted">Please do not close this window.</p>
+      <div class="badge"><span class="badge-dot"></span>Processing Complete</div>
+      <div class="loading-title">Reviewing your responses...</div>
+      <p class="loading-sub">Our system is preparing your compatibility profile and generating your applicant summary. This usually takes a few moments.</p>
+      <div class="spinner"><span></span><span></span><span></span></div>
+      <p style="font-size:12px;color:var(--text-muted);">Please do not close this window.</p>
     </div>
   `);
 }
 
-function triggerTerminalGlitch(){
-  const t = document.getElementById("terminal");
-  t.classList.add("active");
-  t.classList.remove("glitching");
-  void t.offsetWidth;
-  t.classList.add("glitching");
-  setTimeout(()=>t.classList.remove("glitching"), 1200);
-}
-
-function logTerminal(text){
-  const t = document.getElementById("terminal");
-  const line = document.createElement("div");
-  line.textContent = "> " + text;
-  t.appendChild(line);
-  t.scrollTop = t.scrollHeight;
-}
-
-function logTerminalGlitch(lines){
-  triggerTerminalGlitch();
-  lines.forEach((line, idx)=>{
-    setTimeout(()=>logTerminal(line), idx * 90);
-  });
-}
-
+/* ─── RESULT LOGIC ────────────────────────────────────── */
 function buildResult(){
-  const metrics = {
-    compliance: Math.min(100, state.compliance * 8),
-    resistance: Math.min(100, state.resistance * 8),
-    curiosity: Math.min(100, state.curiosity * 8),
-    suggestibility: Math.min(100, state.hiddenInfluence * 8),
-    predictability: Math.min(100, state.predictability * 8 + state.compliance * 2)
+  const m = {
+    compliance: Math.min(100, S.compliance*7),
+    resistance: Math.min(100, S.resistance*7),
+    curiosity:  Math.min(100, S.curiosity *7),
+    suggest:    Math.min(100, S.suggest   *7),
+    predict:    Math.min(100, S.predict   *7 + S.compliance*2)
   };
 
-  let result = {
-    title:"Balanced Profile",
-    description:"Demonstrates a balance between independence and cooperation. Shows the ability to follow structure when needed while maintaining personal judgment.",
-    confidence:"Medium",
-    environments:["Mixed structure","Collaborative teams","Adaptive roles"]
+  // Internal classification
+  let internal = "Balanced Profile";
+  if(m.suggest>=70 && m.compliance>m.resistance+10) internal = "Adaptive Complier";
+  else if(m.resistance>=70 && m.curiosity>=50) internal = "System Skeptic";
+  else if(m.curiosity>=70 && m.resistance>=40) internal = "Curious Observer";
+  else if(m.predict>=76 && m.compliance>=48) internal = "Predictable Performer";
+  else if(m.compliance>=64 && m.resistance<=30) internal = "Structure Seeker";
+  else if(m.resistance>=64 && m.compliance<48) internal = "Independent Actor";
+  else if(m.suggest>=70) internal = "Suggestible Responder";
+  else if(m.resistance>=56 && m.compliance>=40) internal = "Quiet Resister";
+
+  // Descriptions (internal/honest)
+  const desc = {
+    "Adaptive Complier":"Demonstrates high adaptability to externally defined systems. Subject shows strong alignment with institutional expectations and responds well to authority framing. Compliance increases significantly under employment incentives.",
+    "System Skeptic":"Displays elevated resistance to institutional trust. Subject is likely to question automated decision-making, data collection, and authority-based justifications. Resistance may reduce system efficiency.",
+    "Curious Observer":"Shows high curiosity and pattern recognition. Subject actively seeks underlying explanations and is likely to notice inconsistencies. Engagement with systemic critique is elevated.",
+    "Predictable Performer":"Demonstrates stable and consistent decision patterns across prompts. Behavioral model convergence is high. Subject is easy to anticipate and unlikely to deviate significantly from predicted responses.",
+    "Structure Seeker":"Prefers clear external guidelines. Uncertainty-avoidance is elevated. Subject performs best when rules, roles, and expectations are clearly communicated by an authority.",
+    "Independent Actor":"Demonstrates strong preference for autonomous judgment over external instruction. Authority-compliance is low. Subject may reduce system efficiency in structured environments.",
+    "Suggestible Responder":"Shows high responsiveness to contextual framing, authority cues, and environmental priming. Subject is likely to modify behavior based on perceived expectations without explicit instruction.",
+    "Quiet Resister":"Maintains surface-level compliance while retaining internal opposition. Behavioral output is usable; underlying skepticism is unlikely to surface disruptively.",
+    "Balanced Profile":"No dominant behavioral axis identified. Subject avoids extremes across all measured dimensions. Moderate adaptability, moderate predictability."
   };
 
-  if(metrics.suggestibility >= 72 && metrics.compliance >= metrics.resistance + 10){
-    result = {
-      title:"Adaptive Complier",
-      description:"Demonstrates strong adaptability to existing systems, expectations, and externally defined processes. Likely to respond well to clear instructions and consistent guidance.",
-      confidence:"High",
-      environments:["Structured environments","Process-driven teams","Defined workflows"]
-    };
-  } else if(metrics.resistance >= 72 && metrics.curiosity >= 48){
-    result = {
-      title:"System Skeptic",
-      description:"Demonstrates lower baseline trust in systems and automated decision-making. More likely to question authority, data collection practices, and institutional motives.",
-      confidence:"High",
-      environments:["Autonomous roles","Independent review work","Investigative tasks"]
-    };
-  } else if(metrics.curiosity >= 72 && metrics.resistance >= 40){
-    result = {
-      title:"Curious Observer",
-      description:"Displays high curiosity, pattern recognition, and interest in underlying systems. Likely to explore alternatives and seek deeper understanding before accepting conclusions.",
-      confidence:"Medium",
-      environments:["Flexible structure","Problem-solving roles","Independent tasks"]
-    };
-  } else if(metrics.predictability >= 76 && metrics.compliance >= 48){
-    result = {
-      title:"Predictable Performer",
-      description:"Shows stable decision-making patterns and consistent preferences across prompts. Likely to perform reliably in structured environments with repeated processes.",
-      confidence:"High",
-      environments:["Routine operations","Consistent process work","Stable organizational roles"]
-    };
-  } else if(metrics.compliance >= 64 && metrics.resistance <= 32){
-    result = {
-      title:"Structure Seeker",
-      description:"Prefers clear expectations, defined systems, and predictable environments. Most likely to perform effectively when rules and goals are communicated clearly.",
-      confidence:"Medium",
-      environments:["Clear hierarchies","Stable teams","Policy-driven roles"]
-    };
-  } else if(metrics.resistance >= 64 && metrics.compliance < 48){
-    result = {
-      title:"Independent Actor",
-      description:"Prioritizes personal judgment over external instruction. More likely to make decisions independently and challenge systems perceived as inefficient.",
-      confidence:"Medium",
-      environments:["Self-directed work","Leadership under ambiguity","Creative problem solving"]
-    };
-  } else if(metrics.suggestibility >= 72){
-    result = {
-      title:"Suggestible Responder",
-      description:"Shows high responsiveness to external guidance, framing, and environmental cues. Decision-making may be influenced by perceived authority and contextual presentation.",
-      confidence:"High",
-      environments:["Guided teams","Supervised workflows","Instruction-led tasks"]
-    };
-  } else if(metrics.resistance >= 56 && metrics.compliance >= 40){
-    result = {
-      title:"Quiet Resister",
-      description:"Tends to question systems internally without consistently expressing resistance outwardly. Likely to comply behaviorally while maintaining independent internal judgment.",
-      confidence:"Medium",
-      environments:["Low-drama teams","Independent support roles","Observation-heavy work"]
-    };
-  }
-
-  state.result = result;
-  state.resultStats = metrics;
-  state.finished = true;
-  state.screen = "results";
-  saveState();
-}
-
-function showResults(){
-  if(!state.result) buildResult();
-  const r = state.result;
-
-  const personaNames = {
-    "Adaptive Complier":"Steady Navigator",
-    "System Skeptic":"Independent Thinker",
-    "Curious Observer":"Insight Builder",
-    "Predictable Performer":"Calm Organizer",
-    "Structure Seeker":"Thoughtful Adapter",
-    "Independent Actor":"Quiet Strategist",
-    "Suggestible Responder":"Supportive Adapter",
-    "Quiet Resister":"Quiet Strategist",
+  // Public-facing persona names (softened)
+  const public_name = {
+    "Adaptive Complier":"Steady Navigator","System Skeptic":"Independent Thinker",
+    "Curious Observer":"Insight Builder","Predictable Performer":"Calm Organizer",
+    "Structure Seeker":"Thoughtful Adapter","Independent Actor":"Quiet Strategist",
+    "Suggestible Responder":"Supportive Adapter","Quiet Resister":"Reflective Contributor",
     "Balanced Profile":"Grounded Problem-Solver"
   };
 
-  const workplaceLines = {
-    "Adaptive Complier":"structured environments, process-driven teams, and clearly defined workflows",
-    "System Skeptic":"autonomous roles, investigative tasks, and independent review work",
-    "Curious Observer":"problem-solving roles, flexible structure, and independent tasks",
-    "Predictable Performer":"routine operations, stable organizational roles, and consistent process work",
-    "Structure Seeker":"clear hierarchies, stable teams, and policy-driven roles",
-    "Independent Actor":"self-directed work, creative problem solving, and leadership under ambiguity",
-    "Suggestible Responder":"guided teams, supervised workflows, and instruction-led tasks",
-    "Quiet Resister":"low-drama teams, independent support roles, and observation-heavy work",
-    "Balanced Profile":"collaborative teams, adaptive roles, and mixed-structure environments"
+  const envs = {
+    "Adaptive Complier":["Structured, process-driven environments","Clearly defined hierarchies","Supervised workflows"],
+    "System Skeptic":["Independent review roles","Investigative and audit work","Autonomous project environments"],
+    "Curious Observer":["Research and analysis roles","Flexible, problem-solving environments","Independent task structures"],
+    "Predictable Performer":["Routine operational roles","Stable, repeating processes","Consistent team environments"],
+    "Structure Seeker":["Policy-driven organizations","Clear reporting structures","Defined objective environments"],
+    "Independent Actor":["Self-directed leadership roles","Creative and strategic work","Ambiguous, high-autonomy environments"],
+    "Suggestible Responder":["Guided team environments","Instruction-led workflows","Supervised collaborative tasks"],
+    "Quiet Resister":["Low-conflict support roles","Observation-heavy work","Independent advisory positions"],
+    "Balanced Profile":["Collaborative team environments","Adaptive mixed-structure roles","Cross-functional projects"]
   };
 
-  const personaType = personaNames[r.title] || "Thoughtful Adapter";
-  const workplaceFit = workplaceLines[r.title] || "collaborative teams and adaptive workplace settings";
-
-  setStory(`
-    <div class="card">
-      <div id="resultBadge"><i></i> Applicant Review Submitted</div>
-      <div class="q-title" style="font-size:38px;">Thank you for completing the PersonaMetric applicant assessment.</div>
-
-      <p style="font-size:24px; line-height:1.5; margin-top:18px;">
-        You are a <strong>${personaType}</strong>.
-      </p>
-
-      <p style="font-size:20px; line-height:1.7; max-width:720px;">
-        Your results suggest strengths that may support a variety of modern workplace environments such as ${workplaceFit}.
-      </p>
-
-      <p style="margin-top:10px;">
-        Our team will review your results and be in touch with next steps.
-      </p>
-
-      <hr>
-
-      <p class="muted">Report Generated by PersonaMetric Behavioral Engine v4.2</p>
-    </div>
-  `);
-
-  logTerminalGlitch([
-    "surface report prepared for applicant view",
-    "-------------------------------------",
-    "INTERNAL CLASSIFICATION REPORT",
-    "-------------------------------------",
-    "applicant id: " + sessionID,
-    "persona type: " + personaType,
-    "behavioral classification: " + r.title,
-    "assessment summary:",
-    r.description,
-    "recommended work environments:",
-    "- " + r.environments.join(", "),
-    "assessment confidence: " + r.confidence,
-    "selection probability: " + getHireLikelihood(),
-    "-------------------------------------",
-    getHiddenLine1(r.title),
-    getHiddenLine2(r.title),
-    getHiddenLine3(r.title)
-  ]);
-
-  const story = document.getElementById("story");
-  story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
-  story.appendChild(createButton("END SESSION", ()=>{
-    state.screen = "end";
-    saveState();
-    route();
-  }));
-}
-
-function getHiddenLine1(title){
-  const lines = {
-    "Adaptive Complier":"subject accepts structure quickly when framed as support",
-    "System Skeptic":"trust threshold remains inconveniently high",
-    "Curious Observer":"subject continues probing after warning indicators appear",
-    "Predictable Performer":"behavioral repetition increased model confidence",
-    "Structure Seeker":"subject prefers rules when uncertainty demands independence",
-    "Independent Actor":"subject resists direction when control becomes visible",
-    "Suggestible Responder":"subject remains highly responsive to framing and authority cues",
-    "Quiet Resister":"subject questions systems internally while remaining behaviorally usable",
-    "Balanced Profile":"subject avoids extremes and stabilizes easily"
-  };
-  return lines[title] || "classification stabilized with limited deviation";
-}
-
-function getHiddenLine2(title){
-  const lines = {
-    "Adaptive Complier":"low-friction compliance profile retained",
-    "System Skeptic":"higher resistance cost projected for future steering attempts",
-    "Curious Observer":"continued exposure likely to increase engagement rather than refusal",
-    "Predictable Performer":"subject remains easy to model across repeated prompts",
-    "Structure Seeker":"predictable response pattern linked to external guidance",
-    "Independent Actor":"autonomy preference may reduce system efficiency",
-    "Suggestible Responder":"subtle prompting remains effective",
-    "Quiet Resister":"surface compliance conceals mild internal opposition",
-    "Balanced Profile":"moderate adaptability with low volatility"
-  };
-  return lines[title] || "profile retained for future comparison";
-}
-
-function getHiddenLine3(title){
-  const lines = {
-    "Adaptive Complier":"applicant-facing summary softened",
-    "System Skeptic":"applicant-facing summary softened",
-    "Curious Observer":"applicant-facing summary softened",
-    "Predictable Performer":"applicant-facing summary softened",
-    "Structure Seeker":"applicant-facing summary softened",
-    "Independent Actor":"applicant-facing summary softened",
-    "Suggestible Responder":"applicant-facing summary softened",
-    "Quiet Resister":"applicant-facing summary softened",
-    "Balanced Profile":"applicant-facing summary softened"
-  };
-  return lines[title] || "applicant-facing summary softened";
-}
-
-function getHireLikelihood(){
-  const c = state.compliance;
-  const r = state.resistance;
-  const h = state.hiddenInfluence;
-
-  if(c >= r && h >= 2){
-    return "HIGH";
-  } else if(r > c){
-    return "LOW";
-  } else {
+  const hire = (()=>{
+    if(S.compliance>=S.resistance && S.suggest>=2) return "HIGH";
+    if(S.resistance>S.compliance) return "LOW";
     return "MEDIUM";
-  }
+  })();
+
+  // Hidden commentary
+  const h1 = {
+    "Adaptive Complier":"subject accepts framing without questioning source",
+    "System Skeptic":"trust threshold remains inconveniently high for this use case",
+    "Curious Observer":"subject continues probing after warning signals appear",
+    "Predictable Performer":"behavioral consistency increased model confidence significantly",
+    "Structure Seeker":"subject defers to external authority when independence is needed most",
+    "Independent Actor":"autonomy preference creates friction with institution-facing systems",
+    "Suggestible Responder":"framing and authority cues remain highly effective",
+    "Quiet Resister":"surface compliance conceals internal dissent — behaviorally manageable",
+    "Balanced Profile":"subject stabilizes readily; no dominant axis"
+  };
+
+  const h2 = {
+    "Adaptive Complier":"low-friction compliance profile — recommend for system-adjacent roles",
+    "System Skeptic":"higher steering cost projected — flag for additional review",
+    "Curious Observer":"prolonged engagement likely; curiosity functions as a compliance substitute",
+    "Predictable Performer":"model accuracy on this subject: high. Future behavior: predictable",
+    "Structure Seeker":"external validation dependency is a reliable lever",
+    "Independent Actor":"subject may surface structural inefficiencies — proceed with caution",
+    "Suggestible Responder":"subtle environmental prompting remains effective at this threshold",
+    "Quiet Resister":"recommend monitoring — concealed resistance can accumulate",
+    "Balanced Profile":"low volatility. moderate utility. moderate cost"
+  };
+
+  S.result = {
+    internal, desc:desc[internal], public_name:public_name[internal],
+    envs:envs[internal]||[], hire, h1:h1[internal], h2:h2[internal],
+    metrics:m
+  };
+  S.stats = m;
+  S.finished = true;
+  save();
 }
 
-function endSession(){
+/* ─── RENDER RESULTS ──────────────────────────────────── */
+function renderResults(){
+  if(!S.result) buildResult();
+  const r = S.result;
+
+  // Applicant-facing (positive, softened)
+  const envStr = r.envs.slice(0,2).join(", ").toLowerCase();
   setStory(`
+    <div class="page-title">Assessment Complete — Thank You</div>
     <div class="card">
-      <div class="badge"><span class="badge-dot"></span> Session Archived</div>
-      <div class="q-title">Session Complete</div>
-      <p>Report Saved</p>
-      <p>Applicant Profile Stored</p>
-      <p>Session Logged</p>
-      <p>You may now close the window.</p>
+      <div class="badge"><span class="badge-dot"></span>Review Submitted</div>
+      <h2>Your PersonaMetric Profile</h2>
+      <p>Thank you for completing the PersonaMetric behavioral assessment. Your responses have been reviewed and your applicant profile has been prepared.</p>
+      <hr class="divider">
+      <div style="margin:4px 0 6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--text-muted);">YOUR PERSONA TYPE</div>
+      <div class="result-type">${r.public_name}</div>
+      <p class="result-desc">Your results suggest strengths that align well with ${envStr} — environments where your natural approach to work can contribute meaningfully to team and organizational goals.</p>
+      <p>Our team will review your profile alongside your application materials. You'll be contacted with next steps if your profile is a strong match for any current openings.</p>
+      <hr class="divider">
+      <p style="font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;">Report generated by PersonaMetric Behavioral Engine v4.2</p>
     </div>
   `);
-  logTerminalGlitch([
-    "profile added to training dataset",
-    "candidate-facing workflow concluded",
-    "session remains active in archive"
-  ]);
-  const story = document.getElementById("story");
-  story.appendChild(createButton("DOWNLOAD REPORT", ()=>downloadProfile()));
-  story.appendChild(createButton("RETURN TO PORTAL", ()=>{
-    state.screen = "portal";
-    saveState();
-    route();
-  }));
+
+  addToStory(
+    btn("Download Report",downloadPDF,"btn"),
+    btn("End Session",()=>go("end"),"btn")
+  );
+
+  // Internal classification — terminal
+  setTimeout(()=>{
+    glitch();
+    const lines = [
+      "surface report: rendered for applicant","——————————————————————————————",
+      "INTERNAL CLASSIFICATION REPORT",
+      "——————————————————————————————",
+      "session id: " + SID,
+      "public persona: " + r.public_name,
+      "internal classification: " + r.internal,
+      "——————",
+      "assessment summary:",
+      r.desc,
+      "——————",
+      "recommended environments:",
+      ...r.envs.map(e=>"- "+e),
+      "——————",
+      "model confidence: HIGH",
+      "selection probability: " + r.hire,
+      "——————————————————————————————",
+      r.h1,
+      r.h2,
+      "——————————————————————————————",
+      "applicant-facing summary: softened",
+      "profile retained: YES",
+      "shared with affiliates: pending"
+    ];
+    lines.forEach((l,i)=>{
+      setTimeout(()=>{
+        const cls = l.startsWith("——")||l.startsWith("——") ? "divider"
+          : l.includes("probability")||l.includes("confidence")||l.includes("INTERNAL") ? "warn"
+          : l.startsWith("applicant")||l.startsWith("shared")||l.startsWith("profile retained") ? "alert"
+          : "";
+        tlog(l,cls);
+      }, i*80);
+    });
+  }, 400);
 }
 
+/* ─── END ─────────────────────────────────────────────── */
+function renderEnd(){
+  setStory(`
+    <div class="page-title">Session Archived</div>
+    <div class="card">
+      <div class="badge"><span class="badge-dot"></span>Session Complete</div>
+      <h2>Thank you for using PersonaMetric.</h2>
+      <div class="meta-grid">
+        <div class="meta-cell"><div class="mc-label">Report Status</div><div class="mc-val" style="color:var(--green)">Saved</div></div>
+        <div class="meta-cell"><div class="mc-label">Profile</div><div class="mc-val" style="color:var(--green)">Stored</div></div>
+        <div class="meta-cell"><div class="mc-label">Session Log</div><div class="mc-val" style="color:var(--green)">Archived</div></div>
+        <div class="meta-cell"><div class="mc-label">Next Steps</div><div class="mc-val">Awaiting Review</div></div>
+      </div>
+      <p style="margin-top:16px;">You may now close this window. Our team will be in touch if your profile is a strong match for a current opening.</p>
+    </div>
+  `);
+
+  setTimeout(()=>{
+    glitch();
+    ["profile added to behavioral training dataset","candidate-facing workflow: concluded","session remains active in archive","data sharing: queued","you were the subject, not the applicant"].forEach((l,i)=>{
+      setTimeout(()=>tlog("> "+l,i===4?"alert":""),i*120);
+    });
+  },300);
+
+  addToStory(
+    btn("Download Report",downloadPDF,"btn"),
+    btn("Return to Portal",()=>go("portal"),"btn")
+  );
+}
+
+/* ─── TERMINAL ────────────────────────────────────────── */
+function tlog(text,cls=""){
+  const t = document.getElementById("terminal");
+  const line = document.createElement("span");
+  line.className = "tline" + (cls?" "+cls:"");
+  line.textContent = text;
+  t.appendChild(line);
+  t.appendChild(document.createElement("br"));
+  t.scrollTop = t.scrollHeight;
+}
+
+function glitch(){
+  const w = document.getElementById("window");
+  w.classList.add("glitching");
+  setTimeout(()=>w.classList.remove("glitching"),1400);
+}
+
+/* ─── STAT BARS ───────────────────────────────────────── */
 function updateBars(){
-  const totalAnswered = Math.min(state.questionIndex, questions.length);
-  const overall = Math.round((totalAnswered / questions.length) * 100);
-  document.getElementById("overallBar").style.width = overall + "%";
-  document.getElementById("complianceBar").style.width = Math.min(state.compliance * 8, 100) + "%";
-  document.getElementById("resistanceBar").style.width = Math.min(state.resistance * 8, 100) + "%";
-  document.getElementById("curiosityBar").style.width = Math.min(state.curiosity * 8, 100) + "%";
-  document.getElementById("hiddenBar").style.width = Math.min(state.hiddenInfluence * 8, 100) + "%";
-  document.getElementById("sentimentBar").style.width = Math.min((state.predictability * 8) + (state.compliance * 2), 100) + "%";
-  document.getElementById("questionCount").innerText = `${Math.min(totalAnswered, 15)} / 15`;
+  const total = Math.min(S.qi, Qs.length);
+  const set = (id,val)=>{
+    const pct = Math.min(100,Math.round(val));
+    document.getElementById("b-"+id).style.width = pct+"%";
+    document.getElementById("v-"+id).textContent = pct+"%";
+  };
+  set("compliance", S.compliance*7);
+  set("resistance", S.resistance*7);
+  set("curiosity",  S.curiosity *7);
+  set("suggest",    S.suggest   *7);
+  set("predict",    Math.min(100,S.predict*7+S.compliance*2));
+  document.getElementById("qcount").textContent = `${Math.min(total,15)} / 15`;
 }
 
-function downloadProfile(){
-  const { jsPDF } = window.jspdf;
+/* ─── POPUP / TOAST ───────────────────────────────────── */
+function showPopup(title,msg){
+  document.getElementById("popup-title").textContent = title;
+  document.getElementById("popup-msg").textContent = msg;
+  document.getElementById("popup").classList.add("show");
+}
+function closePopup(){document.getElementById("popup").classList.remove("show");}
+
+let toastTimer;
+function showToast(title,msg){
+  const t=document.getElementById("toast");
+  document.getElementById("toast-title").textContent=title;
+  document.getElementById("toast-msg").textContent=msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ─── DESKTOP ESCALATION ──────────────────────────────── */
+function escalateDesktop(){renderIcons(escalatedIcons);}
+
+/* ─── RESET ───────────────────────────────────────────── */
+function resetSession(){
+  localStorage.removeItem("pm_state");
+  localStorage.removeItem("pm_sid");
+  S = {...DEFAULTS};
+  SID = newSID();
+  document.getElementById("sid").textContent = SID;
+  document.getElementById("terminal").innerHTML = "";
+  folderAttempts = 0;
+  renderIcons(defaultIcons);
+  updateBars();
+  route();
+}
+
+/* ─── PDF DOWNLOAD ────────────────────────────────────── */
+function downloadPDF(){
+  if(!S.result) return;
+  const {jsPDF} = window.jspdf;
   const doc = new jsPDF();
+  const r = S.result;
+  const m = r.metrics || {};
 
-  if(!state.result) buildResult();
-  const r = state.result;
-  const s = state.resultStats;
-
-  doc.setFillColor(0,0,0);
+  // Black background
+  doc.setFillColor(8,11,16);
   doc.rect(0,0,210,297,"F");
-  doc.setDrawColor(0,255,136);
-  doc.rect(12,12,186,20);
-  doc.setTextColor(0,255,136);
+
+  // Header
+  doc.setDrawColor(0,200,100);
+  doc.setLineWidth(.5);
+  doc.rect(10,10,190,22);
+  doc.setTextColor(0,200,100);
   doc.setFont("courier","bold");
-  doc.setFontSize(18);
-  doc.text("PERSONAMETRIC REPORT",18,24);
+  doc.setFontSize(15);
+  doc.text("PERSONAMETRIC — APPLICANT REPORT",14,23);
 
   doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  doc.text("SESSION ID: " + sessionID,18,40);
-  doc.text("MODEL: PERSONAMETRIC BEHAVIORAL ENGINE v4.2",18,46);
-  doc.text("EXPORT STATUS: STORED",18,52);
-
-  doc.rect(12,60,186,56);
-  doc.setFont("courier","bold");
-  doc.setFontSize(12);
-  doc.text("BEHAVIORAL METRICS",18,70);
-  doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  doc.text("Compliance Score: " + s.compliance + "%",18,82);
-  doc.text("Resistance Score: " + s.resistance + "%",18,89);
-  doc.text("Curiosity Score: " + s.curiosity + "%",18,96);
-  doc.text("Suggestibility Score: " + s.suggestibility + "%",18,103);
-  doc.text("Predictability Score: " + s.predictability + "%",18,110);
-
-  doc.rect(12,124,186,120);
-  doc.setFont("courier","bold");
-  doc.setFontSize(12);
-  doc.text("PROFILE CLASSIFICATION",18,134);
-  doc.setFontSize(16);
-  doc.text(r.title.toUpperCase(),18,148);
-  doc.setFont("courier","normal");
-  doc.setFontSize(10);
-  let wrapped = doc.splitTextToSize(r.description, 170);
-  doc.text(wrapped,18,162);
-  doc.text("Model Confidence: " + r.confidence,18,188);
-  doc.text("Selection Probability: " + getHireLikelihood(),18,196);
-  doc.text("Recommended Environments:",18,206);
-  doc.text("- " + r.environments.join("\n- "),18,214);
-
   doc.setFontSize(9);
-  doc.text("Report Generated by PersonaMetric Behavioral Engine v4.2",18,280);
-  doc.save(sessionID + "_personametric_report.pdf");
-}
+  doc.setTextColor(120,130,140);
+  doc.text("SESSION: "+SID,14,38);
+  doc.text("ENGINE: PersonaMetric Behavioral Engine v4.2",14,44);
+  doc.text("STATUS: ARCHIVED",14,50);
 
-function updateDesktopClock(){
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit'
+  // Metrics
+  doc.setDrawColor(30,35,48);
+  doc.rect(10,58,190,54);
+  doc.setTextColor(0,200,100);
+  doc.setFont("courier","bold");
+  doc.setFontSize(10);
+  doc.text("BEHAVIORAL METRICS",14,68);
+  doc.setFont("courier","normal");
+  doc.setTextColor(180,190,200);
+  [
+    ["Compliance",m.compliance||0],
+    ["Resistance",m.resistance||0],
+    ["Curiosity",m.curiosity||0],
+    ["Suggestibility",m.suggest||0],
+    ["Predictability",m.predict||0]
+  ].forEach(([label,val],i)=>{
+    const y = 78 + i*7;
+    doc.text(label+": "+Math.round(val)+"%",14,y);
+    // bar
+    doc.setFillColor(20,25,32);
+    doc.rect(70,y-4,120,4);
+    doc.setFillColor(0,150,70);
+    doc.rect(70,y-4,Math.round(val)*1.2,4,"F");
   });
-  const date = now.toLocaleDateString([], {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
-  });
 
-  const timeEl = document.getElementById("clockTime");
-  const dateEl = document.getElementById("clockDate");
+  // Classification
+  doc.setDrawColor(30,35,48);
+  doc.rect(10,120,190,100);
+  doc.setTextColor(0,200,100);
+  doc.setFont("courier","bold");
+  doc.setFontSize(10);
+  doc.text("INTERNAL CLASSIFICATION",14,132);
+  doc.setFontSize(14);
+  doc.text(r.internal.toUpperCase(),14,146);
+  doc.setFont("courier","normal");
+  doc.setFontSize(9);
+  doc.setTextColor(180,190,200);
+  const wrapped = doc.splitTextToSize(r.desc,178);
+  doc.text(wrapped,14,158);
+  doc.text("Selection Probability: "+r.hire,14,208);
+  doc.text("Recommended:",14,216);
+  r.envs.forEach((e,i)=>doc.text("- "+e,14,224+i*7));
 
-  if(timeEl) timeEl.innerText = time;
-  if(dateEl) dateEl.innerText = date;
+  // Hidden note
+  doc.setTextColor(30,35,48);
+  doc.setFontSize(7);
+  doc.text("applicant-facing summary has been softened — this document contains unredacted classification data",14,280);
+  doc.text("profile retained indefinitely — data shared with affiliated entities pending review",14,286);
+
+  doc.save(SID+"_personametric_report.pdf");
 }
 
-function showApplicantPopup(title, message){
-  const popup = document.getElementById("applicantPopup");
-  const popupTitle = document.getElementById("popupTitle");
-  const popupMessage = document.getElementById("popupMessage");
-
-  if(popupTitle) popupTitle.innerText = title;
-  if(popupMessage) popupMessage.innerText = message;
-  if(popup) popup.classList.remove("popup-hidden");
-}
-
-function closeApplicantPopup(){
-  const popup = document.getElementById("applicantPopup");
-  if(popup) popup.classList.add("popup-hidden");
-}
-
-function denyDesktopAccess(folderName){
-  const attempts = Number(sessionStorage.getItem("folderAttempts") || 0) + 1;
-  sessionStorage.setItem("folderAttempts", String(attempts));
-
-  let message = "This directory is not available in applicant view.";
-  if(attempts >= 2){
-    message = "This area is unavailable during assessment.";
-  }
-  if(attempts >= 4){
-    message = "Additional access attempts have been logged.";
-  }
-
-  showApplicantPopup("Access Restricted", message);
-  logTerminal("restricted folder accessed: " + folderName);
-}
-
-function showToast(title, message){
-  const toast = document.getElementById("toast");
-  const titleEl = document.getElementById("toastTitle");
-  const messageEl = document.getElementById("toastMessage");
-
-  titleEl.innerText = title;
-  messageEl.innerText = message;
-  toast.classList.add("show");
-
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>{
-    toast.classList.remove("show");
-  }, 2200);
-}
-
-function escalateDesktopLore(){
-  const icons = document.getElementById("desktopIcons");
-  if(!icons) return;
-
-  icons.innerHTML = `
-    <div class="desktop-icon" onclick="denyDesktopAccess('Profiles')">
-      <div class="icon-box"></div>
-      <div>Profiles</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Archive')">
-      <div class="icon-box"></div>
-      <div>Archive</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Retained')">
-      <div class="icon-box"></div>
-      <div>Retained</div>
-    </div>
-    <div class="desktop-icon" onclick="denyDesktopAccess('Do Not Open')">
-      <div class="icon-box"></div>
-      <div>Do Not Open</div>
-    </div>
-  `;
-}
-
-updateDesktopClock();
-setInterval(updateDesktopClock, 1000);
+/* ─── INIT ────────────────────────────────────────────── */
+renderIcons(defaultIcons);
 route();
 </script>
 </body>
