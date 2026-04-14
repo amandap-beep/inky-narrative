@@ -903,6 +903,8 @@ function answer(opt,q){
 
   // System error popups
   if(q.err) fireError(q.err);
+  // FORCE TEST: directly show err1 at Q10 regardless of guards
+  if(qi===9) setTimeout(()=>showOverlay("err1"), 1800);
 
   // Bar label leak — one label per question from Q10 onward
   if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
