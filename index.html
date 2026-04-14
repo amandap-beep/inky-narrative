@@ -376,7 +376,7 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 /* ═══════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════ */
-const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null};
+const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null,errShown:{e1:false,e2:false,e3:false}};
 let S=JSON.parse(localStorage.getItem("pm_s")||"null")||{...DEF};
 let SID=localStorage.getItem("pm_id")||mkSID();
 let dataset=18492+Math.floor(Math.random()*600);
@@ -384,7 +384,8 @@ let dataset=18492+Math.floor(Math.random()*600);
 let corruptionLevel=S.qi>=15?4:S.qi>=11?3:S.qi>=10?2:S.qi>=8?1:0;
 let barsRevealed=S.qi>=11;
 let terminalUnlocked=S.qi>=11; // terminal only shows from Q11 onward
-let errShown={e1:S.qi>9,e2:S.qi>14,e3:S.qi>17};
+// ensure errShown exists on restored sessions that predate this field
+if(!S.errShown) S.errShown={e1:false,e2:false,e3:false};
 let folderClickCount=0;
 let profileRevealed=false;
 
@@ -619,13 +620,12 @@ function closeOverlay(id){document.getElementById(id).classList.remove("show");}
    SYSTEM ERRORS
 ═══════════════════════════════════════════════════════ */
 function fireError(key){
-  if(errShown[key]) return;
-  errShown[key]=true;
+  if(S.errShown[key]) return;
+  S.errShown[key]=true;
+  save();
   const delays={e1:1800,e2:1400,e3:1200};
   setTimeout(()=>{
-    if(key==="e2"){
-      document.getElementById("err2-sid").textContent=SID;
-    }
+    if(key==="e2") document.getElementById("err2-sid").textContent=SID;
     if(key==="e3"){
       const now=new Date();
       const t1=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
@@ -665,7 +665,6 @@ function tlogCorrupt(text,cls,severity,delay){
     });
     spans.forEach(sp=>ln.appendChild(sp));
     t.appendChild(ln);t.appendChild(document.createElement("br"));t.scrollTop=t.scrollHeight;
-    // Resolve unless severity 4
     if(severity<4){
       cpos.forEach((p,idx)=>{
         setTimeout(()=>{spans[p].textContent=chars[p];spans[p].classList.remove("corrupt");},200+(idx*80)+(Math.random()*100));
@@ -685,19 +684,18 @@ function tlog(text,cls,delay){
   },delay||0);
 }
 
+function revealTerminal(){
+  const w=document.getElementById("term-wrap");
+  if(w.style.visibility==="hidden"){w.style.visibility="visible";w.style.animation="fadeIn .5s ease";}
+}
+
 function unlockTerminal(){
   terminalUnlocked=true;
   revealTerminal();
 }
 
-function revealTerminal(){
-  if(!terminalUnlocked) return;
-  const w=document.getElementById("term-wrap");
-  if(w.style.visibility==="hidden"){w.style.visibility="visible";w.style.animation="fadeIn .5s ease";}
-}
-
 function dispatchLog(entry){
-  if(!terminalUnlocked) return; // terminal not active yet
+  if(!terminalUnlocked) return;
   const d=entry.delay||0;
   if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),d);
   else tlog(entry.t,entry.cls||"",d);
@@ -928,13 +926,20 @@ function answer(opt,q){
   if(qi===10) corruptionLevel=3;
   if(qi===14) corruptionLevel=4;
 
-  // Fire terminal log entries (only dispatched if terminalUnlocked)
+  // Fire terminal log entries
   if(q.log&&q.log.length){
-    const baseDelay = qi===10 ? 2200 : 0; // Q11 logs wait for terminal to appear
-    q.log.forEach(entry=>{
-      const adjustedEntry={...entry, delay:(entry.delay||0)+baseDelay};
-      dispatchLog(adjustedEntry);
-    });
+    if(qi===10){
+      // Q11: terminal unlocks at 1800ms — schedule logs to fire after that
+      q.log.forEach(entry=>{
+        const d=2000+(entry.delay||0);
+        setTimeout(()=>{
+          if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
+          else tlog(entry.t,entry.cls||"",0);
+        },d);
+      });
+    } else {
+      q.log.forEach(entry=>dispatchLog(entry));
+    }
   }
 
   // Milestone toasts (applicant-facing, always neutral)
@@ -1128,7 +1133,6 @@ function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
   S={...DEF};SID=mkSID();
   corruptionLevel=0;barsRevealed=false;terminalUnlocked=false;
-  errShown={e1:false,e2:false,e3:false};
   folderClickCount=0;profileRevealed=false;
   barLabelProgress={c:0,r:0,q:0,s:0,p:0};
   document.getElementById("sid").textContent=SID;
