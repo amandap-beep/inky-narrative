@@ -376,24 +376,29 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 /* ═══════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════ */
-const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null,errShown:{e1:false,e2:false,e3:false}};
-let S=JSON.parse(localStorage.getItem("pm_s")||"null")||{...DEF};
+const DEF=()=>({screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null,errShown:{e1:false,e2:false,e3:false}});
+let S=JSON.parse(localStorage.getItem("pm_s")||"null")||DEF();
 let SID=localStorage.getItem("pm_id")||mkSID();
 let dataset=18492+Math.floor(Math.random()*600);
-// Derive volatile flags from restored session so replays always sync
-let corruptionLevel=S.qi>=15?4:S.qi>=11?3:S.qi>=10?2:S.qi>=8?1:0;
-let barsRevealed=S.qi>=11;
-let terminalUnlocked=S.qi>=11; // terminal only shows from Q11 onward
-// ensure errShown exists on restored sessions that predate this field
 if(!S.errShown) S.errShown={e1:false,e2:false,e3:false};
+
+let corruptionLevel=0;
+let barsRevealed=false;
+let terminalUnlocked=false;
 let folderClickCount=0;
 let profileRevealed=false;
-
-// Bar label reveal state: track how many letters of each label have leaked
-// Labels start leaking 1-2 chars per question from Q11 onward
 const BAR_LABELS={c:"Compliance",r:"Resistance",q:"Curiosity",s:"Suggestibility",p:"Predictability"};
-let barLabelProgress={c:0,r:0,q:0,s:0,p:0}; // 0 = fully redacted, 1 = fully revealed
-if(barsRevealed) barLabelProgress={c:1,r:1,q:1,s:1,p:1};
+let barLabelProgress={c:0,r:0,q:0,s:0,p:0};
+
+// Sync volatile flags if restoring a mid-session state
+function syncVolatileFlags(){
+  corruptionLevel=S.qi>=15?4:S.qi>=14?3:S.qi>=10?2:S.qi>=8?1:0;
+  barsRevealed=S.qi>=11;
+  terminalUnlocked=S.qi>=11;
+  if(barsRevealed) barLabelProgress={c:1,r:1,q:1,s:1,p:1};
+  else barLabelProgress={c:0,r:0,q:0,s:0,p:0};
+}
+syncVolatileFlags();
 
 function mkSID(){const id="PM-"+Math.random().toString(36).slice(2,10).toUpperCase();localStorage.setItem("pm_id",id);return id;}
 function save(){localStorage.setItem("pm_s",JSON.stringify(S));}
@@ -623,21 +628,17 @@ function fireError(key){
   if(S.errShown[key]) return;
   S.errShown[key]=true;
   save();
-  const delays={e1:1800,e2:1400,e3:1200};
   setTimeout(()=>{
     if(key==="e2") document.getElementById("err2-sid").textContent=SID;
     if(key==="e3"){
       const now=new Date();
-      const t1=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-      const t2=new Date(now.getTime()+90000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-      const t3=new Date(now.getTime()+150000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
       document.getElementById("err3-sid").textContent=SID;
-      document.getElementById("err3-time").textContent=t1;
-      document.getElementById("err3-time2").textContent=t2;
-      document.getElementById("err3-time3").textContent=t3;
+      document.getElementById("err3-time").textContent=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+      document.getElementById("err3-time2").textContent=new Date(now.getTime()+90000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+      document.getElementById("err3-time3").textContent=new Date(now.getTime()+150000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
     }
     showOverlay(key);
-  },delays[key]);
+  }, key==="e1"?1800:key==="e2"?1400:1200);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -687,18 +688,6 @@ function tlog(text,cls,delay){
 function revealTerminal(){
   const w=document.getElementById("term-wrap");
   if(w.style.visibility==="hidden"){w.style.visibility="visible";w.style.animation="fadeIn .5s ease";}
-}
-
-function unlockTerminal(){
-  terminalUnlocked=true;
-  revealTerminal();
-}
-
-function dispatchLog(entry){
-  if(!terminalUnlocked) return;
-  const d=entry.delay||0;
-  if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),d);
-  else tlog(entry.t,entry.cls||"",d);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -904,45 +893,42 @@ function answer(opt,q){
   const e=opt.e||{};
   S.c+=(e.c||0);S.r+=(e.r||0);S.q+=(e.q||0);S.s+=(e.s||0);S.p+=(e.p||0);
   S.answers.push({qi:S.qi,a:opt.l});
+  const qi=S.qi;
 
-  const qi=S.qi; // capture before increment
+  // Corruption escalation
+  if(qi>=14) corruptionLevel=4;
+  else if(qi>=10) corruptionLevel=3;
+  else if(qi>=9) corruptionLevel=2;
+  else if(qi>=7) corruptionLevel=1;
 
-  // ── 1. POPUP FIRST (fires immediately) ──────────────────
+  // System error popups
   if(q.err) fireError(q.err);
 
-  // ── 2. BAR LABEL LEAK (fires 900ms after popup) ─────────
-  // Starts leaking from Q10 onward, one label per question
-  if(qi>=10){
-    setTimeout(()=>leakBarLabels(qi), 900);
+  // Bar label leak — one label per question from Q10 onward
+  if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
+
+  // Terminal unlock at Q11 (index 10)
+  if(qi===10){
+    setTimeout(()=>{
+      terminalUnlocked=true;
+      revealTerminal();
+    }, 2000);
   }
 
-  // ── 3. UNLOCK TERMINAL + LOGS (fires after bar leak) ────
-  // Terminal appears for first time at Q11
-  if(qi===10) setTimeout(()=>unlockTerminal(), 1800);
-
-  // Escalate corruption level (controls how garbled corrupt lines are)
-  if(qi===7)  corruptionLevel=1;
-  if(qi===9)  corruptionLevel=2;
-  if(qi===10) corruptionLevel=3;
-  if(qi===14) corruptionLevel=4;
-
-  // Fire terminal log entries
+  // Terminal logs — always delayed enough for terminal to be visible
   if(q.log&&q.log.length){
-    if(qi===10){
-      // Q11: terminal unlocks at 1800ms — schedule logs to fire after that
-      q.log.forEach(entry=>{
-        const d=2000+(entry.delay||0);
-        setTimeout(()=>{
-          if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
-          else tlog(entry.t,entry.cls||"",0);
-        },d);
-      });
-    } else {
-      q.log.forEach(entry=>dispatchLog(entry));
-    }
+    const base = qi===10 ? 2400 : 0; // Q11 logs wait for terminal reveal
+    q.log.forEach(entry=>{
+      const when=base+(entry.delay||0);
+      setTimeout(()=>{
+        if(!terminalUnlocked) return;
+        if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
+        else tlog(entry.t,entry.cls||"",0);
+      }, when);
+    });
   }
 
-  // Milestone toasts (applicant-facing, always neutral)
+  // Milestone toasts
   if(qi===4)  showToast("Progress Saved","Applicant profile synchronized.");
   if(qi===9)  showToast("Assessment Update","Behavioral markers refreshed.");
   if(qi===14) showToast("Halfway Complete","Your responses are being processed.");
@@ -1131,10 +1117,8 @@ function showToast(t,m){
 ═══════════════════════════════════════════════════════ */
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
-  S={...DEF};SID=mkSID();
-  corruptionLevel=0;barsRevealed=false;terminalUnlocked=false;
-  folderClickCount=0;profileRevealed=false;
-  barLabelProgress={c:0,r:0,q:0,s:0,p:0};
+  S=DEF();SID=mkSID();folderClickCount=0;profileRevealed=false;
+  syncVolatileFlags();
   document.getElementById("sid").textContent=SID;
   document.getElementById("terminal").innerHTML="";
   document.getElementById("term-wrap").style.visibility="hidden";
