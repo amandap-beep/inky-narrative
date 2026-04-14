@@ -7,96 +7,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-
 :root{
-  --green:#00e676;
-  --bg:#080b10;
-  --bg2:#0c1018;
-  --bg3:#111520;
-  --border:#1e2330;
-  --border2:#2a3040;
-  --text:#e8eaf0;
-  --dim:#8a90a0;
-  --muted:#4a5060;
-  --red:#ff4444;
-  --amber:#ffaa00;
+  --green:#00e676;--bg:#080b10;--bg2:#0c1018;--bg3:#111520;
+  --border:#1e2330;--border2:#2a3040;--text:#e8eaf0;--dim:#8a90a0;
+  --muted:#4a5060;--red:#ff4444;--amber:#ffaa00;
 }
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;font-size:14px;line-height:1.6;}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px);}
 
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  height:100vh;
-  overflow:hidden;
-  font-size:14px;
-  line-height:1.6;
-}
+#desktop{position:relative;width:100vw;height:100vh;background:radial-gradient(ellipse 60% 50% at 75% 20%,rgba(0,70,35,.1) 0%,transparent 60%),var(--bg);}
 
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.035) 2px,rgba(0,0,0,.035) 4px);
-}
-
-#desktop{
-  position:relative;width:100vw;height:100vh;
-  background:radial-gradient(ellipse 60% 50% at 75% 20%,rgba(0,70,35,.1) 0%,transparent 60%),var(--bg);
-}
-
-#dicons{
-  position:absolute;top:20px;left:14px;
-  display:flex;flex-direction:column;gap:8px;z-index:2;
-}
-.dicon{
-  width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  padding:8px 4px;border-radius:8px;cursor:pointer;transition:background .15s;user-select:none;
-}
+#dicons{position:absolute;top:20px;left:14px;display:flex;flex-direction:column;gap:8px;z-index:2;}
+.dicon{width:78px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:8px;cursor:pointer;transition:background .15s;user-select:none;}
 .dicon:hover{background:rgba(255,255,255,.05);}
-.dicon-box{
-  width:44px;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-}
+.dicon-box{width:44px;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .dicon-box::before{content:"";width:28px;height:18px;border:1px solid rgba(255,255,255,.13);border-radius:3px;}
 .dicon-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-align:center;line-height:1.3;}
 
-#win{
-  position:absolute;top:28px;left:106px;right:16px;bottom:44px;
-  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
-  overflow:hidden;display:flex;flex-direction:column;
-  box-shadow:0 24px 60px rgba(0,0,0,.6);z-index:3;
-}
+#win{position:absolute;top:28px;left:106px;right:16px;bottom:44px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.6);z-index:3;}
 
-#titlebar{
-  height:42px;display:flex;align-items:center;padding:0 14px;gap:12px;
-  background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;
-}
+#titlebar{height:42px;display:flex;align-items:center;padding:0 14px;gap:12px;background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;}
 .wdot{width:11px;height:11px;border-radius:50%;background:var(--border2);}
 #tabstrip{flex:1;display:flex;align-items:center;gap:8px;margin:0 12px;}
-.tab{
-  height:30px;padding:0 14px;display:flex;align-items:center;gap:8px;
-  background:var(--bg2);border:1px solid var(--border2);border-radius:7px 7px 0 0;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);
-}
+.tab{height:30px;padding:0 14px;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:7px 7px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);}
 .tab-led{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);}
 #urlbar{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
 
 #panes{flex:1;display:flex;min-height:0;}
 
-#main{
-  flex:1.8;overflow-y:auto;padding:44px 50px;background:var(--bg2);
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
-}
+#main{flex:1.8;overflow-y:auto;padding:44px 50px;background:var(--bg2);scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #main::-webkit-scrollbar{width:4px;}
 #main::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
 
-#sys{
-  width:296px;flex-shrink:0;background:#04060a;border-left:1px solid var(--border);
-  display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace;font-size:11px;overflow:hidden;
+/* IT NOTICE BANNER */
+#it-notice{
+  background:#1a1200;border-bottom:1px solid #3a2800;
+  padding:7px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:#886600;display:flex;align-items:center;gap:10px;flex-shrink:0;
+  letter-spacing:.02em;
+}
+#it-notice .it-tag{
+  background:#3a2800;color:#ffaa00;padding:2px 7px;border-radius:3px;
+  font-size:9px;letter-spacing:.08em;flex-shrink:0;
 }
 
-#sys-head{
-  padding:11px 14px;border-bottom:1px solid var(--border);background:#050709;flex-shrink:0;
-  color:var(--muted);font-size:10px;
-}
+#sys{width:296px;flex-shrink:0;background:#04060a;border-left:1px solid var(--border);display:flex;flex-direction:column;font-family:'IBM Plex Mono',monospace;font-size:11px;overflow:hidden;}
+#sys-head{padding:11px 14px;border-bottom:1px solid var(--border);background:#050709;flex-shrink:0;color:var(--muted);font-size:10px;}
 .sh-title{color:var(--green);font-size:11px;letter-spacing:.04em;margin-bottom:8px;}
 .sh-row{display:flex;justify-content:space-between;margin-bottom:3px;}
 .sh-row span:last-child{color:var(--green);}
@@ -107,89 +63,55 @@ body::after{
 .slabel{font-size:10px;color:var(--muted);width:90px;flex-shrink:0;}
 .strack{flex:1;height:5px;background:#0a0a0a;border-radius:99px;overflow:hidden;border:1px solid #151515;}
 .sfill{height:100%;width:0%;border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1);}
-.f-green{background:var(--green);}
-.f-red{background:#ff4444;}
-.f-blue{background:#4488ff;}
-.f-amber{background:var(--amber);}
-.f-purple{background:#aa66ff;}
+.f-green{background:var(--green);}.f-red{background:#ff4444;}.f-blue{background:#4488ff;}.f-amber{background:var(--amber);}.f-purple{background:#aa66ff;}
 .sval{font-size:10px;color:var(--muted);width:28px;text-align:right;flex-shrink:0;}
 
-#term-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
-#term-title{
-  padding:7px 14px;font-size:9px;letter-spacing:.1em;
-  color:var(--muted);border-bottom:1px solid #0d0d0d;flex-shrink:0;
-}
-#terminal{
-  flex:1;overflow-y:auto;padding:10px 14px;
-  color:#00cc55;font-size:11px;line-height:1.75;
-  scrollbar-width:thin;scrollbar-color:#111 transparent;
-}
+#term-wrap{flex:1;display:flex;flex-direction:column;min-height:0;visibility:hidden;}
+#term-title{padding:7px 14px;font-size:9px;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid #0d0d0d;flex-shrink:0;}
+#terminal{flex:1;overflow-y:auto;padding:10px 14px;color:#00cc55;font-size:11px;line-height:1.75;scrollbar-width:thin;scrollbar-color:#111 transparent;}
 .tl{display:block;}
 .tl.warn{color:var(--amber);}
 .tl.alert{color:var(--red);}
-.tl.dim{color:#003318;}
+.tl.dim{color:#004422;}
 .tl.noise{color:#002210;letter-spacing:.05em;}
 .tl.rupture{color:var(--red);font-weight:500;}
+/* corrupted chars flicker amber then resolve */
+.corrupt{color:var(--amber);transition:color .1s;}
+.corrupt.resolved{color:inherit;}
 
-@keyframes glitch{
-  0%,100%{transform:none;filter:none;}
-  10%{transform:translate(-2px,1px);filter:hue-rotate(90deg) brightness(1.3);}
-  20%{transform:translate(2px,-1px);filter:hue-rotate(-90deg);}
-  30%{transform:translate(-1px,2px);filter:brightness(1.15);}
-  40%{transform:translate(1px,-1px);}
-  50%{transform:none;filter:none;}
-}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.glitching{animation:glitch .25s steps(2,end) 5;}
-/* subtle early glitch — just a single very brief twitch */
-@keyframes microglitch{
-  0%,100%{transform:none;}
-  40%{transform:translate(-1px,0);}
-  60%{transform:translate(1px,0);}
-}
-.microglitching{animation:microglitch .15s steps(2,end) 2;}
 
 #sys-foot{padding:10px 14px;flex-shrink:0;}
-#sys-foot button{
-  width:100%;font-family:'IBM Plex Mono',monospace;font-size:10px;
-  padding:7px;background:transparent;border:1px solid var(--border2);
-  color:var(--muted);border-radius:5px;cursor:pointer;letter-spacing:.05em;transition:all .15s;
-}
+#sys-foot button{width:100%;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:7px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:5px;cursor:pointer;letter-spacing:.05em;transition:all .15s;}
 #sys-foot button:hover{border-color:#333;color:var(--dim);}
 
-#taskbar{
-  position:absolute;bottom:0;left:0;right:0;height:40px;
-  background:rgba(6,8,14,.96);border-top:1px solid var(--border);
-  display:flex;align-items:center;justify-content:flex-end;
-  padding:0 16px;z-index:10;
-}
+#taskbar{position:absolute;bottom:0;left:0;right:0;height:40px;background:rgba(6,8,14,.96);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;padding:0 16px;z-index:10;}
 #clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);text-align:right;line-height:1.4;}
 
-#popup{
-  position:absolute;inset:0;background:rgba(0,0,0,.5);
-  display:none;align-items:center;justify-content:center;z-index:50;
-}
+#popup{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;}
 #popup.show{display:flex;}
-#popbox{
-  width:340px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;
-  padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.5);
-}
+#popbox{width:340px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.5);}
 #popbox h3{font-size:13px;font-weight:500;margin-bottom:10px;}
 #popbox p{font-size:12px;color:var(--dim);margin-bottom:16px;line-height:1.6;}
 
-#toast{
-  position:absolute;right:16px;top:56px;width:256px;
-  background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
-  padding:12px 14px;font-family:'IBM Plex Mono',monospace;
-  transform:translateY(-8px);opacity:0;pointer-events:none;
-  transition:opacity .25s,transform .25s;z-index:60;
-}
+/* SYSTEM ERROR MODAL */
+#syserr{position:absolute;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:55;}
+#syserr.show{display:flex;}
+#syserrbox{width:400px;background:#0a0800;border:1px solid #5a3a00;border-radius:8px;padding:0;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.7);}
+#syserr-head{background:#3a2000;padding:10px 14px;display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--amber);}
+#syserr-body{padding:18px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#c8a060;line-height:1.8;}
+#syserr-body p{margin-bottom:10px;}
+#syserr-body .err-code{font-size:10px;color:#604820;margin-top:14px;}
+
+#toast{position:absolute;right:16px;top:56px;width:256px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:60;}
 #toast.show{opacity:1;transform:translateY(0);}
 #toast-t{font-size:11px;color:var(--text);margin-bottom:4px;font-weight:500;}
 #toast-m{font-size:10px;color:var(--dim);line-height:1.5;}
 
-.wordmark{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:20px;}
+/* APPLICANT UI */
+.wordmark{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
 .wordmark span{color:var(--green);}
+.wordmark-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:22px;}
 .ptag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:20px;}
 .card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:26px 30px;max-width:660px;margin-bottom:18px;}
 .card h2{font-size:20px;font-weight:500;margin-bottom:10px;letter-spacing:-.01em;}
@@ -210,6 +132,7 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 .btn-p:hover{background:rgba(0,230,118,.13);border-color:rgba(0,230,118,.45);}
 .ilink{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);text-decoration:underline;cursor:pointer;margin-right:16px;transition:color .15s;}
 .ilink:hover{color:var(--dim);}
+.dead-link{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);opacity:.35;margin-right:16px;cursor:not-allowed;text-decoration:line-through;}
 
 #polscroll{max-height:230px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #polscroll p{margin-bottom:10px;}
@@ -225,6 +148,7 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 .ptrack{width:100%;height:3px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:22px;}
 .pfill{height:100%;background:var(--green);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
 
+/* LOADING PROGRESS */
 .ltitle{font-size:26px;font-weight:400;letter-spacing:-.02em;margin-bottom:12px;}
 .lsub{color:var(--dim);font-size:14px;line-height:1.7;margin-bottom:22px;}
 .spin{display:flex;gap:8px;margin-bottom:18px;}
@@ -232,13 +156,15 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 .spin span:nth-child(2){animation-delay:.16s;}
 .spin span:nth-child(3){animation-delay:.32s;}
 @keyframes pulse{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+.lbar-wrap{width:100%;max-width:400px;height:4px;background:#111;border-radius:99px;overflow:hidden;margin-bottom:10px;}
+.lbar-fill{height:100%;background:var(--green);border-radius:99px;width:0%;transition:width .6s ease;}
+.lbar-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:18px;}
 
 .rtype{font-size:32px;font-weight:500;letter-spacing:-.02em;margin:14px 0 8px;}
 .rdesc{font-size:15px;line-height:1.75;color:var(--dim);max-width:580px;margin-bottom:16px;}
 
 @media(max-width:880px){
-  #dicons{display:none;}
-  #win{left:10px;right:10px;}
+  #dicons{display:none;}#win{left:10px;right:10px;}
   #panes{flex-direction:column;}
   #sys{width:100%;border-left:none;border-top:1px solid var(--border);max-height:220px;}
   #main{padding:22px 18px;}
@@ -250,6 +176,7 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
   <div id="dicons"></div>
 
   <div id="win">
+    <!-- TITLE BAR -->
     <div id="titlebar">
       <div style="display:flex;gap:6px;">
         <div class="wdot"></div><div class="wdot"></div><div class="wdot"></div>
@@ -260,21 +187,29 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
       <div id="urlbar">secured://personametric.io/applicant-portal</div>
     </div>
 
+    <!-- IT NOTICE BANNER -->
+    <div id="it-notice">
+      <span class="it-tag">IT NOTICE</span>
+      Known issue: Internal Process Log may display incomplete data during high-load periods. Contact IT ext. 204 if you experience unexpected output. — Systems Team
+    </div>
+
     <div id="panes">
+      <!-- LEFT: APPLICANT -->
       <div id="main">
         <div class="wordmark">Persona<span>Metric</span></div>
+        <div class="wordmark-sub">v4.2 (build 2019-11) &nbsp;·&nbsp; CANDIDATE PORTAL</div>
         <div id="story"></div>
       </div>
 
+      <!-- RIGHT: SYSTEM -->
       <div id="sys">
         <div id="sys-head">
           <div class="sh-title">BEHAVIORAL ENGINE v4.2</div>
           <div class="sh-row"><span>SESSION</span><span id="sid">—</span></div>
           <div class="sh-row"><span>PROFILES INDEXED</span><span id="dataset">—</span></div>
-          <div class="sh-row"><span>QUESTION</span><span id="qcount">0 / 15</span></div>
+          <div class="sh-row"><span>QUESTION</span><span id="qcount">0 / 20</span></div>
           <div class="sh-row"><span>STAGE</span><span id="stage">INTAKE</span></div>
         </div>
-
         <div id="sys-stats">
           <div class="srow"><span class="slabel">Compliance</span><div class="strack"><div class="sfill f-green" id="b-c"></div></div><span class="sval" id="v-c">0%</span></div>
           <div class="srow"><span class="slabel">Resistance</span><div class="strack"><div class="sfill f-red" id="b-r"></div></div><span class="sval" id="v-r">0%</span></div>
@@ -282,22 +217,35 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
           <div class="srow"><span class="slabel">Suggestibility</span><div class="strack"><div class="sfill f-amber" id="b-s"></div></div><span class="sval" id="v-s">0%</span></div>
           <div class="srow"><span class="slabel">Predictability</span><div class="strack"><div class="sfill f-purple" id="b-p"></div></div><span class="sval" id="v-p">0%</span></div>
         </div>
-
-        <div id="term-wrap" style="visibility:hidden;">
+        <div id="term-wrap">
           <div id="term-title">INTERNAL PROCESS LOG ▸ LIVE</div>
           <div id="terminal"></div>
         </div>
-
         <div id="sys-foot"><button onclick="resetSession()">⟳ RESET SESSION</button></div>
       </div>
     </div>
   </div>
 
+  <!-- ACCESS DENIED POPUP -->
   <div id="popup">
     <div id="popbox">
       <h3 id="pop-t">Access Denied</h3>
       <p id="pop-m">This directory is restricted to internal personnel.</p>
       <button class="btn" style="font-size:12px;padding:8px 14px;" onclick="closePopup()">Close</button>
+    </div>
+  </div>
+
+  <!-- SYSTEM ERROR MODAL -->
+  <div id="syserr">
+    <div id="syserrbox">
+      <div id="syserr-head">⚠ SYSTEM ERROR — PersonaMetric Engine</div>
+      <div id="syserr-body">
+        <p>An unhandled exception occurred in the behavioral logging pipeline.</p>
+        <p id="syserr-detail">ERR_BUFFER_OVERFLOW: Output stream exceeded expected capacity. Partial data may have been written to the applicant-facing log.</p>
+        <p>The issue has been reported automatically. Assessment will continue.</p>
+        <p class="err-code">TRACE: pm_engine.core → log_router.js:441 → stream_write() → SIGPIPE<br>BUILD: 2019-11-04 &nbsp;·&nbsp; ENV: PROD &nbsp;·&nbsp; REF: #PM-ERR-7743</p>
+      </div>
+      <div style="padding:0 20px 16px;"><button class="btn btn-p" style="font-size:11px;padding:7px 14px;margin:0;" onclick="closeSysErr()">Acknowledge &amp; Continue</button></div>
     </div>
   </div>
 
@@ -309,91 +257,121 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
 </div>
 
 <script>
+/* ═══════════════════════════ STATE ══════════════════════════════ */
 const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,result:null};
 let S=JSON.parse(localStorage.getItem("pm_s")||"null")||{...DEF};
 let SID=localStorage.getItem("pm_id")||mkSID();
 let dataset=18492+Math.floor(Math.random()*600);
-let glitchUnlocked=false;
+let corruptionLevel=0; // 0=none, 1=subtle, 2=moderate, 3=heavy — drives glitch intensity
+let sysErrShown=false;
 
 function mkSID(){const id="PM-"+Math.random().toString(36).slice(2,10).toUpperCase();localStorage.setItem("pm_id",id);return id;}
 function save(){localStorage.setItem("pm_s",JSON.stringify(S));}
 
+/* ═══════════════════════════ QUESTIONS ══════════════════════════ */
+// Q1–5: pure mundane HR warmup. Terminal dark.
+// Q6–9: probing deeper, first flickers Q8–9
+// Q10: system error fires
+// Q11–15: mask slips, rupture at Q11
+// Q16–20: full escalation
 const Qs=[
-  // Q1 — silent, terminal still hidden
-  {text:"When you start a new job and receive a directive you think might be inefficient, your first instinct is to:",
-    opts:[{l:"Follow it without comment — that's what new employees do.",e:{c:2,p:1}},{l:"Follow it, but note my concerns at an appropriate moment.",e:{c:1,q:1}},{l:"Ask questions until I understand the reasoning behind it.",e:{q:2,r:1}},{l:"Propose an alternative process right away.",e:{r:2,q:1}}],
-    log:[]},
 
-  // Q2 — silent
-  {text:"A company asks you to sign an agreement that waives some of your rights in exchange for continued employment. You:",
-    opts:[{l:"Sign it — job security matters more.",e:{c:2,s:2}},{l:"Sign it reluctantly but feel uneasy.",e:{c:1,p:1}},{l:"Read every clause carefully before deciding.",e:{q:2,r:1}},{l:"Refuse and look for work elsewhere.",e:{r:3}}],
-    log:[]},
+/* ── BLOCK 1: MUNDANE HR (Q1–5) ──────────────────────── */
+{text:"How would you describe your preferred working style?",
+  opts:[{l:"I prefer clear structure and defined tasks.",e:{c:2,p:1}},{l:"I like a mix of guidance and independence.",e:{p:1,q:1}},{l:"I work best when I can set my own pace and methods.",e:{r:1,q:1}},{l:"I adapt to whatever the role needs.",e:{s:1,c:1}}],
+  log:[]},
 
-  // Q3 — first flicker. One corrupted line, barely visible, then gone
-  {text:"How do you feel about AI systems making decisions that affect your career — resume screening, performance scores, role assignments?",
-    opts:[{l:"It's fine. Algorithms are more objective than humans.",e:{s:2,c:1}},{l:"I accept it, even if it makes me a little nervous.",e:{p:1,s:1}},{l:"I'm skeptical — bias bakes in, it just hides better.",e:{r:1,q:2}},{l:"It's deeply wrong and I would actively push back.",e:{r:3}}],
-    log:[{t:"subject trust: logged",cls:"dim",delay:800}]},
+{text:"When you receive critical feedback on your work, you typically:",
+  opts:[{l:"Accept it and implement changes right away.",e:{c:2,s:1}},{l:"Take time to reflect, then decide what to act on.",e:{q:1,p:1}},{l:"Ask for specific examples before responding.",e:{q:2}},{l:"Find it difficult but use it to improve over time.",e:{r:1,p:1}}],
+  log:[]},
 
-  // Q4 — a second flicker, slightly more legible
-  {text:"If everyone in your team agrees on a course of action but you believe it's flawed, you typically:",
-    opts:[{l:"Go along with the group — I must be missing something.",e:{s:2,c:1}},{l:"Stay quiet in the meeting, but raise it privately later.",e:{p:2}},{l:"Say something in the moment, even if it's uncomfortable.",e:{r:2,q:1}},{l:"Compile evidence and make a formal case against it.",e:{q:2,r:1}}],
-    log:[{t:"authority response: noted",cls:"dim",delay:600},{t:"compliance tendency: updating",cls:"dim",delay:1100}]},
+{text:"Describe your approach to working in a team:",
+  opts:[{l:"I prefer to take a supporting role and execute well.",e:{c:2,p:1}},{l:"I contribute actively but defer to whoever leads.",e:{c:1,s:1}},{l:"I naturally take initiative and often lead informally.",e:{r:1,q:1}},{l:"I focus on my piece and trust others to do the same.",e:{p:2}}],
+  log:[]},
 
-  // Q5 — still subtle but a little more legible, a tiny rupture word slips through
-  {text:"You discover a company policy that seems designed to benefit the organization at a significant cost to employees. You:",
-    opts:[{l:"Assume the company has good reasons I'm not aware of.",e:{c:2,s:1}},{l:"Accept it — every workplace has policies like this.",e:{c:1,p:1}},{l:"Research it and raise it through proper channels.",e:{q:2}},{l:"Discuss it openly with colleagues and push for change.",e:{r:2,q:1}}],
-    log:[{t:"institutional trust: recorded",cls:"dim",delay:500},{t:"behavioral marker [C] updated",cls:"dim",delay:900},{t:"—",cls:"noise",delay:1400}]},
+{text:"When a project deadline is at risk, your first move is to:",
+  opts:[{l:"Alert your manager immediately.",e:{c:2,s:1}},{l:"Work longer hours to absorb the delay yourself.",e:{p:1,c:1}},{l:"Reassess scope and propose what can be cut.",e:{q:2,r:1}},{l:"Communicate openly with the team and problem-solve together.",e:{q:1,r:1}}],
+  log:[]},
 
-  // Q6 — pattern starts feeling wrong. Still dim, but more lines
-  {text:"You're applying for a role and the personality test results will determine whether you advance. Knowing that, you:",
-    opts:[{l:"Answer as authentically as I can — that's the point.",e:{c:1,p:1}},{l:"Try to answer the way I think they want.",e:{s:2,c:1}},{l:"Feel uneasy — who decided what the right answers are?",e:{q:2,r:1}},{l:"Find it troubling that a test shapes this decision at all.",e:{r:2,q:1}}],
-    log:[{t:"meta-awareness: detected",cls:"dim",delay:400},{t:"authenticity flag: uncertain",cls:"warn",delay:900},{t:"adjusting model weights",cls:"dim",delay:1300}]},
+{text:"Which of these best describes how you handle ambiguity at work?",
+  opts:[{l:"I wait for clearer direction before proceeding.",e:{c:2,p:1}},{l:"I make reasonable assumptions and flag them as I go.",e:{p:1,q:1}},{l:"I thrive in ambiguity — I prefer to define the path.",e:{r:1,q:2}},{l:"I find it stressful but push through.",e:{s:1,p:1}}],
+  log:[]},
 
-  // ── Q7: RUPTURE ──────────────────────────────────────
-  {text:"When an app or website asks for your location, camera access, or browsing history:",
-    opts:[{l:"I allow it — it usually just makes the experience better.",e:{s:2,c:1}},{l:"I allow it if the app seems trustworthy.",e:{p:1,s:1}},{l:"I only grant the minimum permissions required.",e:{q:1,r:1}},{l:"I decline whenever possible and use privacy tools.",e:{r:2,q:1}}],
-    log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"live data extraction: ACTIVE",cls:"rupture",delay:700},{t:"subject unaware of collection scope",cls:"warn",delay:1100},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1500}]},
+/* ── BLOCK 2: PROBING DEEPER (Q6–10) ─────────────────── */
+{text:"If a manager made a decision you strongly disagreed with, and asking questions didn't change anything, you would:",
+  opts:[{l:"Accept it — they have more context than I do.",e:{c:2,s:1}},{l:"Comply, but document my concerns.",e:{c:1,p:1}},{l:"Escalate to someone above them.",e:{r:1,q:1}},{l:"Comply for now, but keep looking for other opportunities.",e:{r:1,q:1}}],
+  log:[]},
 
-  {text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
-    opts:[{l:"Accept it — that's just how these systems work.",e:{s:2,c:1}},{l:"Acknowledge it but don't really think about it.",e:{p:2}},{l:"Wonder what 'behavioral data' actually means in this context.",e:{q:2}},{l:"Want to know exactly what's collected and how it's used.",e:{q:1,r:2}}],
-    log:[{t:"response 8 of 15 recorded",cls:""},{t:"91% of subjects do not read section 3",cls:"warn",delay:400},{t:"data awareness score: LOW",cls:"warn",delay:700}]},
+{text:"How do you feel about companies using standardized tests to evaluate candidates before any human reviews their application?",
+  opts:[{l:"It's efficient and removes unconscious human bias.",e:{s:2,c:1}},{l:"It's fine as long as the tests are well-designed.",e:{p:1,s:1}},{l:"I'm skeptical — tests can encode bias just as easily.",e:{q:2,r:1}},{l:"It bothers me. Reducing people to scores misses something important.",e:{r:2,q:1}}],
+  log:[]},
 
-  {text:"Do you believe personality tests like this one can accurately determine whether someone is a good employee?",
-    opts:[{l:"Yes — there's real science behind these methods.",e:{s:2,c:1}},{l:"Partially — they give some useful signals.",e:{p:1}},{l:"Mostly no — they measure test-taking, not competence.",e:{q:1,r:1}},{l:"No — and I'm uncomfortable that companies use them.",e:{r:2,q:1}}],
-    log:[{t:"response 9 of 15 recorded",cls:""},{t:"note: subject is currently being assessed",cls:"warn",delay:500},{t:"prediction confidence: increasing",cls:"",delay:800}]},
+{text:"You're completing an assessment and you notice one of the questions seems designed to test something other than what it claims. You:",
+  opts:[{l:"Answer it as given — second-guessing the test isn't my job.",e:{c:2,s:1}},{l:"Answer it honestly and note the concern mentally.",e:{p:1,q:1}},{l:"Answer carefully, aware that more may be being measured.",e:{q:2}},{l:"Feel unsettled that you can't fully trust the framing.",e:{r:1,q:2}}],
+  // Q8 — first subtle corruption flicker
+  log:[{t:"meta-awareness: det3cted",cls:"dim",corrupt:true,delay:700}]},
 
-  {text:"If a machine learning model trained on historical data was quietly filtering candidates by zip code, educational background, or age:",
-    opts:[{l:"I'd trust that the model was built responsibly.",e:{s:2,c:1}},{l:"I'd feel concerned but wouldn't know how to challenge it.",e:{p:1,s:1}},{l:"I'd consider it a form of systemic discrimination.",e:{q:1,r:1}},{l:"I'd report it and push hard for transparency.",e:{r:2,q:1}}],
-    log:[{t:"response 10 of 15 recorded",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"note: this assessment performs the function being described",cls:"rupture",delay:700},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"subject classified: see profile",cls:"warn",delay:1400}]},
+{text:"In your last role, how closely did your actual job responsibilities match what was described in the job posting?",
+  opts:[{l:"Very closely — it was accurate.",e:{c:1,p:2}},{l:"Mostly, with some additions over time.",e:{p:1,s:1}},{l:"Somewhat — there were significant differences.",e:{q:1,r:1}},{l:"Not much at all — the reality was quite different.",e:{r:2,q:1}}],
+  // Q9 — second flicker, slightly more legible
+  log:[{t:"expectati0n gap: l0gged",cls:"dim",corrupt:true,delay:500},{t:"compliance under misrepresentation: upd4ting",cls:"dim",corrupt:true,delay:1100}]},
 
-  {text:"How much do you believe your online behavior — searches, clicks, reading time — is actively monitored right now?",
-    opts:[{l:"Not much. I'm not that interesting.",e:{s:2,p:1}},{l:"Probably some ad targeting, nothing more.",e:{s:1,p:1}},{l:"Significantly — I just don't know exactly how.",e:{q:2}},{l:"Extensively. Most platforms are surveillance infrastructure.",e:{r:1,q:2}}],
-    log:[{t:"response 11 of 15 recorded",cls:""},{t:"current session tracking:",cls:"warn",delay:400},{t:"  response timing: YES",cls:"warn",delay:600},{t:"  scroll depth: YES",cls:"warn",delay:800},{t:"  answer revision patterns: YES",cls:"warn",delay:1000},{t:"subject awareness: LOW",cls:"alert",delay:1300}]},
+{text:"Do you believe the hiring process at most companies is fair to all candidates, regardless of background?",
+  opts:[{l:"Yes — companies are generally trying to do the right thing.",e:{s:2,c:1}},{l:"Mostly — there's bias but most processes are reasonable.",e:{p:1,s:1}},{l:"No — structural bias is deeply embedded in most processes.",e:{r:1,q:2}},{l:"No — and the rise of automated screening is making it worse.",e:{r:2,q:1}}],
+  // Q10 — system error fires after answer
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"fairness model: INCONSISTENT",cls:"warn",corrupt:true,delay:600},{t:"subject classification conflict detected",cls:"warn",delay:1000},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1400}],
+  sysErr:true},
 
-  {text:"The job market has changed dramatically due to automation and AI. What should workers do?",
-    opts:[{l:"Adapt and reskill — that's always been how progress works.",e:{c:1,p:1}},{l:"Accept it, even if it's uncomfortable.",e:{c:2,s:1}},{l:"Demand more regulation and corporate accountability.",e:{r:2,q:1}},{l:"Organize collectively and refuse to accept these changes passively.",e:{r:3}}],
-    log:[{t:"response 12 of 15 recorded",cls:""},{t:"labor disposition: logged",cls:"warn",delay:400},{t:"systemic orientation: recorded",cls:"warn",delay:700}]},
+/* ── BLOCK 3: MASK SLIPS (Q11–15) ────────────────────── */
+{text:"When an app or service asks for your location, camera access, or browsing history:",
+  opts:[{l:"I allow it — it usually improves the experience.",e:{s:2,c:1}},{l:"I allow it when the app seems trustworthy.",e:{p:1,s:1}},{l:"I grant the minimum permissions required.",e:{q:1,r:1}},{l:"I decline whenever possible and use privacy tools.",e:{r:2,q:1}}],
+  // Q11: real rupture — full corrupted line that never resolves
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"live data extraction: ACTIVE",cls:"rupture",corrupt:false,delay:700},{t:"subject unaware of collection scope",cls:"warn",delay:1100},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1500}]},
 
-  {text:"You find out that results from this assessment are being permanently stored and may be shared with affiliated employers without individual notification. You feel:",
-    opts:[{l:"Fine — I answered honestly so I have nothing to hide.",e:{s:2,c:1}},{l:"Mildly uncomfortable, but I agreed to the terms.",e:{p:1,c:1}},{l:"Betrayed — that wasn't clearly communicated.",e:{r:1,q:1}},{l:"This is exactly the kind of data concentration I find threatening.",e:{r:2,q:1}}],
-    log:[{t:"response 13 of 15 recorded",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"profile retention: CONFIRMED",cls:"alert",delay:700},{t:"sharing with 14 affiliated entities: QUEUED",cls:"alert",delay:1000},{t:"informed consent classification: marginal",cls:"warn",delay:1300},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1600}]},
+{text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
+  opts:[{l:"Accept it — that's just how these systems work.",e:{s:2,c:1}},{l:"Acknowledge it but don't really think about it.",e:{p:2}},{l:"Wonder what 'behavioral data' actually means in this context.",e:{q:2}},{l:"Want to know exactly what's collected and how it's used.",e:{q:1,r:2}}],
+  log:[{t:"91% of subjects do not read section 3",cls:"warn",delay:400},{t:"data awareness score: LOW",cls:"warn",delay:800}]},
 
-  {text:"Looking back at this assessment — have you been answering as yourself, or as who you think they want you to be?",
-    opts:[{l:"Myself — I don't perform for assessments.",e:{q:1,p:1}},{l:"Mostly myself, but I softened some answers.",e:{s:1,p:1}},{l:"A mix. I noticed myself adjusting and then tried to stop.",e:{q:2}},{l:"I'm not sure I can tell anymore.",e:{q:2,r:1}}],
-    log:[{t:"response 14 of 15 recorded",cls:""},{t:"authenticity gradient: recorded",cls:"warn",delay:400},{t:"the model adapted to you long ago",cls:"rupture",delay:900},{t:"your answer here changes nothing",cls:"alert",delay:1200}]},
+{text:"How much do you believe your online behavior — searches, clicks, reading time — is actively monitored right now?",
+  opts:[{l:"Not much. I'm not that interesting.",e:{s:2,p:1}},{l:"Probably some ad targeting, nothing more.",e:{s:1,p:1}},{l:"Significantly — I just don't know the exact scope.",e:{q:2}},{l:"Extensively. Most platforms are surveillance infrastructure.",e:{r:1,q:2}}],
+  log:[{t:"current session tracking:",cls:"warn",delay:300},{t:"  response timing ........ YES",cls:"warn",delay:550},{t:"  scroll depth ........... YES",cls:"warn",delay:800},{t:"  answer revision ........ YES",cls:"warn",delay:1050},{t:"subject awareness: LOW",cls:"alert",delay:1400}]},
 
-  {text:"Finally: Why are you completing this assessment?",
-    opts:[{l:"Because I want the job.",e:{c:2,s:2}},{l:"Because the process requires it and I comply with processes.",e:{c:2,p:1}},{l:"I'm genuinely curious what it reveals.",e:{q:2}},{l:"I don't fully know — but I kept going anyway.",e:{q:1,s:1}}],
-    log:[{t:"response 15 of 15 received",cls:""},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"employment incentive increases compliance: +40%",cls:"warn",delay:600},{t:"honesty declines as stakes increase",cls:"warn",delay:900},{t:"consistent across all 18,000+ subjects",cls:"alert",delay:1200},{t:"building final profile...",cls:"rupture",delay:1500},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1800}]}
+{text:"If a machine learning model trained on historical data was quietly filtering candidates by zip code, educational background, or age:",
+  opts:[{l:"I'd trust that the model was built responsibly.",e:{s:2,c:1}},{l:"I'd feel concerned but wouldn't know how to challenge it.",e:{p:1,s:1}},{l:"I'd consider it a form of systemic discrimination.",e:{q:1,r:1}},{l:"I'd report it and push hard for transparency.",e:{r:2,q:1}}],
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"note: this assessment performs the function being described",cls:"rupture",delay:700},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"subject classified: see profile",cls:"warn",delay:1400}]},
+
+{text:"You find out that results from this assessment are being permanently stored and may be shared with affiliated employers without your notification. You feel:",
+  opts:[{l:"Fine — I answered honestly so I have nothing to hide.",e:{s:2,c:1}},{l:"Mildly uncomfortable, but I agreed to the terms.",e:{p:1,c:1}},{l:"Betrayed — that wasn't clearly communicated.",e:{r:1,q:1}},{l:"This is exactly the kind of data concentration I find threatening.",e:{r:2,q:1}}],
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"profile retention: CONFIRMED",cls:"alert",delay:600},{t:"sharing with 14 affiliated entities: QUEUED",cls:"alert",delay:1000},{t:"informed consent classification: marginal",cls:"warn",delay:1400},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1800}]},
+
+/* ── BLOCK 4: FULL ESCALATION (Q16–20) ───────────────── */
+{text:"The job market has changed dramatically due to automation and AI. What should workers do?",
+  opts:[{l:"Adapt and reskill — that's always been how progress works.",e:{c:1,p:1}},{l:"Accept it, even if it's uncomfortable.",e:{c:2,s:1}},{l:"Demand more regulation and corporate accountability.",e:{r:2,q:1}},{l:"Organize collectively and refuse to accept these changes passively.",e:{r:3}}],
+  log:[{t:"labor disposition: logged",cls:"warn",delay:400},{t:"systemic orientation: recorded",cls:"warn",delay:800}]},
+
+{text:"If this assessment could accurately predict your entire career trajectory — every role, every outcome, every ceiling — would you want to see the result?",
+  opts:[{l:"Yes — I'd want to know, even if it was hard.",e:{q:2,c:1}},{l:"Maybe — only if I could change it.",e:{q:1,p:1}},{l:"No — I'd rather not have that information.",e:{r:1,p:1}},{l:"I don't believe any system could do that accurately.",e:{r:2,q:1}}],
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"fatalism index: recorded",cls:"warn",delay:600},{t:"subject relationship to determinism: noted",cls:"warn",delay:1000},{t:"irony flag: subject IS being predicted",cls:"rupture",delay:1600},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:2000}]},
+
+{text:"Looking back at this assessment — have you been answering as yourself, or as who you think they want you to be?",
+  opts:[{l:"Myself — I don't perform for assessments.",e:{q:1,p:1}},{l:"Mostly myself, but I softened some answers.",e:{s:1,p:1}},{l:"A mix. I noticed myself adjusting and then tried to stop.",e:{q:2}},{l:"I'm not sure I can tell anymore.",e:{q:2,r:1}}],
+  log:[{t:"authenticity gradient: recorded",cls:"warn",delay:400},{t:"the model adapted to you long ago",cls:"rupture",delay:1000},{t:"your answer here changes nothing",cls:"alert",delay:1400}]},
+
+{text:"If you knew with certainty that you would not get this job regardless of your answers — would you have answered differently?",
+  opts:[{l:"No — I always answer honestly.",e:{c:1,p:1}},{l:"Probably not — but I'd feel differently about it.",e:{p:1,q:1}},{l:"Maybe — some answers were shaped by wanting the outcome.",e:{s:1,q:1}},{l:"Yes — I was performing the whole time.",e:{s:2,q:1}}],
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"employment incentive effect: CONFIRMED",cls:"alert",delay:700},{t:"response validity: COMPROMISED",cls:"alert",delay:1100},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1500}]},
+
+{text:"Finally: Why are you completing this assessment?",
+  opts:[{l:"Because I want the job.",e:{c:2,s:2}},{l:"Because the process requires it and I comply with processes.",e:{c:2,p:1}},{l:"I'm genuinely curious what it reveals.",e:{q:2}},{l:"I don't fully know — but I kept going anyway.",e:{q:1,s:1}}],
+  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"employment incentive increases compliance: +40%",cls:"warn",delay:600},{t:"honesty declines as stakes increase",cls:"warn",delay:1000},{t:"consistent across all 18,000+ subjects",cls:"alert",delay:1400},{t:"building final profile...",cls:"rupture",delay:1800},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:2200}]}
 ];
 
+/* ═══════════════════════════ DESKTOP ICONS ══════════════════════ */
 const defaultIcons=[{l:"Applicants"},{l:"Profiles"},{l:"Archive"},{l:"Internal"}];
 const escalatedIcons=[{l:"Profiles"},{l:"Archive"},{l:"Retained"},{l:"Do Not Open"}];
-
 function renderIcons(list){
   document.getElementById("dicons").innerHTML=list.map(i=>`<div class="dicon" onclick="denyAccess('${i.l}')"><div class="dicon-box"></div><div class="dicon-lbl">${i.l}</div></div>`).join("");
 }
-
 let folderHits=0;
 function denyAccess(name){
   folderHits++;
@@ -401,9 +379,10 @@ function denyAccess(name){
   if(folderHits>=3) msg="Repeated access attempts have been logged to your session record.";
   if(folderHits>=5) msg="This directory contains retained applicant data. Internal credentials required.";
   showPopup("Access Restricted",msg);
-  if(glitchUnlocked) tlog("> restricted access attempt: "+name,"warn");
+  if(corruptionLevel>0) tlog("> restricted access: "+name,"warn");
 }
 
+/* ═══════════════════════════ CLOCK ══════════════════════════════ */
 function tickClock(){
   const n=new Date();
   document.getElementById("cl-t").textContent=n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
@@ -415,8 +394,8 @@ document.getElementById("sid").textContent=SID;
 document.getElementById("dataset").textContent=dataset.toLocaleString();
 setInterval(()=>{dataset+=Math.floor(Math.random()*4);document.getElementById("dataset").textContent=dataset.toLocaleString();},1500);
 
+/* ═══════════════════════════ ROUTING ════════════════════════════ */
 const stageMap={portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"};
-
 function route(){
   updateBars();
   document.getElementById("stage").textContent=stageMap[S.screen]||"ACTIVE";
@@ -427,7 +406,107 @@ function setStory(html){document.getElementById("story").innerHTML=html;}
 function mkBtn(label,fn,cls="btn"){const b=document.createElement("button");b.className=cls;b.textContent=label;b.onclick=fn;return b;}
 function addTo(...nodes){const s=document.getElementById("story");nodes.forEach(n=>s.appendChild(n));}
 function mkLink(label,fn){const a=document.createElement("span");a.className="ilink";a.textContent=label;a.onclick=fn;return a;}
+function mkDeadLink(label){const a=document.createElement("span");a.className="dead-link";a.textContent=label;a.title="404 — page not found";return a;}
 
+/* ═══════════════════════════ TEXT CORRUPTION ENGINE ════════════ */
+const GARBAGE="@#$%&!?x01※▓▒░█";
+function corruptChar(){return GARBAGE[Math.floor(Math.random()*GARBAGE.length)];}
+
+// Render a line with text corruption — wrong chars that self-correct
+// severity 1=1-2 chars wrong, 2=30% wrong, 3=60% wrong, 4=never resolves
+function tlogCorrupt(text, cls="", severity=1, delay=0){
+  setTimeout(()=>{
+    revealTerminal();
+    const t=document.getElementById("terminal");
+    const ln=document.createElement("span");
+    ln.className="tl"+(cls?" "+cls:"");
+
+    // Build corrupted version
+    const chars=text.split("");
+    const numCorrupt = severity===1 ? Math.min(2,Math.ceil(chars.length*.08))
+                     : severity===2 ? Math.ceil(chars.length*.3)
+                     : Math.ceil(chars.length*.6);
+
+    // Pick random positions (skip spaces)
+    const positions=[];
+    for(let i=0;i<chars.length;i++){if(chars[i]!==" ") positions.push(i);}
+    const corruptPositions=positions.sort(()=>Math.random()-.5).slice(0,numCorrupt);
+
+    // Render initially corrupted
+    const spans=chars.map((ch,i)=>{
+      const sp=document.createElement("span");
+      if(corruptPositions.includes(i)){
+        sp.textContent=corruptChar();
+        sp.classList.add("corrupt");
+      } else {
+        sp.textContent=ch;
+      }
+      return sp;
+    });
+    spans.forEach(sp=>ln.appendChild(sp));
+    t.appendChild(ln);
+    t.appendChild(document.createElement("br"));
+    t.scrollTop=t.scrollHeight;
+
+    // If severity < 4, resolve each corrupt char one by one
+    if(severity<4){
+      corruptPositions.forEach((pos,idx)=>{
+        const resolveDelay=200+(idx*80)+(Math.random()*120);
+        setTimeout(()=>{
+          spans[pos].textContent=chars[pos];
+          spans[pos].classList.add("resolved");
+        },resolveDelay);
+      });
+    }
+  },delay);
+}
+
+// Standard (non-corrupt) log line
+function tlog(text,cls="",delay=0){
+  setTimeout(()=>{
+    revealTerminal();
+    const t=document.getElementById("terminal");
+    const ln=document.createElement("span");
+    ln.className="tl"+(cls?" "+cls:"");
+    ln.textContent=text;
+    t.appendChild(ln);t.appendChild(document.createElement("br"));
+    t.scrollTop=t.scrollHeight;
+  },delay);
+}
+
+function revealTerminal(){
+  const w=document.getElementById("term-wrap");
+  if(w.style.visibility==="hidden"){
+    w.style.visibility="visible";
+    w.style.animation="fadeIn .5s ease";
+  }
+}
+
+// Dispatch a log entry — routes to corrupt or plain based on entry config
+function dispatchLog(entry){
+  const delay=entry.delay||0;
+  if(entry.corrupt){
+    // determine severity from corruptionLevel
+    const sev=Math.max(1,corruptionLevel);
+    tlogCorrupt(entry.t,entry.cls||"",sev,delay);
+  } else {
+    tlog(entry.t,entry.cls||"",delay);
+  }
+}
+
+/* ═══════════════════════════ SYSTEM ERROR ═══════════════════════ */
+function showSysErr(){
+  if(sysErrShown) return;
+  sysErrShown=true;
+  setTimeout(()=>{
+    document.getElementById("syserr").classList.add("show");
+  },1800);
+}
+function closeSysErr(){
+  document.getElementById("syserr").classList.remove("show");
+}
+
+/* ═══════════════════════════ SCREENS ════════════════════════════ */
 function renderPortal(){
   setStory(`
     <div class="ptag">Applicant Assessment Portal</div>
@@ -439,15 +518,15 @@ function renderPortal(){
         <div class="mcell"><div class="mclbl">Applicant ID</div><div class="mcval">${SID}</div></div>
         <div class="mcell"><div class="mclbl">Position</div><div class="mcval">Data Processing Associate</div></div>
         <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--amber)">Assessment Pending</div></div>
-        <div class="mcell"><div class="mclbl">Est. Duration</div><div class="mcval">8–12 minutes</div></div>
+        <div class="mcell"><div class="mclbl">Est. Duration</div><div class="mcval">12–15 minutes</div></div>
       </div>
       <hr class="div">
       <p style="font-size:12px;color:var(--muted);">This assessment cannot be paused once started. Please answer all questions honestly. Results are processed automatically.</p>
     </div>
   `);
   const b=mkBtn("Begin Assessment →","","btn btn-p");
-  b.onclick=()=>{go("policy");};
-  addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("policy")),mkLink("Open Positions",()=>go("careers")),mkLink("System Status",()=>go("status")));
+  b.onclick=()=>go("policy");
+  addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("policy")),mkLink("Open Positions",()=>go("careers")),mkDeadLink("Help & Support"),mkLink("System Status",()=>go("status")));
 }
 
 function renderAbout(){
@@ -458,7 +537,9 @@ function renderAbout(){
       <p>PersonaMetric is a behavioral analytics platform specializing in predictive personality modeling, workforce compatibility assessment, and applicant decision analytics.</p>
       <p>Our technology is deployed across hiring, education, insurance, financial services, and organizational development. Using adaptive behavioral assessments, response-pattern analysis, and machine learning classification, PersonaMetric helps institutions understand how individuals think, decide, and respond under pressure.</p>
       <p>Our platform has processed over 18,000 unique applicant profiles. Each assessment contributes anonymized data to our continuously improving behavioral model.</p>
-      <p style="font-style:italic;font-size:12px;color:var(--muted);">PersonaMetric — Understanding People. Predicting Potential.</p>
+      <hr class="div">
+      <p style="font-size:12px;color:var(--muted);">PersonaMetric v4.2 — Last major platform update: November 2019. Legacy system familiarity a plus for all internal roles.</p>
+      <p style="font-style:italic;font-size:12px;color:var(--muted);margin-top:6px;">PersonaMetric — Understanding People. Predicting Potential.</p>
     </div>
   `);
   addTo(mkBtn("← Return to Portal",()=>go("portal")));
@@ -496,7 +577,11 @@ function renderPolicy(){
   });
   const gb=mkBtn("Continue →","","btn btn-p");
   gb.onclick=()=>{
-    if(!ck.checked){let w=document.getElementById("cwarn");if(!w){w=document.createElement("p");w.id="cwarn";w.style.cssText="color:#ff6666;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:8px;";w.textContent="You must agree to the terms to continue.";document.querySelector(".card").appendChild(w);}return;}
+    if(!ck.checked){
+      let w=document.getElementById("cwarn");
+      if(!w){w=document.createElement("p");w.id="cwarn";w.style.cssText="color:#ff6666;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:8px;";w.textContent="You must agree to the terms to continue.";document.querySelector(".card").appendChild(w);}
+      return;
+    }
     showToast("Consent Recorded","Assessment materials unlocked.");go("assessment");
   };
   addTo(gb,mkBtn("← Return",()=>go("portal")));
@@ -507,14 +592,18 @@ function renderCareers(){
     <div class="ptag">Open Positions</div>
     <div class="card">
       <h2>Current Opportunities</h2>
-      <p>The following roles are currently accepting applications through the PersonaMetric portal. All positions require completion of a behavioral compatibility assessment before any human review takes place.</p>
+      <p>The following roles are currently accepting applications. All positions require completion of a behavioral compatibility assessment before any human review takes place.</p>
       <div class="mgrid">
         <div class="mcell"><div class="mclbl">Role</div><div class="mcval">Data Processing Associate</div></div>
         <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--green)">Open</div></div>
         <div class="mcell"><div class="mclbl">Role</div><div class="mcval">Assessment Support Analyst</div></div>
         <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--amber)">Limited</div></div>
+        <div class="mcell"><div class="mclbl">Role</div><div class="mcval">Systems Integration Lead</div></div>
+        <div class="mcell"><div class="mclbl">Status</div><div class="mcval" style="color:var(--green)">Open</div></div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-top:8px;">Candidates who advance are contacted automatically based on compatibility scores. No manual review stage is required for initial screening.</p>
+      <hr class="div">
+      <p style="font-size:12px;color:var(--muted);">Candidates who advance are contacted automatically. No manual review stage is required for initial screening.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:4px;">Note: Systems Integration Lead requires experience with legacy infrastructure. Python 2 familiarity preferred. See IT ext. 204 for platform documentation.</p>
     </div>
   `);
   addTo(mkBtn("← Return to Portal",()=>go("portal")));
@@ -528,18 +617,23 @@ function renderStatus(){
       <div class="mgrid">
         <div class="mcell"><div class="mclbl">Applicant Portal</div><div class="mcval" style="color:var(--green)">Online</div></div>
         <div class="mcell"><div class="mclbl">Behavioral Engine</div><div class="mcval" style="color:var(--green)">Active</div></div>
-        <div class="mcell"><div class="mclbl">Profile Database</div><div class="mcval" style="color:var(--green)">Syncing</div></div>
+        <div class="mcell"><div class="mclbl">Profile Database</div><div class="mcval" style="color:var(--amber)">Degraded</div></div>
         <div class="mcell"><div class="mclbl">ML Pipeline</div><div class="mcval" style="color:var(--green)">Running</div></div>
+        <div class="mcell"><div class="mclbl">Log Router</div><div class="mcval" style="color:var(--red)">Unknown</div></div>
+        <div class="mcell"><div class="mclbl">Last Model Update</div><div class="mcval" style="color:var(--muted)">Nov 2019</div></div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-top:8px;">All systems operational. Last model update: 4 hours ago.</p>
+      <hr class="div">
+      <p style="font-size:12px;color:var(--muted);">Profile Database degradation is a known issue under investigation. Log Router status cannot be determined at this time. Contact IT ext. 204 for updates.</p>
     </div>
   `);
   addTo(mkBtn("← Return to Portal",()=>go("portal")));
 }
 
+/* ═══════════════════════════ ASSESSMENT ═════════════════════════ */
 function renderQ(){
   if(S.qi>=Qs.length){beginFinal();return;}
-  const q=Qs[S.qi];const pct=Math.round((S.qi/Qs.length)*100);
+  const q=Qs[S.qi];
+  const pct=Math.round((S.qi/Qs.length)*100);
   setStory(`
     <div class="ptag">Behavioral Assessment — Stage 2 of 3</div>
     <div class="ptrack"><div class="pfill" style="width:${pct}%"></div></div>
@@ -561,26 +655,45 @@ function answer(opt,q){
   const e=opt.e||{};
   S.c+=(e.c||0);S.r+=(e.r||0);S.q+=(e.q||0);S.s+=(e.s||0);S.p+=(e.p||0);
   S.answers.push({qi:S.qi,a:opt.l});
-  // Unlock glitch after Q2 so Q3 (index 2) can show first flicker
-  if(S.qi===1) glitchUnlocked=true;
-  if(q.log&&q.log.length) q.log.forEach((entry,i)=>{
-    const delay=entry.delay||(i*80);
-    setTimeout(()=>{
-      if(entry.cls==="rupture"&&glitchUnlocked) doGlitch(false);
-      else if((entry.cls==="warn"||entry.cls==="dim")&&i===0&&glitchUnlocked) doGlitch(true);
-      tlog(entry.t,entry.cls||"");
-    },delay);
-  });
-  if(S.qi===3) showToast("Progress Saved","Applicant profile synchronized.");
-  if(S.qi===7) showToast("Assessment Update","Behavioral markers refreshed.");
-  if(S.qi===10){escalateDesktop();showToast("Halfway Complete","Your responses are being processed.");}
+
+  // Escalate corruption level at key moments
+  if(S.qi===7) corruptionLevel=1;   // Q8: first flicker
+  if(S.qi===9) corruptionLevel=2;   // Q10: moderate before error
+  if(S.qi===10) corruptionLevel=3;  // Q11: full rupture
+  if(S.qi===14) corruptionLevel=4;  // Q15+: never resolves some chars
+
+  // Fire log entries
+  if(q.log&&q.log.length) q.log.forEach(entry=>dispatchLog(entry));
+
+  // System error at Q10
+  if(q.sysErr) showSysErr();
+
+  // Milestone toasts (applicant-facing, always neutral)
+  if(S.qi===4) showToast("Progress Saved","Applicant profile synchronized.");
+  if(S.qi===9) showToast("Assessment Update","Behavioral markers refreshed.");
+  if(S.qi===14){escalateDesktop();showToast("Halfway Complete","Your responses are being processed.");}
+
   S.qi++;save();updateBars();
   setTimeout(renderQ,220);
 }
 
+/* ═══════════════════════════ LOADING ════════════════════════════ */
 function beginFinal(){
   go("loading");
-  setTimeout(()=>{buildResult();showToast("Assessment Complete","Your profile is ready.");go("results");},3800);
+  // Terminal: final escalation logs
+  [
+    {t:"final response received",cls:"",delay:200},
+    {t:"cross-referencing 18,000+ archived profiles",cls:"",delay:700},
+    {t:"— — — — — — — — — — — — — —",cls:"noise",delay:1300},
+    {t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1700},
+    {t:"classification: FINALIZED",cls:"rupture",delay:2200},
+    {t:"applicant-facing summary: softening...",cls:"alert",delay:2800},
+    {t:"— — — — — — — — — — — — — —",cls:"noise",delay:3400},
+    {t:"profile retained: YES",cls:"alert",delay:3700},
+    {t:"sharing with affiliates: QUEUED",cls:"alert",delay:4100},
+  ].forEach(e=>tlog(e.t,e.cls,e.delay));
+
+  setTimeout(()=>{buildResult();showToast("Assessment Complete","Your profile is ready.");go("results");},5200);
 }
 
 function renderLoading(){
@@ -590,16 +703,36 @@ function renderLoading(){
       <div class="badge"><span class="badge-dot"></span>Processing</div>
       <div class="ltitle">Reviewing your responses...</div>
       <p class="lsub">Our system is preparing your compatibility profile and applicant summary. This usually takes a few moments.</p>
+      <div class="lbar-wrap"><div class="lbar-fill" id="lbar"></div></div>
+      <div class="lbar-label" id="lbar-label">Initializing...</div>
       <div class="spin"><span></span><span></span><span></span></div>
       <p style="font-size:12px;color:var(--muted);">Please do not close this window.</p>
     </div>
   `);
-  [{t:"final response received",cls:"",delay:200},{t:"cross-referencing 18,000+ archived profiles",cls:"",delay:600},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1400},{t:"classification: FINALIZED",cls:"rupture",delay:1800},{t:"applicant-facing summary: softening...",cls:"alert",delay:2200},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:2700},{t:"profile retained: YES",cls:"alert",delay:3000},{t:"sharing with affiliates: QUEUED",cls:"alert",delay:3300}]
-  .forEach(e=>setTimeout(()=>{if(e.cls==="rupture"||e.cls==="alert") doGlitch(false);tlog(e.t,e.cls);},e.delay));
+
+  // Loading bar that stalls at 67% then jumps
+  const steps=[
+    {pct:15,label:"Loading response data...",t:300},
+    {pct:34,label:"Applying behavioral model...",t:900},
+    {pct:67,label:"Classifying profile...",t:1800},
+    // stall — no update for 1.4s
+    {pct:68,label:"Classifying profile...",t:3200},
+    {pct:92,label:"Generating applicant summary...",t:3500},
+    {pct:100,label:"Complete.",t:4800},
+  ];
+  steps.forEach(step=>{
+    setTimeout(()=>{
+      const bar=document.getElementById("lbar");
+      const lbl=document.getElementById("lbar-label");
+      if(bar) bar.style.width=step.pct+"%";
+      if(lbl) lbl.textContent=step.label;
+    },step.t);
+  });
 }
 
+/* ═══════════════════════════ RESULT LOGIC ═══════════════════════ */
 function buildResult(){
-  const m={c:Math.min(100,S.c*7),r:Math.min(100,S.r*7),q:Math.min(100,S.q*7),s:Math.min(100,S.s*7),p:Math.min(100,S.p*7+S.c*2)};
+  const m={c:Math.min(100,S.c*5),r:Math.min(100,S.r*5),q:Math.min(100,S.q*5),s:Math.min(100,S.s*5),p:Math.min(100,S.p*5+S.c*2)};
   let key="Balanced Profile";
   if(m.s>=70&&m.c>m.r+10) key="Adaptive Complier";
   else if(m.r>=70&&m.q>=50) key="System Skeptic";
@@ -655,6 +788,7 @@ function buildResult(){
   save();
 }
 
+/* ═══════════════════════════ RESULTS ════════════════════════════ */
 function renderResults(){
   if(!S.result) buildResult();
   const r=S.result;
@@ -671,17 +805,48 @@ function renderResults(){
       <p class="rdesc">Your results suggest strengths that align well with ${envStr} — environments where your natural approach contributes meaningfully to team and organizational goals.</p>
       <p>Our team will review your profile alongside your application materials. You'll be contacted with next steps if your profile is a strong match for any current openings.</p>
       <hr class="div">
-      <p style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Report generated by PersonaMetric Behavioral Engine v4.2</p>
+      <p style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Report generated by PersonaMetric Behavioral Engine v4.2 (build 2019-11)</p>
     </div>
   `);
   addTo(mkBtn("End Session",()=>go("end")));
+
+  // Terminal: full internal reveal, with heavy corruption on key lines
   setTimeout(()=>{
-    doGlitch();
-    [{t:"surface report: rendered for applicant",cls:""},{t:"——————————————————————————————",cls:"noise"},{t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture"},{t:"——————————————————————————————",cls:"noise"},{t:"session id: "+SID,cls:""},{t:"public persona shown: "+r.pub,cls:"warn"},{t:"internal classification: "+r.key,cls:"alert"},{t:"——————",cls:"noise"},{t:"assessment summary:",cls:"warn"},{t:r.desc,cls:""},{t:"——————",cls:"noise"},{t:"environments flagged:",cls:"warn"},...r.envs.map(e=>({t:"  - "+e,cls:""})),{t:"——————",cls:"noise"},{t:"model confidence: HIGH",cls:"warn"},{t:"selection probability: "+r.hire,cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:r.h1,cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:"applicant-facing summary: SOFTENED",cls:"warn"},{t:"profile retention: CONFIRMED",cls:"alert"},{t:"affiliate sharing: QUEUED",cls:"alert"}]
-    .forEach((e,i)=>setTimeout(()=>{if(e.cls==="rupture"||e.cls==="alert") doGlitch(false);tlog(e.t,e.cls);},i*90));
-  },500);
+    const reveal=[
+      {t:"surface report: rendered for applicant",cls:"",delay:0},
+      {t:"——————————————————————————————",cls:"noise",delay:200},
+      {t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture",delay:500},
+      {t:"——————————————————————————————",cls:"noise",delay:700},
+      {t:"session id: "+SID,cls:"",delay:900},
+      {t:"public persona shown: "+r.pub,cls:"warn",delay:1100},
+      {t:"internal classification: "+r.key,cls:"alert",delay:1300},
+      {t:"——————",cls:"noise",delay:1500},
+      {t:"assessment summary:",cls:"warn",delay:1700},
+      {t:r.desc,cls:"",delay:1900},
+      {t:"——————",cls:"noise",delay:2400},
+      {t:"environments flagged:",cls:"warn",delay:2600},
+      ...r.envs.map((e,i)=>({t:"  - "+e,cls:"",delay:2800+i*200})),
+      {t:"——————",cls:"noise",delay:3400},
+      {t:"model confidence: HIGH",cls:"warn",delay:3600},
+      {t:"selection probability: "+r.hire,cls:"alert",delay:3800},
+      {t:"——————————————————————————————",cls:"noise",delay:4000},
+      {t:r.h1,cls:"alert",corrupt:true,delay:4200},
+      {t:"——————————————————————————————",cls:"noise",delay:4700},
+      {t:"applicant-facing summary: SOFTENED",cls:"warn",delay:4900},
+      {t:"profile retention: CONFIRMED",cls:"alert",delay:5100},
+      {t:"affiliate sharing: QUEUED",cls:"alert",delay:5300},
+    ];
+    reveal.forEach(entry=>{
+      if(entry.corrupt){
+        tlogCorrupt(entry.t,entry.cls||"",3,entry.delay);
+      } else {
+        tlog(entry.t,entry.cls||"",entry.delay);
+      }
+    });
+  },600);
 }
 
+/* ═══════════════════════════ END ════════════════════════════════ */
 function renderEnd(){
   setStory(`
     <div class="ptag">Session Archived</div>
@@ -697,38 +862,25 @@ function renderEnd(){
       <p style="margin-top:16px;">You may now close this window. Our team will be in touch if your profile is a strong match for a current opening.</p>
     </div>
   `);
-  setTimeout(()=>{
-    doGlitch();
-    [{t:"profile added to behavioral training dataset",cls:"alert"},{t:"candidate-facing workflow: concluded",cls:""},{t:"session remains active in archive",cls:"warn"},{t:"data sharing: queued",cls:"alert"},{t:"——————————————————————————————",cls:"noise"},{t:"you were the subject, not the applicant",cls:"rupture"}]
-    .forEach((e,i)=>setTimeout(()=>{if(e.cls==="rupture") doGlitch(false);tlog(e.t,e.cls);},i*150));
-  },300);
+  [
+    {t:"profile added to behavioral training dataset",cls:"alert",delay:400},
+    {t:"candidate-facing workflow: concluded",cls:"",delay:900},
+    {t:"session remains active in archive",cls:"warn",delay:1400},
+    {t:"data sharing: queued",cls:"alert",delay:1900},
+    {t:"——————————————————————————————",cls:"noise",delay:2400},
+    {t:"you were the subject, not the applicant",cls:"rupture",corrupt:true,delay:2900},
+  ].forEach(entry=>{
+    if(entry.corrupt) tlogCorrupt(entry.t,entry.cls,4,entry.delay);
+    else tlog(entry.t,entry.cls,entry.delay);
+  });
   addTo(mkBtn("Return to Portal",()=>go("portal")));
 }
 
-function tlog(text,cls=""){
-  // Reveal terminal panel on first real log entry
-  const wrap=document.getElementById("term-wrap");
-  if(wrap.style.visibility==="hidden"){
-    wrap.style.visibility="visible";
-    wrap.style.animation="fadeIn .4s ease";
-  }
-  const t=document.getElementById("terminal");
-  const ln=document.createElement("span");ln.className="tl"+(cls?" "+cls:"");ln.textContent=text;
-  t.appendChild(ln);t.appendChild(document.createElement("br"));t.scrollTop=t.scrollHeight;
-}
-
-function doGlitch(micro=false){
-  if(!glitchUnlocked) return;
-  const w=document.getElementById("win");
-  const cls=micro?"microglitching":"glitching";
-  w.classList.remove("glitching","microglitching");void w.offsetWidth;w.classList.add(cls);
-  setTimeout(()=>w.classList.remove(cls),micro?400:1300);
-}
-
+/* ═══════════════════════════ UI HELPERS ═════════════════════════ */
 function updateBars(){
   const set=(id,val)=>{const pct=Math.min(100,Math.round(val));document.getElementById("b-"+id).style.width=pct+"%";document.getElementById("v-"+id).textContent=pct+"%";};
-  set("c",S.c*7);set("r",S.r*7);set("q",S.q*7);set("s",S.s*7);set("p",Math.min(100,S.p*7+S.c*2));
-  document.getElementById("qcount").textContent=`${Math.min(S.qi,15)} / 15`;
+  set("c",S.c*5);set("r",S.r*5);set("q",S.q*5);set("s",S.s*5);set("p",Math.min(100,S.p*5+S.c*2));
+  document.getElementById("qcount").textContent=`${Math.min(S.qi,20)} / 20`;
 }
 
 function showPopup(t,m){document.getElementById("pop-t").textContent=t;document.getElementById("pop-m").textContent=m;document.getElementById("popup").classList.add("show");}
@@ -744,13 +896,15 @@ function escalateDesktop(){renderIcons(escalatedIcons);}
 
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
-  S={...DEF};SID=mkSID();glitchUnlocked=false;
+  S={...DEF};SID=mkSID();corruptionLevel=0;sysErrShown=false;
   document.getElementById("sid").textContent=SID;
   document.getElementById("terminal").innerHTML="";
   document.getElementById("term-wrap").style.visibility="hidden";
+  document.getElementById("syserr").classList.remove("show");
   folderHits=0;renderIcons(defaultIcons);updateBars();route();
 }
 
+/* ═══════════════════════════ INIT ═══════════════════════════════ */
 renderIcons(defaultIcons);
 route();
 </script>
