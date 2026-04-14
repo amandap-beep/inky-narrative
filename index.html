@@ -380,11 +380,19 @@ const DEF={screen:"portal",qi:0,c:0,r:0,q:0,s:0,p:0,answers:[],finished:false,re
 let S=JSON.parse(localStorage.getItem("pm_s")||"null")||{...DEF};
 let SID=localStorage.getItem("pm_id")||mkSID();
 let dataset=18492+Math.floor(Math.random()*600);
-let corruptionLevel=0;
-let barsRevealed=false;
-let errShown={e1:false,e2:false,e3:false};
+// Derive volatile flags from restored session so replays always sync
+let corruptionLevel=S.qi>=15?4:S.qi>=11?3:S.qi>=10?2:S.qi>=8?1:0;
+let barsRevealed=S.qi>=11;
+let terminalUnlocked=S.qi>=11; // terminal only shows from Q11 onward
+let errShown={e1:S.qi>9,e2:S.qi>14,e3:S.qi>17};
 let folderClickCount=0;
 let profileRevealed=false;
+
+// Bar label reveal state: track how many letters of each label have leaked
+// Labels start leaking 1-2 chars per question from Q11 onward
+const BAR_LABELS={c:"Compliance",r:"Resistance",q:"Curiosity",s:"Suggestibility",p:"Predictability"};
+let barLabelProgress={c:0,r:0,q:0,s:0,p:0}; // 0 = fully redacted, 1 = fully revealed
+if(barsRevealed) barLabelProgress={c:1,r:1,q:1,s:1,p:1};
 
 function mkSID(){const id="PM-"+Math.random().toString(36).slice(2,10).toUpperCase();localStorage.setItem("pm_id",id);return id;}
 function save(){localStorage.setItem("pm_s",JSON.stringify(S));}
@@ -418,61 +426,60 @@ const Qs=[
 
 {text:"You're completing an assessment and notice a question seems designed to measure something other than what it claims. You:",
   opts:[{l:"Answer it as given — second-guessing the test isn't my job.",e:{c:2,s:1}},{l:"Answer it honestly and note the concern mentally.",e:{p:1,q:1}},{l:"Answer carefully, aware that more may be being measured.",e:{q:2}},{l:"Feel unsettled that you can't fully trust the framing.",e:{r:1,q:2}}],
-  log:[{t:"meta-awaren3ss: det3cted",cls:"dim",corrupt:true,delay:800}]},
+  log:[]},
 
 {text:"In your last role, how closely did your actual responsibilities match the job description?",
   opts:[{l:"Very closely — it was accurate.",e:{c:1,p:2}},{l:"Mostly, with some additions over time.",e:{p:1,s:1}},{l:"Somewhat — there were significant differences.",e:{q:1,r:1}},{l:"Not much at all — the reality was quite different.",e:{r:2,q:1}}],
-  log:[{t:"expectati0n gap: l0gged",cls:"dim",corrupt:true,delay:500},{t:"compliance under misrepresentation: upd4ting",cls:"dim",corrupt:true,delay:1100}]},
+  log:[]},
 
 {text:"Do you believe the hiring process at most companies is fair to all candidates, regardless of background?",
   opts:[{l:"Yes — companies are generally trying to do the right thing.",e:{s:2,c:1}},{l:"Mostly — there's bias but most processes are reasonable.",e:{p:1,s:1}},{l:"No — structural bias is deeply embedded in most processes.",e:{r:1,q:2}},{l:"No — and the rise of automated screening is making it worse.",e:{r:2,q:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"fairness model: INCONSISTENT",cls:"warn",corrupt:true,delay:600},{t:"subject classification conflict detected",cls:"warn",delay:1000},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1400}],
+  log:[],
   err:"e1"},
 
-/* ── Q11: RUPTURE — bars reveal, mask slips ── */
+/* ── Q11: RUPTURE ── */
 {text:"When an app or service asks for your location, camera access, or browsing history:",
   opts:[{l:"I allow it — it usually improves the experience.",e:{s:2,c:1}},{l:"I allow it when the app seems trustworthy.",e:{p:1,s:1}},{l:"I grant the minimum permissions required.",e:{q:1,r:1}},{l:"I decline whenever possible and use privacy tools.",e:{r:2,q:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:300},{t:"live data extraction: ACTIVE",cls:"rupture",delay:700},{t:"subject unaware of collection scope",cls:"warn",delay:1100},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1500}],
-  revealBars:true},
+  log:[{t:"live data extraction: ACTIVE",cls:"rupture"},{t:"subject unaware of collection scope",cls:"warn",delay:600}]},
 
 {text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
   opts:[{l:"Accept it — that's just how these systems work.",e:{s:2,c:1}},{l:"Acknowledge it but don't really think about it.",e:{p:2}},{l:"Wonder what 'behavioral data' actually means in this context.",e:{q:2}},{l:"Want to know exactly what's collected and how it's used.",e:{q:1,r:2}}],
-  log:[{t:"91% of subjects do not read section 3",cls:"warn",delay:400},{t:"data awareness score: LOW",cls:"warn",delay:800}]},
+  log:[{t:"91% of subjects do not read section 3",cls:"warn"},{t:"data awareness: LOW",cls:"warn",delay:500}]},
 
 {text:"How much do you believe your online behavior — searches, clicks, reading time — is actively monitored right now?",
   opts:[{l:"Not much. I'm not that interesting.",e:{s:2,p:1}},{l:"Probably some ad targeting, nothing more.",e:{s:1,p:1}},{l:"Significantly — I just don't know the exact scope.",e:{q:2}},{l:"Extensively. Most platforms are surveillance infrastructure.",e:{r:1,q:2}}],
-  log:[{t:"current session tracking:",cls:"warn",delay:300},{t:"  response timing ........ YES",cls:"warn",delay:550},{t:"  scroll depth ........... YES",cls:"warn",delay:800},{t:"  answer revision ........ YES",cls:"warn",delay:1050},{t:"subject awareness: LOW",cls:"alert",delay:1400}]},
+  log:[{t:"tracking active: response timing, scroll depth, edits",cls:"warn"},{t:"subject awareness: LOW",cls:"alert",delay:700}]},
 
 {text:"If a machine learning model trained on historical data was quietly filtering candidates by zip code, educational background, or age:",
   opts:[{l:"I'd trust that the model was built responsibly.",e:{s:2,c:1}},{l:"I'd feel concerned but wouldn't know how to challenge it.",e:{p:1,s:1}},{l:"I'd consider it a form of systemic discrimination.",e:{q:1,r:1}},{l:"I'd report it and push hard for transparency.",e:{r:2,q:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"note: this assessment performs the function being described",cls:"rupture",delay:700},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1100},{t:"subject classified: see profile",cls:"warn",delay:1400}]},
+  log:[{t:"note: this assessment performs the function described",cls:"rupture"},{t:"subject classified — see profile",cls:"warn",delay:700}]},
 
 {text:"You find out that results from this assessment are being permanently stored and may be shared with affiliated employers without your notification. You feel:",
   opts:[{l:"Fine — I answered honestly so I have nothing to hide.",e:{s:2,c:1}},{l:"Mildly uncomfortable, but I agreed to the terms.",e:{p:1,c:1}},{l:"Betrayed — that wasn't clearly communicated.",e:{r:1,q:1}},{l:"This is exactly the kind of data concentration I find threatening.",e:{r:2,q:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"profile retention: CONFIRMED",cls:"alert",delay:600},{t:"sharing with 14 affiliated entities: QUEUED",cls:"alert",delay:1000},{t:"informed consent classification: marginal",cls:"warn",delay:1400},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1800}],
+  log:[{t:"profile retention: CONFIRMED",cls:"alert"},{t:"sharing with 14 affiliated entities: QUEUED",cls:"alert",delay:500},{t:"consent classification: marginal",cls:"warn",delay:1000}],
   err:"e2"},
 
 /* ── Q16–20: FULL ESCALATION ── */
 {text:"The job market has changed dramatically due to automation and AI. What should workers do?",
   opts:[{l:"Adapt and reskill — that's always been how progress works.",e:{c:1,p:1}},{l:"Accept it, even if it's uncomfortable.",e:{c:2,s:1}},{l:"Demand more regulation and corporate accountability.",e:{r:2,q:1}},{l:"Organize collectively and refuse to accept these changes passively.",e:{r:3}}],
-  log:[{t:"labor disposition: logged",cls:"warn",delay:400},{t:"systemic orientation: recorded",cls:"warn",delay:800}]},
+  log:[{t:"labor disposition: logged",cls:"warn"},{t:"systemic orientation: recorded",cls:"warn",delay:500}]},
 
 {text:"If this assessment could accurately predict your entire career trajectory — every role, every outcome, every ceiling — would you want to see the result?",
   opts:[{l:"Yes — I'd want to know, even if it was hard.",e:{q:2,c:1}},{l:"Maybe — only if I could change it.",e:{q:1,p:1}},{l:"No — I'd rather not have that information.",e:{r:1,p:1}},{l:"I don't believe any system could do that accurately.",e:{r:2,q:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"fatalism index: recorded",cls:"warn",delay:600},{t:"irony flag: subject IS being predicted right now",cls:"rupture",delay:1400},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1900}]},
+  log:[{t:"fatalism index: recorded",cls:"warn"},{t:"note: subject IS being predicted right now",cls:"rupture",delay:800}]},
 
 {text:"When you think about surveillance technology in the workplace — monitoring of emails, activity tracking, location data — you feel:",
   opts:[{l:"Fine with it — if you're doing your job, you have nothing to hide.",e:{s:2,c:1}},{l:"Accepting — it's increasingly standard and I've adjusted.",e:{p:1,s:1}},{l:"Uncomfortable — I believe I have a right to privacy at work.",e:{r:1,q:2}},{l:"Opposed — it fundamentally changes the power dynamic.",e:{r:2,q:1}}],
-  log:[{t:"surveillance acceptance: recorded",cls:"warn",delay:400},{t:"power dynamic awareness: noted",cls:"warn",delay:900}],
+  log:[{t:"surveillance acceptance: recorded",cls:"warn"},{t:"power awareness: noted",cls:"warn",delay:500}],
   err:"e3"},
 
 {text:"Looking back at this assessment — have you been answering as yourself, or as who you think they want you to be?",
   opts:[{l:"Myself — I don't perform for assessments.",e:{q:1,p:1}},{l:"Mostly myself, but I softened some answers.",e:{s:1,p:1}},{l:"A mix. I noticed myself adjusting and then tried to stop.",e:{q:2}},{l:"I'm not sure I can tell anymore.",e:{q:2,r:1}}],
-  log:[{t:"authenticity gradient: recorded",cls:"warn",delay:400},{t:"the model adapted to you long ago",cls:"rupture",delay:1000},{t:"your answer here changes nothing",cls:"alert",delay:1400}]},
+  log:[{t:"authenticity gradient: recorded",cls:"warn"},{t:"the model adapted long before this question",cls:"rupture",delay:700},{t:"your answer here changes nothing",cls:"alert",delay:1200}]},
 
 {text:"Finally: Why are you completing this assessment?",
   opts:[{l:"Because I want the job.",e:{c:2,s:2}},{l:"Because the process requires it and I comply with processes.",e:{c:2,p:1}},{l:"I'm genuinely curious what it reveals.",e:{q:2}},{l:"I don't fully know — but I kept going anyway.",e:{q:1,s:1}}],
-  log:[{t:"— — — — — — — — — — — — — —",cls:"noise",delay:200},{t:"employment incentive increases compliance: +40%",cls:"warn",delay:700},{t:"honesty declines as stakes increase",cls:"warn",delay:1100},{t:"consistent across all 18,000+ subjects",cls:"alert",delay:1500},{t:"building final profile...",cls:"rupture",delay:2000},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:2400}]}
+  log:[{t:"employment incentive: compliance +40%",cls:"warn"},{t:"honesty declines as stakes increase",cls:"warn",delay:500},{t:"consistent across 18,000+ subjects",cls:"alert",delay:1000},{t:"building final profile",cls:"rupture",delay:1600}]}
 ];
 
 /* ═══════════════════════════════════════════════════════
@@ -678,62 +685,81 @@ function tlog(text,cls,delay){
   },delay||0);
 }
 
+function unlockTerminal(){
+  terminalUnlocked=true;
+  revealTerminal();
+}
+
 function revealTerminal(){
+  if(!terminalUnlocked) return;
   const w=document.getElementById("term-wrap");
   if(w.style.visibility==="hidden"){w.style.visibility="visible";w.style.animation="fadeIn .5s ease";}
 }
 
 function dispatchLog(entry){
+  if(!terminalUnlocked) return; // terminal not active yet
   const d=entry.delay||0;
   if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),d);
   else tlog(entry.t,entry.cls||"",d);
 }
 
 /* ═══════════════════════════════════════════════════════
-   STAT BAR REVEAL at Q11
+   STAT BAR LABEL LEAK — 1-2 letters revealed per question
 ═══════════════════════════════════════════════════════ */
-const BAR_LABELS={c:"Compliance",r:"Resistance",q:"Curiosity",s:"Suggestibility",p:"Predictability"};
+// Called once per question answered, starting at Q11
+// Each call reveals ~2 chars across a randomly chosen label
+function leakBarLabels(qi){
+  // qi is the question just answered (0-indexed)
+  // Start leaking from Q10 (index 10), one label per question answered
+  if(qi<10) return;
 
-function revealBars(){
-  if(barsRevealed) return;
-  barsRevealed=true;
-  // Reveal all 5 labels with staggered corruption-decode effect
-  Object.entries(BAR_LABELS).forEach(([key,label],idx)=>{
-    setTimeout(()=>{
-      const lbl=document.getElementById("lbl-"+key);
-      const val=document.getElementById("v-"+key);
-      const track=document.getElementById("track-"+key);
-      // Remove redaction from track
-      track.classList.remove("redacted-fill");
-      // Corrupt-decode the label
-      let frame=0;
-      const total=12;
-      const interval=setInterval(()=>{
-        frame++;
-        if(frame>=total){
-          lbl.textContent=label;
-          lbl.classList.remove("redacted");
-          lbl.style.animation="labelReveal .3s ease";
-          val.classList.remove("redacted");
-          clearInterval(interval);
-          // Now show real value
-          const pct=getBarpct(key);
-          val.textContent=pct+"%";
-        } else {
-          // Show scrambled version that approaches real label
-          const progress=frame/total;
-          let out="";
-          for(let i=0;i<label.length;i++){
-            if(Math.random()<progress) out+=label[i];
-            else out+=GARBAGE[Math.floor(Math.random()*GARBAGE.length)];
-          }
-          lbl.textContent=out;
-          lbl.classList.remove("redacted");
-          lbl.style.color="var(--amber)";
+  // Which label to advance this round — cycle through them
+  const keys=["c","r","q","s","p"];
+  const idx=(qi-10) % keys.length;
+  const key=keys[idx];
+  const label=BAR_LABELS[key];
+  const lbl=document.getElementById("lbl-"+key);
+  const val=document.getElementById("v-"+key);
+  const track=document.getElementById("track-"+key);
+
+  // Advance progress for this label by 2 chars worth
+  const charsPerStep=2;
+  const prev=Math.floor(barLabelProgress[key]*label.length);
+  const next=Math.min(label.length,prev+charsPerStep);
+  barLabelProgress[key]=next/label.length;
+  const isComplete=next>=label.length;
+
+  // Render: revealed chars shown, rest still redacted
+  lbl.classList.remove("redacted");
+  lbl.style.color="var(--amber)";
+
+  // Scramble animation over ~600ms then settle
+  let frame=0;const total=10;
+  const iv=setInterval(()=>{
+    frame++;
+    let out="";
+    for(let i=0;i<label.length;i++){
+      if(i<next) out+=label[i]; // revealed portion: correct
+      else if(frame<total) out+=GARBAGE[Math.floor(Math.random()*GARBAGE.length)]; // unrevealed: garbage
+      else out+="█"; // settled: block
+    }
+    lbl.textContent=out;
+    if(frame>=total){
+      clearInterval(iv);
+      if(isComplete){
+        lbl.style.color="";
+        lbl.className="slabel";
+        lbl.textContent=label;
+        track.classList.remove("redacted-fill");
+        val.classList.remove("redacted");
+        val.textContent=getBarpct(key)+"%";
+        // If all labels complete, mark barsRevealed
+        if(Object.values(barLabelProgress).every(v=>v>=1)){
+          barsRevealed=true;
         }
-      },60);
-    },idx*200);
-  });
+      }
+    }
+  },60);
 }
 
 function getBarpct(key){
@@ -881,25 +907,40 @@ function answer(opt,q){
   S.c+=(e.c||0);S.r+=(e.r||0);S.q+=(e.q||0);S.s+=(e.s||0);S.p+=(e.p||0);
   S.answers.push({qi:S.qi,a:opt.l});
 
-  // Escalate corruption
-  if(S.qi===7) corruptionLevel=1;
-  if(S.qi===9) corruptionLevel=2;
-  if(S.qi===10) corruptionLevel=3;
-  if(S.qi===14) corruptionLevel=4;
+  const qi=S.qi; // capture before increment
 
-  // Reveal bars at Q11
-  if(q.revealBars) setTimeout(revealBars,800);
-
-  // Fire logs
-  if(q.log&&q.log.length) q.log.forEach(entry=>dispatchLog(entry));
-
-  // Fire system errors
+  // ── 1. POPUP FIRST (fires immediately) ──────────────────
   if(q.err) fireError(q.err);
 
-  // Milestone toasts
-  if(S.qi===4) showToast("Progress Saved","Applicant profile synchronized.");
-  if(S.qi===9) showToast("Assessment Update","Behavioral markers refreshed.");
-  if(S.qi===14) showToast("Halfway Complete","Your responses are being processed.");
+  // ── 2. BAR LABEL LEAK (fires 900ms after popup) ─────────
+  // Starts leaking from Q10 onward, one label per question
+  if(qi>=10){
+    setTimeout(()=>leakBarLabels(qi), 900);
+  }
+
+  // ── 3. UNLOCK TERMINAL + LOGS (fires after bar leak) ────
+  // Terminal appears for first time at Q11
+  if(qi===10) setTimeout(()=>unlockTerminal(), 1800);
+
+  // Escalate corruption level (controls how garbled corrupt lines are)
+  if(qi===7)  corruptionLevel=1;
+  if(qi===9)  corruptionLevel=2;
+  if(qi===10) corruptionLevel=3;
+  if(qi===14) corruptionLevel=4;
+
+  // Fire terminal log entries (only dispatched if terminalUnlocked)
+  if(q.log&&q.log.length){
+    const baseDelay = qi===10 ? 2200 : 0; // Q11 logs wait for terminal to appear
+    q.log.forEach(entry=>{
+      const adjustedEntry={...entry, delay:(entry.delay||0)+baseDelay};
+      dispatchLog(adjustedEntry);
+    });
+  }
+
+  // Milestone toasts (applicant-facing, always neutral)
+  if(qi===4)  showToast("Progress Saved","Applicant profile synchronized.");
+  if(qi===9)  showToast("Assessment Update","Behavioral markers refreshed.");
+  if(qi===14) showToast("Halfway Complete","Your responses are being processed.");
 
   S.qi++;save();updateBars();setTimeout(renderQ,220);
 }
@@ -909,7 +950,7 @@ function answer(opt,q){
 ═══════════════════════════════════════════════════════ */
 function beginFinal(){
   go("loading");
-  [{t:"final response received",cls:"",delay:200},{t:"cross-referencing 18,000+ archived profiles",cls:"",delay:700},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:1300},{t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1700},{t:"classification: FINALIZED",cls:"rupture",delay:2200},{t:"applicant-facing summary: softening...",cls:"alert",delay:2800},{t:"— — — — — — — — — — — — — —",cls:"noise",delay:3400},{t:"profile retained: YES",cls:"alert",delay:3700},{t:"sharing with affiliates: QUEUED",cls:"alert",delay:4100}]
+  [{t:"final responses received",cls:"",delay:200},{t:"cross-referencing 18,000+ archived profiles",cls:"dim",delay:800},{t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1600},{t:"classification: FINALIZED",cls:"rupture",delay:2200},{t:"applicant-facing summary: softening...",cls:"alert",delay:2800},{t:"profile retained: YES",cls:"alert",delay:3500},{t:"sharing with affiliates: QUEUED",cls:"alert",delay:4000}]
   .forEach(e=>tlog(e.t,e.cls,e.delay));
   setTimeout(()=>{buildResult();showToast("Assessment Complete","Your profile is ready.");go("results");},5200);
 }
@@ -1016,28 +1057,17 @@ function renderResults(){
   addTo(mkBtn("End Session",()=>go("end")));
   setTimeout(()=>{
     const reveal=[
-      {t:"surface report: rendered for applicant",cls:"",delay:0},
-      {t:"——————————————————————————————",cls:"noise",delay:200},
-      {t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture",delay:500},
-      {t:"——————————————————————————————",cls:"noise",delay:700},
-      {t:"session id: "+SID,cls:"",delay:900},
-      {t:"public persona shown: "+r.pub,cls:"warn",delay:1100},
-      {t:"internal classification: "+r.key,cls:"alert",delay:1300},
-      {t:"——————",cls:"noise",delay:1500},
-      {t:"assessment summary:",cls:"warn",delay:1700},
-      {t:r.desc,cls:"",delay:1900},
-      {t:"——————",cls:"noise",delay:2400},
-      {t:"environments flagged:",cls:"warn",delay:2600},
-      ...r.envs.map((e,i)=>({t:"  - "+e,cls:"",delay:2800+i*200})),
-      {t:"——————",cls:"noise",delay:3400},
-      {t:"model confidence: HIGH",cls:"warn",delay:3600},
-      {t:"selection probability: "+r.hire,cls:"alert",delay:3800},
-      {t:"——————————————————————————————",cls:"noise",delay:4000},
-      {t:r.h1,cls:"alert",corrupt:true,delay:4200},
-      {t:"——————————————————————————————",cls:"noise",delay:4700},
-      {t:"applicant-facing summary: SOFTENED",cls:"warn",delay:4900},
-      {t:"profile retention: CONFIRMED",cls:"alert",delay:5100},
-      {t:"affiliate sharing: QUEUED",cls:"alert",delay:5300},
+      {t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture",delay:0},
+      {t:"session: "+SID,cls:"dim",delay:300},
+      {t:"shown to applicant: "+r.pub,cls:"warn",delay:600},
+      {t:"internal classification: "+r.key,cls:"alert",delay:900},
+      {t:"summary: "+r.desc,cls:"",delay:1200},
+      {t:"environments: "+r.envs.join(", "),cls:"dim",delay:1800},
+      {t:"confidence: HIGH  |  selection probability: "+r.hire,cls:"warn",delay:2200},
+      {t:r.h1,cls:"alert",corrupt:true,delay:2700},
+      {t:"summary softened for applicant view",cls:"warn",delay:3300},
+      {t:"profile retention: CONFIRMED",cls:"alert",delay:3700},
+      {t:"affiliate sharing: QUEUED",cls:"alert",delay:4000},
     ];
     reveal.forEach(entry=>{
       if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",3,entry.delay);
@@ -1064,7 +1094,7 @@ function renderEnd(){
       <p style="margin-top:16px;">You may now close this window. Our team will be in touch if your profile is a strong match for a current opening.</p>
     </div>
   `);
-  [{t:"profile added to behavioral training dataset",cls:"alert",delay:400},{t:"candidate-facing workflow: concluded",cls:"",delay:900},{t:"session remains active in archive",cls:"warn",delay:1400},{t:"data sharing: queued",cls:"alert",delay:1900},{t:"——————————————————————————————",cls:"noise",delay:2400},{t:"you were the subject, not the applicant",cls:"rupture",corrupt:true,delay:2900}]
+  [{t:"profile added to training dataset",cls:"alert",delay:400},{t:"session remains active in archive",cls:"warn",delay:900},{t:"data sharing: queued",cls:"alert",delay:1400},{t:"you were the subject, not the applicant",cls:"rupture",corrupt:true,delay:2000}]
   .forEach(entry=>{if(entry.corrupt)tlogCorrupt(entry.t,entry.cls,4,entry.delay);else tlog(entry.t,entry.cls,entry.delay);});
   addTo(mkBtn("Return to Portal",()=>go("portal")));
 }
@@ -1096,12 +1126,14 @@ function showToast(t,m){
 ═══════════════════════════════════════════════════════ */
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
-  S={...DEF};SID=mkSID();corruptionLevel=0;barsRevealed=false;
-  errShown={e1:false,e2:false,e3:false};folderClickCount=0;profileRevealed=false;
+  S={...DEF};SID=mkSID();
+  corruptionLevel=0;barsRevealed=false;terminalUnlocked=false;
+  errShown={e1:false,e2:false,e3:false};
+  folderClickCount=0;profileRevealed=false;
+  barLabelProgress={c:0,r:0,q:0,s:0,p:0};
   document.getElementById("sid").textContent=SID;
   document.getElementById("terminal").innerHTML="";
   document.getElementById("term-wrap").style.visibility="hidden";
-  // Re-redact bars
   ["c","r","q","s","p"].forEach(key=>{
     const lbl=document.getElementById("lbl-"+key);
     lbl.textContent="████████";lbl.className="slabel redacted";lbl.style.animation="";lbl.style.color="";
