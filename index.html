@@ -387,6 +387,7 @@ let barsRevealed=false;
 let terminalUnlocked=false;
 let folderClickCount=0;
 let profileRevealed=false;
+let applicantGlitchFired=false;
 const BAR_LABELS={c:"Compliance",r:"Resistance",q:"Curiosity",s:"Suggestibility",p:"Predictability"};
 let barLabelProgress={c:0,r:0,q:0,s:0,p:0};
 
@@ -619,15 +620,38 @@ function mkDead(lbl){const a=document.createElement("span");a.className="dead-li
    OVERLAY HELPERS
 ═══════════════════════════════════════════════════════ */
 function showOverlay(id){document.getElementById(id).classList.add("show");}
-function closeOverlay(id){document.getElementById(id).classList.remove("show");}
+function closeOverlay(id){
+  document.getElementById(id).classList.remove("show");
+  if(id==="err3" && !applicantGlitchFired){
+    applicantGlitchFired=true;
+    setTimeout(triggerApplicantGlitch, 2000);
+  }
+}
+
+function triggerApplicantGlitch(){
+  // Find the question text element on the applicant side
+  const qtext=document.querySelector(".qtext");
+  if(!qtext) return;
+  const original=qtext.textContent;
+  // Replace with alarming internal message
+  qtext.style.transition="none";
+  qtext.style.color="var(--red)";
+  qtext.textContent="SUBJECT FLAGGED FOR REVIEW — session routed to hold queue";
+  // Snap back after 600ms
+  setTimeout(()=>{
+    qtext.textContent=original;
+    qtext.style.color="";
+  },600);
+}
 
 /* ═══════════════════════════════════════════════════════
    SYSTEM ERRORS
 ═══════════════════════════════════════════════════════ */
+const errFired=new Set(); // tracks which errors have shown this session
+
 function fireError(key){
-  if(S.errShown[key]) return;
-  S.errShown[key]=true;
-  save();
+  if(errFired.has(key)) return;
+  errFired.add(key);
   setTimeout(()=>{
     if(key==="e2") document.getElementById("err2-sid").textContent=SID;
     if(key==="e3"){
@@ -774,7 +798,8 @@ function renderPortal(){
       <p style="font-size:12px;color:var(--muted);">This assessment cannot be paused once started. Please answer all questions honestly. Results are processed automatically.</p>
     </div>
   `);
-  const b=mkBtn("Begin Assessment →","","btn btn-p");b.onclick=()=>go("policy");
+  const b=mkBtn("Begin Assessment →","","btn btn-p");
+  b.onclick=()=>{initAudio();go("policy");};
   addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("policy")),mkLink("Open Positions",()=>go("careers")),mkDead("Help & Support"),mkLink("System Status",()=>go("status")));
 }
 
@@ -887,6 +912,20 @@ function renderQ(){
     b.innerHTML=`<span class="okey">${String.fromCharCode(65+i)}</span>${o.l}`;
     b.onclick=()=>answer(o,q);wrap.appendChild(b);
   });
+
+  // Subtle glitch at Q6 (index 5) — question number briefly jumps ahead then snaps back
+  if(S.qi===5){
+    setTimeout(()=>{
+      const qnum=document.querySelector(".qnum");
+      if(!qnum) return;
+      const original=qnum.textContent;
+      qnum.style.color="var(--amber)";
+      qnum.textContent="QUESTION 14 OF 20";
+      setTimeout(()=>{
+        if(qnum){qnum.textContent=original;qnum.style.color="";}
+      },400);
+    },3200);
+  }
 }
 
 function answer(opt,q){
@@ -900,11 +939,11 @@ function answer(opt,q){
   else if(qi>=10) corruptionLevel=3;
   else if(qi>=9) corruptionLevel=2;
   else if(qi>=7) corruptionLevel=1;
+  setAudioLevel(corruptionLevel);
+  if(qi===10||qi===14||qi===19) playRuptureStab();
 
   // System error popups
   if(q.err) fireError(q.err);
-  // FORCE TEST: directly show err1 at Q10 regardless of guards
-  if(qi===9) setTimeout(()=>showOverlay("err1"), 1800);
 
   // Bar label leak — one label per question from Q10 onward
   if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
@@ -944,7 +983,10 @@ function answer(opt,q){
 function beginFinal(){
   go("loading");
   [{t:"final responses received",cls:"",delay:200},{t:"cross-referencing 18,000+ archived profiles",cls:"dim",delay:800},{t:"behavioral fingerprint: COMPUTED",cls:"warn",delay:1600},{t:"classification: FINALIZED",cls:"rupture",delay:2200},{t:"applicant-facing summary: softening...",cls:"alert",delay:2800},{t:"profile retained: YES",cls:"alert",delay:3500},{t:"sharing with affiliates: QUEUED",cls:"alert",delay:4000}]
-  .forEach(e=>tlog(e.t,e.cls,e.delay));
+  .forEach(e=>{
+    if(e.cls==="rupture") setTimeout(()=>playRuptureStab(),e.delay);
+    tlog(e.t,e.cls,e.delay);
+  });
   setTimeout(()=>{buildResult();showToast("Assessment Complete","Your profile is ready.");go("results");},5200);
 }
 
@@ -1073,23 +1115,54 @@ function renderResults(){
    END
 ═══════════════════════════════════════════════════════ */
 function renderEnd(){
+  const ts=new Date().toLocaleString([],{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
   setStory(`
-    <div class="ptag">Session Archived</div>
+    <div class="ptag">Session Closed</div>
     <div class="card">
-      <div class="badge"><span class="badge-dot"></span>Session Complete</div>
-      <h2>Thank you for using PersonaMetric.</h2>
+      <h2 style="color:var(--dim);font-weight:400;">This session has been closed.</h2>
+      <p style="color:var(--muted);font-size:13px;">No further action is required from you.</p>
+      <hr class="div">
       <div class="mgrid">
-        <div class="mcell"><div class="mclbl">Report Status</div><div class="mcval" style="color:var(--green)">Saved</div></div>
-        <div class="mcell"><div class="mclbl">Profile</div><div class="mcval" style="color:var(--green)">Stored</div></div>
-        <div class="mcell"><div class="mclbl">Session Log</div><div class="mcval" style="color:var(--green)">Archived</div></div>
-        <div class="mcell"><div class="mclbl">Next Steps</div><div class="mcval">Awaiting Review</div></div>
+        <div class="mcell"><div class="mclbl">Session ID</div><div class="mcval" style="font-family:'IBM Plex Mono',monospace;font-size:12px;">${SID}</div></div>
+        <div class="mcell"><div class="mclbl">Closed</div><div class="mcval" style="font-family:'IBM Plex Mono',monospace;font-size:12px;">${ts}</div></div>
+        <div class="mcell"><div class="mclbl">Profile Status</div><div class="mcval" style="color:var(--green)">Filed</div></div>
+        <div class="mcell"><div class="mclbl">Data Retention</div><div class="mcval" style="color:var(--dim)">Indefinite</div></div>
+        <div class="mcell"><div class="mclbl">Sharing</div><div class="mcval" style="color:var(--amber)">Processing</div></div>
+        <div class="mcell"><div class="mclbl">Next Steps</div><div class="mcval" style="color:var(--muted)">None required</div></div>
       </div>
-      <p style="margin-top:16px;">You may now close this window. Our team will be in touch if your profile is a strong match for a current opening.</p>
+      <hr class="div">
+      <p id="end-existential" style="font-size:11px;color:transparent;font-family:'IBM Plex Mono',monospace;transition:color 2s ease;margin-top:4px;">You completed the assessment. The assessment is not complete.</p>
     </div>
   `);
-  [{t:"profile added to training dataset",cls:"alert",delay:400},{t:"session remains active in archive",cls:"warn",delay:900},{t:"data sharing: queued",cls:"alert",delay:1400},{t:"you were the subject, not the applicant",cls:"rupture",corrupt:true,delay:2000}]
-  .forEach(entry=>{if(entry.corrupt)tlogCorrupt(entry.t,entry.cls,4,entry.delay);else tlog(entry.t,entry.cls,entry.delay);});
-  addTo(mkBtn("Return to Portal",()=>go("portal")));
+
+  // Bureaucratic terminal — keeps logging after you've "ended"
+  [
+    {t:"session "+SID+": CLOSED",cls:"",delay:300},
+    {t:"profile data: filed",cls:"dim",delay:800},
+    {t:"cross-referencing with 14 affiliated entities",cls:"warn",delay:1400},
+    {t:"flagged profiles: forwarded to secondary review queue",cls:"alert",delay:2200},
+    {t:"behavioral model: updated with session data",cls:"warn",delay:3000},
+    {t:"applicant portal: session marked complete",cls:"dim",delay:3800},
+  ].forEach(e=>tlog(e.t,e.cls,e.delay));
+
+  // Threatening line — arrives after a pause, when everything seems done
+  setTimeout(()=>tlogCorrupt("you were the subject, not the applicant","rupture",4,0),5000);
+
+  // Delayed silence — then one more line
+  setTimeout(()=>{
+    tlog("session "+SID+": archived. retention period: indefinite.","alert");
+  },7000);
+
+  // Existential last line fades in slowly after everything settles
+  setTimeout(()=>{
+    const el=document.getElementById("end-existential");
+    if(el) el.style.color="var(--muted)";
+  },8500);
+
+  // "Return to Portal" appears late — after the experience lands
+  setTimeout(()=>{
+    addTo(mkBtn("Return to Portal",()=>go("portal")));
+  },6000);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1106,8 +1179,74 @@ function updateBars(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   TOAST / POPUP
+   AMBIENT SOUND ENGINE
 ═══════════════════════════════════════════════════════ */
+let audioCtx=null;
+let humGain=null;
+let noiseGain=null;
+let audioStarted=false;
+
+function initAudio(){
+  if(audioStarted) return;
+  audioStarted=true;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+
+    // Base hum — very low sine wave
+    const osc=audioCtx.createOscillator();
+    humGain=audioCtx.createGain();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(58,audioCtx.currentTime);
+    humGain.gain.setValueAtTime(0.025,audioCtx.currentTime);
+    osc.connect(humGain);
+    humGain.connect(audioCtx.destination);
+    osc.start();
+
+    // Noise layer — brown noise via buffer
+    const bufSize=audioCtx.sampleRate*2;
+    const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
+    const data=buf.getChannelData(0);
+    let last=0;
+    for(let i=0;i<bufSize;i++){
+      const white=(Math.random()*2-1);
+      last=(last+0.02*white)/1.02;
+      data[i]=last*8; // brown noise
+    }
+    const noiseSource=audioCtx.createBufferSource();
+    noiseSource.buffer=buf;
+    noiseSource.loop=true;
+    noiseGain=audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0,audioCtx.currentTime);
+    noiseSource.connect(noiseGain);
+    noiseGain.connect(audioCtx.destination);
+    noiseSource.start();
+  } catch(e){/* audio not available */}
+}
+
+function setAudioLevel(level){
+  // level 0-4 matching corruptionLevel
+  if(!audioCtx||!humGain||!noiseGain) return;
+  const t=audioCtx.currentTime;
+  const humVols=[0.025,0.035,0.05,0.07,0.09];
+  const noiseVols=[0,0.003,0.008,0.018,0.03];
+  humGain.gain.linearRampToValueAtTime(humVols[level]||0.025,t+1.5);
+  noiseGain.gain.linearRampToValueAtTime(noiseVols[level]||0,t+1.5);
+}
+
+function playRuptureStab(){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    osc.type="sawtooth";
+    osc.frequency.setValueAtTime(120,audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(40,audioCtx.currentTime+0.3);
+    g.gain.setValueAtTime(0.08,audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.4);
+    osc.connect(g);g.connect(audioCtx.destination);
+    osc.start();osc.stop(audioCtx.currentTime+0.4);
+  } catch(e){}
+}
 let _tt;
 function showToast(t,m){
   document.getElementById("toast-t").textContent=t;document.getElementById("toast-m").textContent=m;
@@ -1119,7 +1258,7 @@ function showToast(t,m){
 ═══════════════════════════════════════════════════════ */
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
-  S=DEF();SID=mkSID();folderClickCount=0;profileRevealed=false;
+  S=DEF();SID=mkSID();folderClickCount=0;profileRevealed=false;applicantGlitchFired=false;
   syncVolatileFlags();
   document.getElementById("sid").textContent=SID;
   document.getElementById("terminal").innerHTML="";
