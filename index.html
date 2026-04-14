@@ -393,9 +393,9 @@ let barLabelProgress={c:0,r:0,q:0,s:0,p:0};
 
 // Sync volatile flags if restoring a mid-session state
 function syncVolatileFlags(){
-  corruptionLevel=S.qi>=15?4:S.qi>=14?3:S.qi>=10?2:S.qi>=8?1:0;
-  barsRevealed=S.qi>=11;
-  terminalUnlocked=S.qi>=11;
+  corruptionLevel=S.qi>=15?4:S.qi>=10?3:S.qi>=9?2:S.qi>=7?1:0;
+  barsRevealed=S.qi>=10;
+  terminalUnlocked=S.qi>=10;
   if(barsRevealed) barLabelProgress={c:1,r:1,q:1,s:1,p:1};
   else barLabelProgress={c:0,r:0,q:0,s:0,p:0};
 }
@@ -433,7 +433,8 @@ const Qs=[
 
 {text:"You're completing an assessment and notice a question seems designed to measure something other than what it claims. You:",
   opts:[{l:"Answer it as given — second-guessing the test isn't my job.",e:{c:2,s:1}},{l:"Answer it honestly and note the concern mentally.",e:{p:1,q:1}},{l:"Answer carefully, aware that more may be being measured.",e:{q:2}},{l:"Feel unsettled that you can't fully trust the framing.",e:{r:1,q:2}}],
-  log:[]},
+  log:[],
+  err:"e1"},
 
 {text:"In your last role, how closely did your actual responsibilities match the job description?",
   opts:[{l:"Very closely — it was accurate.",e:{c:1,p:2}},{l:"Mostly, with some additions over time.",e:{p:1,s:1}},{l:"Somewhat — there were significant differences.",e:{q:1,r:1}},{l:"Not much at all — the reality was quite different.",e:{r:2,q:1}}],
@@ -441,8 +442,7 @@ const Qs=[
 
 {text:"Do you believe the hiring process at most companies is fair to all candidates, regardless of background?",
   opts:[{l:"Yes — companies are generally trying to do the right thing.",e:{s:2,c:1}},{l:"Mostly — there's bias but most processes are reasonable.",e:{p:1,s:1}},{l:"No — structural bias is deeply embedded in most processes.",e:{r:1,q:2}},{l:"No — and the rise of automated screening is making it worse.",e:{r:2,q:1}}],
-  log:[],
-  err:"e1"},
+  log:[]},
 
 /* ── Q11: RUPTURE ── */
 {text:"When an app or service asks for your location, camera access, or browsing history:",
@@ -948,17 +948,17 @@ function answer(opt,q){
   // Bar label leak — one label per question from Q10 onward
   if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
 
-  // Terminal unlock at Q11 (index 10)
-  if(qi===10){
+  // Terminal unlock at Q10 (index 9)
+  if(qi===9){
     setTimeout(()=>{
       terminalUnlocked=true;
       revealTerminal();
     }, 2000);
   }
 
-  // Terminal logs — always delayed enough for terminal to be visible
+  // Terminal logs — delayed enough for terminal to be visible on Q10
   if(q.log&&q.log.length){
-    const base = qi===10 ? 2400 : 0; // Q11 logs wait for terminal reveal
+    const base = qi===9 ? 2400 : 0;
     q.log.forEach(entry=>{
       const when=base+(entry.delay||0);
       setTimeout(()=>{
@@ -971,8 +971,7 @@ function answer(opt,q){
 
   // Milestone toasts
   if(qi===4)  showToast("Progress Saved","Applicant profile synchronized.");
-  if(qi===9)  showToast("Assessment Update","Behavioral markers refreshed.");
-  if(qi===14) showToast("Halfway Complete","Your responses are being processed.");
+  if(qi===9)  showToast("Halfway Complete","Your responses are being processed.");
 
   S.qi++;save();updateBars();setTimeout(renderQ,220);
 }
