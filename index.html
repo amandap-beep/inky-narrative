@@ -645,27 +645,6 @@ function triggerApplicantGlitch(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   SYSTEM ERRORS
-═══════════════════════════════════════════════════════ */
-const errFired=new Set(); // tracks which errors have shown this session
-
-function fireError(key){
-  if(errFired.has(key)) return;
-  errFired.add(key);
-  setTimeout(()=>{
-    if(key==="e2") document.getElementById("err2-sid").textContent=SID;
-    if(key==="e3"){
-      const now=new Date();
-      document.getElementById("err3-sid").textContent=SID;
-      document.getElementById("err3-time").textContent=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-      document.getElementById("err3-time2").textContent=new Date(now.getTime()+90000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-      document.getElementById("err3-time3").textContent=new Date(now.getTime()+150000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-    }
-    showOverlay(key);
-  }, key==="e1"?1800:key==="e2"?1400:1200);
-}
-
-/* ═══════════════════════════════════════════════════════
    TEXT CORRUPTION ENGINE
 ═══════════════════════════════════════════════════════ */
 const GARBAGE="@#$%&!?x01※▓▒░█";
@@ -913,7 +892,7 @@ function renderQ(){
     b.onclick=()=>answer(o,q);wrap.appendChild(b);
   });
 
-  // Subtle glitch at Q6 (index 5) — question number briefly jumps ahead then snaps back
+  // Q6: question number jumps ahead briefly
   if(S.qi===5){
     setTimeout(()=>{
       const qnum=document.querySelector(".qnum");
@@ -921,10 +900,57 @@ function renderQ(){
       const original=qnum.textContent;
       qnum.style.color="var(--amber)";
       qnum.textContent="QUESTION 14 OF 20";
-      setTimeout(()=>{
-        if(qnum){qnum.textContent=original;qnum.style.color="";}
-      },400);
+      setTimeout(()=>{if(qnum){qnum.textContent=original;qnum.style.color="";}},400);
     },3200);
+  }
+
+  // Q7+: progressive UI degradation — small rendering artifacts
+  if(S.qi===6){
+    // Stage label briefly shows wrong text
+    setTimeout(()=>{
+      const ptag=document.querySelector(".ptag");
+      if(!ptag) return;
+      const orig=ptag.textContent;
+      ptag.textContent="Behavioral Assessment — Stage 2 of 3 ██";
+      setTimeout(()=>{if(ptag) ptag.textContent=orig;},300);
+    },2800);
+  }
+
+  if(S.qi===7){
+    // Progress bar label shows wrong percentage briefly
+    setTimeout(()=>{
+      const ptrack=document.querySelector(".ptrack");
+      if(!ptrack) return;
+      const bar=ptrack.querySelector(".pfill");
+      if(!bar) return;
+      const orig=bar.style.width;
+      bar.style.width="94%";
+      setTimeout(()=>{if(bar) bar.style.width=orig;},250);
+    },1800);
+  }
+
+  if(S.qi===8){
+    // One option label gets a stray character for half a second
+    setTimeout(()=>{
+      const opts=document.querySelectorAll(".opt");
+      if(!opts.length) return;
+      const target=opts[1];
+      if(!target) return;
+      const orig=target.innerHTML;
+      target.innerHTML=orig.replace("—","—█");
+      setTimeout(()=>{if(target) target.innerHTML=orig;},400);
+    },2200);
+  }
+
+  if(S.qi>=9){
+    // From Q10 onward: question counter flickers to a slightly wrong number
+    setTimeout(()=>{
+      const qnum=document.querySelector(".qnum");
+      if(!qnum) return;
+      const orig=qnum.textContent;
+      qnum.style.opacity="0.4";
+      setTimeout(()=>{if(qnum){qnum.textContent=orig;qnum.style.opacity="";}},180);
+    },1200+Math.random()*1000);
   }
 }
 
@@ -942,30 +968,45 @@ function answer(opt,q){
   setAudioLevel(corruptionLevel);
   if(qi===10||qi===14||qi===19) playRuptureStab();
 
-  // System error popups
-  if(q.err) fireError(q.err);
+  // System error popups — triggered directly by question index, no external guards
+  if(qi===7)  setTimeout(()=>showOverlay("err1"), 1800);
+  if(qi===14) setTimeout(()=>showOverlay("err2"), 1400);
+  if(qi===17) setTimeout(()=>{
+    const now=new Date();
+    document.getElementById("err3-sid").textContent=SID;
+    document.getElementById("err3-time").textContent=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+    document.getElementById("err3-time2").textContent=new Date(now.getTime()+90000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+    document.getElementById("err3-time3").textContent=new Date(now.getTime()+150000).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+    showOverlay("err3");
+  }, 1200);
 
   // Bar label leak — one label per question from Q10 onward
   if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
 
-  // Terminal unlock at Q10 (index 9)
+  // Terminal unlock at Q10 (index 9) — logs for THIS question fire from inside here
   if(qi===9){
+    const logsToFire=q.log||[];
     setTimeout(()=>{
       terminalUnlocked=true;
       revealTerminal();
+      // Fire this question's logs now that terminal is open
+      logsToFire.forEach(entry=>{
+        const d=entry.delay||0;
+        setTimeout(()=>{
+          if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
+          else tlog(entry.t,entry.cls||"",0);
+        },d);
+      });
     }, 2000);
-  }
-
-  // Terminal logs — delayed enough for terminal to be visible on Q10
-  if(q.log&&q.log.length){
-    const base = qi===9 ? 2400 : 0;
+    // Skip normal log dispatch below for this question
+  } else if(q.log&&q.log.length){
+    // Terminal already open — dispatch immediately
     q.log.forEach(entry=>{
-      const when=base+(entry.delay||0);
+      const d=entry.delay||0;
       setTimeout(()=>{
-        if(!terminalUnlocked) return;
         if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
         else tlog(entry.t,entry.cls||"",0);
-      }, when);
+      },d);
     });
   }
 
@@ -1258,6 +1299,7 @@ function showToast(t,m){
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
   S=DEF();SID=mkSID();folderClickCount=0;profileRevealed=false;applicantGlitchFired=false;
+  terminalUnlocked=false;
   syncVolatileFlags();
   document.getElementById("sid").textContent=SID;
   document.getElementById("terminal").innerHTML="";
