@@ -623,7 +623,7 @@ const GARBAGE="@#$%&!?x01※▓▒░█";
 function corruptChar(){return GARBAGE[Math.floor(Math.random()*GARBAGE.length)];}
 
 function tlogCorrupt(text,cls,severity,delay){
-  setTimeout(()=>{
+  safeTimeout(()=>{
     revealTerminal();
     const t=document.getElementById("terminal");
     const ln=document.createElement("span");
@@ -643,14 +643,14 @@ function tlogCorrupt(text,cls,severity,delay){
     t.appendChild(ln);t.appendChild(document.createElement("br"));t.scrollTop=t.scrollHeight;
     if(severity<4){
       cpos.forEach((p,idx)=>{
-        setTimeout(()=>{spans[p].textContent=chars[p];spans[p].classList.remove("corrupt");},200+(idx*80)+(Math.random()*100));
+        safeTimeout(()=>{spans[p].textContent=chars[p];spans[p].classList.remove("corrupt");},200+(idx*80)+(Math.random()*100));
       });
     }
   },delay||0);
 }
 
 function tlog(text,cls,delay){
-  setTimeout(()=>{
+  safeTimeout(()=>{
     revealTerminal();
     const t=document.getElementById("terminal");
     const ln=document.createElement("span");
@@ -960,9 +960,9 @@ function answer(opt,q){
   setAudioLevel(corruptionLevel);
   if(qi===10||qi===14||qi===19) playRuptureStab();
 
-  // System error popups — triggered directly by question index, no external guards
-  if(qi===7)  setTimeout(()=>showOverlay("err1"), 1800);
-  if(qi===17) setTimeout(()=>{
+  // System error popups
+  if(qi===7)  safeTimeout(()=>showOverlay("err1"), 1800);
+  if(qi===17) safeTimeout(()=>{
     const now=new Date();
     document.getElementById("err3-sid").textContent=SID;
     document.getElementById("err3-time").textContent=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
@@ -971,31 +971,28 @@ function answer(opt,q){
     showOverlay("err3");
   }, 1200);
 
-  // Bar label leak — one label per question from Q10 onward
-  if(qi>=9) setTimeout(()=>leakBarLabels(qi), 1000);
+  // Bar label leak
+  if(qi>=9) safeTimeout(()=>leakBarLabels(qi), 1000);
 
-  // Terminal unlock at Q10 (index 9) — logs for THIS question fire from inside here
+  // Terminal unlock at Q10 (index 9)
   if(qi===9){
     const logsToFire=q.log||[];
-    setTimeout(()=>{
+    safeTimeout(()=>{
       terminalUnlocked=true;
       revealTerminal();
-      // Fire this question's logs now that terminal is open
       logsToFire.forEach(entry=>{
         const d=entry.delay||0;
-        setTimeout(()=>{
+        safeTimeout(()=>{
           if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
           else tlog(entry.t,entry.cls||"",0);
         },d);
       });
     }, 2000);
-    // Skip normal log dispatch below for this question
   } else if(q.log&&q.log.length){
-    // Terminal already open — small base delay for Q11 to let terminal settle visually
-    const base = qi===10 ? 600 : 0;
+    const base=qi===10?600:0;
     q.log.forEach(entry=>{
       const d=base+(entry.delay||0);
-      setTimeout(()=>{
+      safeTimeout(()=>{
         if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
         else tlog(entry.t,entry.cls||"",0);
       },d);
@@ -1290,18 +1287,24 @@ function showToast(t,m){
 /* ═══════════════════════════════════════════════════════
    RESET
 ═══════════════════════════════════════════════════════ */
+let sessionToken=Date.now();
+
+function safeTimeout(fn, delay){
+  const tok=sessionToken;
+  setTimeout(()=>{ if(sessionToken===tok) fn(); }, delay);
+}
+
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
+  sessionToken=Date.now(); // invalidates all pending timeouts from previous session
   S=DEF();SID=mkSID();
   corruptionLevel=0;barsRevealed=false;terminalUnlocked=false;
   folderClickCount=0;profileRevealed=false;applicantGlitchFired=false;
   barLabelProgress={c:0,r:0,q:0,s:0,p:0};
-  // Reset terminal
   const term=document.getElementById("terminal");
   if(term) term.innerHTML="";
   document.getElementById("term-wrap").style.visibility="hidden";
   document.getElementById("sid").textContent=SID;
-  // Reset stat bars to redacted
   ["c","r","q","s","p"].forEach(key=>{
     const lbl=document.getElementById("lbl-"+key);
     lbl.textContent="████████";lbl.className="slabel redacted";lbl.style.animation="";lbl.style.color="";
@@ -1309,9 +1312,7 @@ function resetSession(){
     document.getElementById("track-"+key).classList.add("redacted-fill");
     document.getElementById("b-"+key).style.width="0%";
   });
-  // Close any open overlays
   ["err1","err3","foldpopup","popup"].forEach(id=>document.getElementById(id).classList.remove("show"));
-  // Reset audio
   setAudioLevel(0);
   renderIcons();updateBars();route();
 }
