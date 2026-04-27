@@ -101,14 +101,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .err1-body p{margin-bottom:10px;}
 .err-code{font-size:10px;color:#604820;margin-top:14px;}
 
-/* ── SYSTEM ERROR 2: INTERNAL TONE (red-tinted) ── */
-#err2box{width:440px;background:#0d0505;border:1px solid #5a1010;border-radius:8px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.7);}
-.err2-head{background:#3a0808;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#ff8888;display:flex;justify-content:space-between;}
-.err2-body{padding:18px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#d08080;line-height:1.8;}
-.err2-body p{margin-bottom:10px;}
-.err2-body .internal-note{color:#804040;font-size:10px;border-left:2px solid #5a1010;padding-left:10px;margin-top:14px;}
-
-/* ── SYSTEM ERROR 3: SLACK FRAGMENT (plain, shocking) ── */
+/* ── SYSTEM ERROR 2: SLACK FRAGMENT (plain, shocking) ── */
 #err3box{width:400px;background:#1a1c22;border:1px solid #2a2d38;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);}
 .err3-head{background:#141618;padding:9px 14px;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;border-bottom:1px solid #222;}
 .err3-head-dot{width:8px;height:8px;border-radius:50%;background:#611f69;}
@@ -295,28 +288,7 @@ hr.div{border:0;border-top:1px solid var(--border);margin:18px 0;}
     </div>
   </div>
 
-  <!-- ERROR 2: INTERNAL TONE / ALARMING (Q15) -->
-  <div class="overlay" id="err2">
-    <div id="err2box">
-      <div class="err2-head">
-        <span>✕ CLASSIFICATION PIPELINE — UNHANDLED EXCEPTION</span>
-        <span style="font-size:9px;opacity:.6;">INTERNAL</span>
-      </div>
-      <div class="err2-body">
-        <p>Subject response pattern has triggered a classification conflict. Two behavioral models returned incompatible outputs. Defaulting to higher-confidence result.</p>
-        <p>This exception has been escalated to the review queue. The subject's session will continue normally.</p>
-        <p style="color:#a06060;">Note: If conflict persists beyond question 18, subject profile will be flagged for manual review. Do not notify applicant.</p>
-        <div class="internal-note">
-          TRACE: classifier.js:882 → resolve_conflict() → TIMEOUT<br>
-          SESSION: <span id="err2-sid">—</span> &nbsp;·&nbsp; CONFLICT_TYPE: RESISTANCE/COMPLIANCE<br>
-          AUTO-ESCALATED: YES &nbsp;·&nbsp; APPLICANT_NOTIFIED: NO
-        </div>
-      </div>
-      <div style="padding:0 20px 16px;"><button class="btn" style="font-size:11px;padding:7px 14px;margin:0;border-color:#5a1010;color:#d08080;" onclick="closeOverlay('err2')">Dismiss</button></div>
-    </div>
-  </div>
-
-  <!-- ERROR 3: SLACK FRAGMENT LEAK (Q18) -->
+  <!-- ERROR 2: SLACK FRAGMENT LEAK (Q18) -->
   <div class="overlay" id="err3">
     <div id="err3box">
       <div class="err3-head">
@@ -442,12 +414,12 @@ const Qs=[
 
 {text:"Do you believe the hiring process at most companies is fair to all candidates, regardless of background?",
   opts:[{l:"Yes — companies are generally trying to do the right thing.",e:{s:2,c:1}},{l:"Mostly — there's bias but most processes are reasonable.",e:{p:1,s:1}},{l:"No — structural bias is deeply embedded in most processes.",e:{r:1,q:2}},{l:"No — and the rise of automated screening is making it worse.",e:{r:2,q:1}}],
-  log:[]},
+  log:[{t:"behavioral scan: initializing",cls:"dim"},{t:"response pattern: logged",cls:"dim",delay:500},{t:"fairness model: CONFLICT",cls:"warn",delay:1000},{t:"subject classification: in progress",cls:"warn",delay:1600}]},
 
 /* ── Q11: RUPTURE ── */
 {text:"When an app or service asks for your location, camera access, or browsing history:",
   opts:[{l:"I allow it — it usually improves the experience.",e:{s:2,c:1}},{l:"I allow it when the app seems trustworthy.",e:{p:1,s:1}},{l:"I grant the minimum permissions required.",e:{q:1,r:1}},{l:"I decline whenever possible and use privacy tools.",e:{r:2,q:1}}],
-  log:[{t:"live data extraction: ACTIVE",cls:"rupture"},{t:"subject unaware of collection scope",cls:"warn",delay:600}]},
+  log:[{t:"live data extraction: ACTIVE",cls:"rupture"},{t:"collection scope: undisclosed",cls:"warn",delay:600}]},
 
 {text:"You're told: 'This platform collects behavioral data to improve your experience.' You:",
   opts:[{l:"Accept it — that's just how these systems work.",e:{s:2,c:1}},{l:"Acknowledge it but don't really think about it.",e:{p:2}},{l:"Wonder what 'behavioral data' actually means in this context.",e:{q:2}},{l:"Want to know exactly what's collected and how it's used.",e:{q:1,r:2}}],
@@ -473,7 +445,7 @@ const Qs=[
 
 {text:"If this assessment could accurately predict your entire career trajectory — every role, every outcome, every ceiling — would you want to see the result?",
   opts:[{l:"Yes — I'd want to know, even if it was hard.",e:{q:2,c:1}},{l:"Maybe — only if I could change it.",e:{q:1,p:1}},{l:"No — I'd rather not have that information.",e:{r:1,p:1}},{l:"I don't believe any system could do that accurately.",e:{r:2,q:1}}],
-  log:[{t:"fatalism index: recorded",cls:"warn"},{t:"note: subject IS being predicted right now",cls:"rupture",delay:800}]},
+  log:[{t:"fatalism index: recorded",cls:"warn"},{t:"prediction model: ACTIVE on this session",cls:"rupture",delay:800}]},
 
 {text:"When you think about surveillance technology in the workplace — monitoring of emails, activity tracking, location data — you feel:",
   opts:[{l:"Fine with it — if you're doing your job, you have nothing to hide.",e:{s:2,c:1}},{l:"Accepting — it's increasingly standard and I've adjusted.",e:{p:1,s:1}},{l:"Uncomfortable — I believe I have a right to privacy at work.",e:{r:1,q:2}},{l:"Opposed — it fundamentally changes the power dynamic.",e:{r:2,q:1}}],
@@ -482,7 +454,7 @@ const Qs=[
 
 {text:"Looking back at this assessment — have you been answering as yourself, or as who you think they want you to be?",
   opts:[{l:"Myself — I don't perform for assessments.",e:{q:1,p:1}},{l:"Mostly myself, but I softened some answers.",e:{s:1,p:1}},{l:"A mix. I noticed myself adjusting and then tried to stop.",e:{q:2}},{l:"I'm not sure I can tell anymore.",e:{q:2,r:1}}],
-  log:[{t:"authenticity gradient: recorded",cls:"warn"},{t:"the model adapted long before this question",cls:"rupture",delay:700},{t:"your answer here changes nothing",cls:"alert",delay:1200}]},
+  log:[{t:"authenticity gradient: recorded",cls:"warn"},{t:"model adapted long before this question",cls:"rupture",delay:700}]},
 
 {text:"Finally: Why are you completing this assessment?",
   opts:[{l:"Because I want the job.",e:{c:2,s:2}},{l:"Because the process requires it and I comply with processes.",e:{c:2,p:1}},{l:"I'm genuinely curious what it reveals.",e:{q:2}},{l:"I don't fully know — but I kept going anyway.",e:{q:1,s:1}}],
@@ -603,11 +575,11 @@ setInterval(()=>{dataset+=Math.floor(Math.random()*4);document.getElementById("d
 /* ═══════════════════════════════════════════════════════
    ROUTING
 ═══════════════════════════════════════════════════════ */
-const stageMap={portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"};
+const stageMap={portal:"INTAKE",about:"INFO",policy:"CONSENT REVIEW",terms:"INFO",careers:"INFO",status:"INFO",assessment:"BEHAVIORAL SCAN",loading:"PROFILING",results:"COMPLETE",end:"ARCHIVED"};
 function route(){
   updateBars();
   document.getElementById("stage").textContent=stageMap[S.screen]||"ACTIVE";
-  ({portal:renderPortal,about:renderAbout,policy:renderPolicy,careers:renderCareers,status:renderStatus,assessment:renderQ,loading:renderLoading,results:renderResults,end:renderEnd})[S.screen]?.();
+  ({portal:renderPortal,about:renderAbout,policy:renderPolicy,terms:renderTerms,careers:renderCareers,status:renderStatus,assessment:renderQ,loading:renderLoading,results:renderResults,end:renderEnd})[S.screen]?.();
 }
 function go(scr){S.screen=scr;save();route();}
 function setStory(html){document.getElementById("story").innerHTML=html;}
@@ -779,7 +751,7 @@ function renderPortal(){
   `);
   const b=mkBtn("Begin Assessment →","","btn btn-p");
   b.onclick=()=>{initAudio();go("policy");};
-  addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("policy")),mkLink("Open Positions",()=>go("careers")),mkDead("Help & Support"),mkLink("System Status",()=>go("status")));
+  addTo(b,mkLink("About PersonaMetric",()=>go("about")),mkLink("Data Use Policy",()=>go("terms")),mkLink("Open Positions",()=>go("careers")),mkDead("Help & Support"),mkLink("System Status",()=>go("status")));
 }
 
 function renderAbout(){
@@ -832,9 +804,29 @@ function renderPolicy(){
   addTo(gb,mkBtn("← Return",()=>go("portal")));
 }
 
+function renderTerms(){
+  setStory(`
+    <div class="ptag">Data Use Policy</div>
+    <div class="card">
+      <h2>PersonaMetric Data Use Policy</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Last updated: November 2019</p>
+      <div id="polscroll" style="max-height:420px;">
+        <p><strong>1. Data Collection.</strong> PersonaMetric collects all responses submitted through this platform, including: answer selections, response timing, navigation patterns, scroll depth, and session duration. This data is processed in real time.</p>
+        <p><strong>2. Behavioral Profiling.</strong> Response data is used to construct a behavioral profile. This profile may include inferred traits such as compliance tendency, resistance to authority, suggestibility, predictability, and curiosity. These classifications are generated automatically.</p>
+        <p><strong>3. Data Retention and Sharing.</strong> Applicant profiles are retained indefinitely. Data may be shared with affiliated hiring organizations, third-party behavioral research partners, and platform licensing clients. You will not be notified of such sharing on an individual basis.</p>
+        <p><strong>4. Use in Model Training.</strong> Anonymized assessment data may be incorporated into PersonaMetric's training datasets. Your data contributes to the system you are currently being evaluated by.</p>
+        <p><strong>5. No Guarantee of Employment.</strong> Completion of this assessment does not guarantee advancement, employment, or any specific outcome.</p>
+        <p><strong>6. No Right of Deletion.</strong> Due to the integrated nature of our behavioral modeling pipeline, individual data cannot be removed once incorporated into the system.</p>
+        <p><strong>7. Changes to This Policy.</strong> PersonaMetric reserves the right to update this policy at any time. Continued use of the platform constitutes acceptance of any revised terms.</p>
+        <p style="color:var(--muted);font-size:11px;margin-top:16px;">For questions regarding this policy, contact legal@personametric.io — response time: 30–90 business days.</p>
+      </div>
+    </div>
+  `);
+  addTo(mkBtn("← Return to Portal",()=>go("portal")));
+}
+
 function renderCareers(){
   setStory(`
-    <div class="ptag">Open Positions</div>
     <div class="card">
       <h2>Current Opportunities</h2>
       <p>All positions require completion of a behavioral compatibility assessment before any human review takes place.</p>
@@ -970,7 +962,6 @@ function answer(opt,q){
 
   // System error popups — triggered directly by question index, no external guards
   if(qi===7)  setTimeout(()=>showOverlay("err1"), 1800);
-  if(qi===14) setTimeout(()=>showOverlay("err2"), 1400);
   if(qi===17) setTimeout(()=>{
     const now=new Date();
     document.getElementById("err3-sid").textContent=SID;
@@ -1000,9 +991,10 @@ function answer(opt,q){
     }, 2000);
     // Skip normal log dispatch below for this question
   } else if(q.log&&q.log.length){
-    // Terminal already open — dispatch immediately
+    // Terminal already open — small base delay for Q11 to let terminal settle visually
+    const base = qi===10 ? 600 : 0;
     q.log.forEach(entry=>{
-      const d=entry.delay||0;
+      const d=base+(entry.delay||0);
       setTimeout(()=>{
         if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
         else tlog(entry.t,entry.cls||"",0);
@@ -1132,17 +1124,26 @@ function renderResults(){
   addTo(mkBtn("End Session",()=>go("end")));
   setTimeout(()=>{
     const reveal=[
-      {t:"INTERNAL CLASSIFICATION REPORT",cls:"rupture",delay:0},
-      {t:"session: "+SID,cls:"dim",delay:300},
-      {t:"shown to applicant: "+r.pub,cls:"warn",delay:600},
-      {t:"internal classification: "+r.key,cls:"alert",delay:900},
-      {t:"summary: "+r.desc,cls:"",delay:1200},
-      {t:"environments: "+r.envs.join(", "),cls:"dim",delay:1800},
-      {t:"confidence: HIGH  |  selection probability: "+r.hire,cls:"warn",delay:2200},
-      {t:r.h1,cls:"alert",corrupt:true,delay:2700},
-      {t:"summary softened for applicant view",cls:"warn",delay:3300},
-      {t:"profile retention: CONFIRMED",cls:"alert",delay:3700},
-      {t:"affiliate sharing: QUEUED",cls:"alert",delay:4000},
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:0},
+      {t:"PARTICIPANT SUMMARY",cls:"rupture",delay:300},
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:500},
+      {t:"session id:       "+SID,cls:"dim",delay:800},
+      {t:"profile shown:    "+r.pub,cls:"warn",delay:1100},
+      {t:"classification:   "+r.key,cls:"alert",delay:1400},
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:1700},
+      {t:"ASSESSMENT NOTES:",cls:"warn",delay:2000},
+      {t:r.desc,cls:"",delay:2300},
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:2900},
+      {t:"recommended environments:",cls:"dim",delay:3200},
+      ...r.envs.map((e,i)=>({t:"  "+e,cls:"dim",delay:3400+i*200})),
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:3900},
+      {t:"MODEL CONFIDENCE:     HIGH",cls:"warn",delay:4200},
+      {t:"HIRING PROBABILITY:   "+r.hire,cls:r.hire==="HIGH"?"rupture":"alert",delay:4600},
+      {t:"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",cls:"noise",delay:5200},
+      {t:r.h1,cls:"alert",corrupt:true,delay:5500},
+      {t:"summary softened for applicant view",cls:"warn",delay:6100},
+      {t:"profile retention: CONFIRMED",cls:"alert",delay:6500},
+      {t:"affiliate sharing: QUEUED",cls:"alert",delay:6900},
     ];
     reveal.forEach(entry=>{
       if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",3,entry.delay);
@@ -1186,7 +1187,7 @@ function renderEnd(){
   ].forEach(e=>tlog(e.t,e.cls,e.delay));
 
   // Threatening line — arrives after a pause, when everything seems done
-  setTimeout(()=>tlogCorrupt("you were the subject, not the applicant","rupture",4,0),5000);
+  setTimeout(()=>tlogCorrupt("session classification: complete. data archived.","rupture",4,0),5000);
 
   // Delayed silence — then one more line
   setTimeout(()=>{
@@ -1298,12 +1299,16 @@ function showToast(t,m){
 ═══════════════════════════════════════════════════════ */
 function resetSession(){
   localStorage.removeItem("pm_s");localStorage.removeItem("pm_id");
-  S=DEF();SID=mkSID();folderClickCount=0;profileRevealed=false;applicantGlitchFired=false;
-  terminalUnlocked=false;
-  syncVolatileFlags();
-  document.getElementById("sid").textContent=SID;
-  document.getElementById("terminal").innerHTML="";
+  S=DEF();SID=mkSID();
+  corruptionLevel=0;barsRevealed=false;terminalUnlocked=false;
+  folderClickCount=0;profileRevealed=false;applicantGlitchFired=false;
+  barLabelProgress={c:0,r:0,q:0,s:0,p:0};
+  // Reset terminal
+  const term=document.getElementById("terminal");
+  if(term) term.innerHTML="";
   document.getElementById("term-wrap").style.visibility="hidden";
+  document.getElementById("sid").textContent=SID;
+  // Reset stat bars to redacted
   ["c","r","q","s","p"].forEach(key=>{
     const lbl=document.getElementById("lbl-"+key);
     lbl.textContent="████████";lbl.className="slabel redacted";lbl.style.animation="";lbl.style.color="";
@@ -1311,7 +1316,10 @@ function resetSession(){
     document.getElementById("track-"+key).classList.add("redacted-fill");
     document.getElementById("b-"+key).style.width="0%";
   });
-  ["err1","err2","err3","foldpopup","popup"].forEach(id=>document.getElementById(id).classList.remove("show"));
+  // Close any open overlays
+  ["err1","err3","foldpopup","popup"].forEach(id=>document.getElementById(id).classList.remove("show"));
+  // Reset audio
+  setAudioLevel(0);
   renderIcons();updateBars();route();
 }
 
