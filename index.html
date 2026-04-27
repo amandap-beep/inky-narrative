@@ -1172,7 +1172,6 @@ function renderEnd(){
         <div class="mcell"><div class="mclbl">Next Steps</div><div class="mcval" style="color:var(--muted)">None required</div></div>
       </div>
       <hr class="div">
-      <p id="end-existential" style="font-size:11px;color:transparent;font-family:'IBM Plex Mono',monospace;transition:color 2s ease;margin-top:4px;">You completed the assessment. The assessment is not complete.</p>
     </div>
   `);
 
@@ -1193,12 +1192,6 @@ function renderEnd(){
   setTimeout(()=>{
     tlog("session "+SID+": archived. retention period: indefinite.","alert");
   },7000);
-
-  // Existential last line fades in slowly after everything settles
-  setTimeout(()=>{
-    const el=document.getElementById("end-existential");
-    if(el) el.style.color="var(--muted)";
-  },8500);
 
   // "Return to Portal" appears late — after the experience lands
   setTimeout(()=>{
