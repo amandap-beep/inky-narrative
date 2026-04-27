@@ -661,6 +661,7 @@ function tlog(text,cls,delay){
 }
 
 function revealTerminal(){
+  if(!terminalUnlocked) return;
   const w=document.getElementById("term-wrap");
   if(w.style.visibility==="hidden"){w.style.visibility="visible";w.style.animation="fadeIn .5s ease";}
 }
@@ -1183,17 +1184,9 @@ function renderEnd(){
   ].forEach(e=>tlog(e.t,e.cls,e.delay));
 
   // Threatening line — arrives after a pause, when everything seems done
-  setTimeout(()=>tlogCorrupt("session classification: complete. data archived.","rupture",4,0),5000);
-
-  // Delayed silence — then one more line
-  setTimeout(()=>{
-    tlog("session "+SID+": archived. retention period: indefinite.","alert");
-  },7000);
-
-  // "Return to Portal" appears late — after the experience lands
-  setTimeout(()=>{
-    addTo(mkBtn("Return to Portal",()=>go("portal")));
-  },6000);
+  safeTimeout(()=>tlogCorrupt("session classification: complete. data archived.","rupture",4,0),5000);
+  safeTimeout(()=>tlog("session "+SID+": archived. retention period: indefinite.","alert"),7000);
+  safeTimeout(()=>addTo(mkBtn("Return to Portal",()=>go("portal"))),6000);
 }
 
 /* ═══════════════════════════════════════════════════════
