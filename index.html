@@ -623,7 +623,8 @@ const GARBAGE="@#$%&!?x01※▓▒░█";
 function corruptChar(){return GARBAGE[Math.floor(Math.random()*GARBAGE.length)];}
 
 function tlogCorrupt(text,cls,severity,delay){
-  safeTimeout(()=>{
+  setTimeout(()=>{
+    if(!terminalUnlocked) return;
     revealTerminal();
     const t=document.getElementById("terminal");
     const ln=document.createElement("span");
@@ -643,14 +644,15 @@ function tlogCorrupt(text,cls,severity,delay){
     t.appendChild(ln);t.appendChild(document.createElement("br"));t.scrollTop=t.scrollHeight;
     if(severity<4){
       cpos.forEach((p,idx)=>{
-        safeTimeout(()=>{spans[p].textContent=chars[p];spans[p].classList.remove("corrupt");},200+(idx*80)+(Math.random()*100));
+        setTimeout(()=>{spans[p].textContent=chars[p];spans[p].classList.remove("corrupt");},200+(idx*80)+(Math.random()*100));
       });
     }
   },delay||0);
 }
 
 function tlog(text,cls,delay){
-  safeTimeout(()=>{
+  setTimeout(()=>{
+    if(!terminalUnlocked) return;
     revealTerminal();
     const t=document.getElementById("terminal");
     const ln=document.createElement("span");
@@ -983,7 +985,7 @@ function answer(opt,q){
       revealTerminal();
       logsToFire.forEach(entry=>{
         const d=entry.delay||0;
-        safeTimeout(()=>{
+        setTimeout(()=>{
           if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
           else tlog(entry.t,entry.cls||"",0);
         },d);
@@ -993,7 +995,7 @@ function answer(opt,q){
     const base=qi===10?600:0;
     q.log.forEach(entry=>{
       const d=base+(entry.delay||0);
-      safeTimeout(()=>{
+      setTimeout(()=>{
         if(entry.corrupt) tlogCorrupt(entry.t,entry.cls||"",Math.max(1,corruptionLevel),0);
         else tlog(entry.t,entry.cls||"",0);
       },d);
